@@ -1,0 +1,828 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "ServicePlanet REST API (SPL 5.3.0-181025)",
+    "version" : "1.5.2",
+    "title" : "ServicePlanet API",
+    "contact" : {
+      "name" : "FNT GmbH",
+      "url" : "https://www.fntsoftware.com",
+      "email" : "support@fntsoftware.com"
+    }
+  },
+  "host" : "localhost:8443",
+  "basePath" : "/serviceplanet/remote/service",
+  "tags" : [ {
+    "name" : "Login_V1",
+    "description" : "Defines a login application service. Handles all aspects of a user <br> login / logout."
+  } ],
+  "schemes" : [ "https" ],
+  "produces" : [ "application/json" ],
+  "paths" : {
+    "/v1/login/authenticate" : {
+      "post" : {
+        "tags" : [ "Login_V1" ],
+        "summary" : "authenticate",
+        "description" : "Authenticate a user given by the user's login name, password and tenant.<br> Upon a successful authentication the user is 'logged-in' and the user data<br> is added to the user's session.<br> <br> <p>Returns a successfully authenticated user or throws an exception</p><br> <br> <p><b>Note:</b> It is the responsibility of the calling service to check <br> the 'requiresNewPassword' and the 'userMayChangePassword' property of the <br> returned user data<br> {@link com.fntsoftware.serviceplanet.services.app.login.dto.UserLoginDto UserLoginDto}.<br> <ul><br> <li>If the property 'requiresNewPassword' is <code>true</code> the GUI must enforce the<br> user to immediately change the password after a successful login.</li><br> <li>If the property 'userMayChangePassword' is <code>true</code> the user may change his<br> password any time at his own will. If it is set to <code>false</code> the user<br> is not allowed to change his password (e.g. for LDAP authentication).</li><br> </ul>",
+        "operationId" : "Login::authenticate::V1",
+        "consumes" : [ ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "loginname",
+          "in" : "query",
+          "description" : "A login name",
+          "required" : true,
+          "type" : "string",
+          "format" : "string"
+        }, {
+          "name" : "password",
+          "in" : "query",
+          "description" : "A password",
+          "required" : true,
+          "type" : "string",
+          "format" : "string"
+        }, {
+          "name" : "tenant",
+          "in" : "query",
+          "description" : "A tenant",
+          "required" : false,
+          "type" : "string",
+          "format" : "string"
+        }, {
+          "name" : "allowDropOldestSession",
+          "in" : "query",
+          "required" : false,
+          "type" : "boolean"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK - Returns The authenticated user with the associated tenant",
+            "schema" : {
+              "$ref" : "#/definitions/UserLoginDto"
+            }
+          },
+          "400" : {
+            "description" : "The request does not comply with all required data constraints. E.g. missing mandatory fields, violating field constraints, ...",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "401" : {
+            "description" : "* _AuthenticationBusinessException:_ If the user given by its login name and password can <br>     not be authenticated",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "403" : {
+            "description" : "* _TenantAuthorizationBusinessException:_ If the user is not authorized to work with the tenant",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "404" : {
+            "description" : "Resource not found",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "500" : {
+            "description" : "* _NoLicenseBusinessException:_ If there is no valid license available\n* _ExpiredLicenseBusinessException:_ If the license has expired\n* _UncategorizedBusinessException:_ On an unexpected service failure",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          }
+        }
+      }
+    },
+    "/v1/login/active_tenants/find_by_user" : {
+      "get" : {
+        "tags" : [ "Login_V1" ],
+        "summary" : "findActiveTenantsByUser",
+        "description" : "Find the active tenants associated with a user.<br> <br> <p>A tenant is active if it has the state <tt>ACTIVE</tt> and if it is <br> associated with an <tt>ACTIVE</tt> user group.</p>",
+        "operationId" : "Login::findActiveTenantsByUser::V1",
+        "consumes" : [ ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "loginname",
+          "in" : "query",
+          "description" : "The user's login name",
+          "required" : true,
+          "type" : "string",
+          "format" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK - Returns A list of tenants (returns an empty list if the user does not exist<br>          or the user has no associated tenants)",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/TenantLoginDto"
+              }
+            }
+          },
+          "400" : {
+            "description" : "The request does not comply with all required data constraints. E.g. missing mandatory fields, violating field constraints, ...",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "401" : {
+            "description" : "The caller is not authenticated. Login first",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "403" : {
+            "description" : "The caller is not authorized to use the resource",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "404" : {
+            "description" : "Resource not found",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "500" : {
+            "description" : "* _EntityRetrievalBusinessException:_ If the user's tenants could not be retrieved <br>     (e.g. DB failures, ...).\n* _UncategorizedBusinessException:_ On an unexpected service failure",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          }
+        }
+      }
+    },
+    "/v1/login/logged_in_user/find" : {
+      "get" : {
+        "tags" : [ "Login_V1" ],
+        "summary" : "getLoggedInUser",
+        "description" : "Returns the logged-in user of the current session.",
+        "operationId" : "Login::getLoggedInUser::V1",
+        "consumes" : [ ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OK - Returns the logged-in user or null if a user is not logged-in on the<br>          current session",
+            "schema" : {
+              "$ref" : "#/definitions/UserLoginDto"
+            }
+          },
+          "400" : {
+            "description" : "The request does not comply with all required data constraints. E.g. missing mandatory fields, violating field constraints, ...",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "401" : {
+            "description" : "The caller is not authenticated. Login first",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "403" : {
+            "description" : "The caller is not authorized to use the resource",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "404" : {
+            "description" : "Resource not found",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "500" : {
+            "description" : "* _NoLicenseException:_ If there is no valid license available\n* _ExpiredLicenseException:_ If the license has expired\n* _UncategorizedBusinessException:_ On an unexpected service failure",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          }
+        }
+      }
+    },
+    "/v1/login/logged_in_user/active" : {
+      "get" : {
+        "tags" : [ "Login_V1" ],
+        "summary" : "hasLoggedInUser",
+        "description" : "Checks if the current session has a logged-in user.",
+        "operationId" : "Login::hasLoggedInUser::V1",
+        "consumes" : [ ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OK - Returns true if the current session has a logged-in user.",
+            "schema" : {
+              "$ref" : "#/definitions/BooleanHolder"
+            }
+          },
+          "400" : {
+            "description" : "The request does not comply with all required data constraints. E.g. missing mandatory fields, violating field constraints, ...",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "401" : {
+            "description" : "The caller is not authenticated. Login first",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "403" : {
+            "description" : "The caller is not authorized to use the resource",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "404" : {
+            "description" : "Resource not found",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "500" : {
+            "description" : "The request could not be served",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          }
+        }
+      }
+    },
+    "/v1/login/logout" : {
+      "post" : {
+        "tags" : [ "Login_V1" ],
+        "summary" : "logout",
+        "description" : "Logout the current user and clean the user's session.",
+        "operationId" : "Login::logout::V1",
+        "consumes" : [ ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "The request does not comply with all required data constraints. E.g. missing mandatory fields, violating field constraints, ...",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "401" : {
+            "description" : "The caller is not authenticated. Login first",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "403" : {
+            "description" : "The caller is not authorized to use the resource",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "404" : {
+            "description" : "Resource not found",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "500" : {
+            "description" : "* _UncategorizedBusinessException:_ On an unexpected service failure",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          }
+        }
+      }
+    },
+    "/v1/login/tenant/switch" : {
+      "post" : {
+        "tags" : [ "Login_V1" ],
+        "summary" : "switchTenant",
+        "description" : "Switches the current user to a new tenant.",
+        "operationId" : "Login::switchTenant::V1",
+        "consumes" : [ ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "tenant",
+          "in" : "query",
+          "description" : "The new tenant to user is switched to",
+          "required" : true,
+          "type" : "string",
+          "format" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK - Returns The authenticated user with the associated new tenant",
+            "schema" : {
+              "$ref" : "#/definitions/UserLoginDto"
+            }
+          },
+          "400" : {
+            "description" : "The request does not comply with all required data constraints. E.g. missing mandatory fields, violating field constraints, ...",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "401" : {
+            "description" : "* _AuthenticationBusinessException:_ The user must logged-in to switch the tenant.",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "403" : {
+            "description" : "* _TenantAuthorizationBusinessException:_ If the user is not authorized to work with the tenant",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "404" : {
+            "description" : "Resource not found",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          },
+          "500" : {
+            "description" : "* _UncategorizedBusinessException:_ On an unexpected service failure",
+            "schema" : {
+              "$ref" : "#/definitions/ApiError"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "ValidationFailure" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/ApiError"
+      }, {
+        "required" : [ "_type" ],
+        "properties" : {
+          "_type" : {
+            "type" : "string",
+            "default" : "ValidationFailure"
+          },
+          "failures" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/LocalizedValidationFailureDto"
+            }
+          }
+        }
+      } ],
+      "x-spl-supertype-ref" : "#/definitions/ApiError"
+    },
+    "ApiError" : {
+      "required" : [ "_type" ],
+      "properties" : {
+        "_type" : {
+          "type" : "string",
+          "default" : "ApiError"
+        },
+        "details" : {
+          "type" : "string"
+        },
+        "minorErrorCode" : {
+          "type" : "string"
+        },
+        "auditEventURI" : {
+          "type" : "string"
+        },
+        "errType" : {
+          "type" : "string"
+        },
+        "uri" : {
+          "type" : "string"
+        },
+        "message" : {
+          "type" : "string"
+        },
+        "localizedMessage" : {
+          "type" : "string"
+        }
+      }
+    },
+    "LocalizedValidationFailureDto" : {
+      "required" : [ "_type" ],
+      "properties" : {
+        "_type" : {
+          "type" : "string",
+          "default" : "LocalizedValidationFailureDto"
+        },
+        "localizedErrMsg" : {
+          "type" : "string"
+        },
+        "rootPath" : {
+          "type" : "string"
+        }
+      },
+      "description" : "Defines a business validation failures. Defines setters & getters as<br> required by the FLEX remoting to work properly."
+    },
+    "ConstraintViolation" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/ApiError"
+      }, {
+        "required" : [ "_type" ],
+        "properties" : {
+          "_type" : {
+            "type" : "string",
+            "default" : "ConstraintViolation"
+          },
+          "violations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/BusinessConstraintViolationDto"
+            }
+          }
+        }
+      } ],
+      "x-spl-supertype-ref" : "#/definitions/ApiError"
+    },
+    "BusinessConstraintViolationDto" : {
+      "required" : [ "_type" ],
+      "properties" : {
+        "_type" : {
+          "type" : "string",
+          "default" : "BusinessConstraintViolationDto"
+        },
+        "rootEntityName" : {
+          "type" : "string"
+        },
+        "propertyPath" : {
+          "type" : "string"
+        },
+        "leafEntityName" : {
+          "type" : "string"
+        },
+        "messageKey" : {
+          "type" : "string"
+        },
+        "invalidValue" : {
+          "type" : "string"
+        },
+        "message" : {
+          "type" : "string"
+        }
+      },
+      "description" : "Defines a business constraint violation. Defines setters & getters as<br> required by the FLEX remoting to work properly."
+    },
+    "ExpressionFailure" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/ApiError"
+      }, {
+        "required" : [ "_type" ],
+        "properties" : {
+          "_type" : {
+            "type" : "string",
+            "default" : "ExpressionFailure"
+          },
+          "expression" : {
+            "type" : "string"
+          },
+          "failures" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/LocalizedExpressionFailureDto"
+            }
+          }
+        }
+      } ],
+      "x-spl-supertype-ref" : "#/definitions/ApiError"
+    },
+    "LocalizedExpressionFailureDto" : {
+      "required" : [ "_type" ],
+      "properties" : {
+        "_type" : {
+          "type" : "string",
+          "default" : "LocalizedExpressionFailureDto"
+        },
+        "beginPosition" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "endPosition" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "localizedErrMsg" : {
+          "type" : "string"
+        }
+      },
+      "description" : "Defines a localized expression failure."
+    },
+    "BooleanHolder" : {
+      "properties" : {
+        "value" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "InvalidSearchQuery" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/ApiError"
+      }, {
+        "required" : [ "_type", "errorStartPosition" ],
+        "properties" : {
+          "_type" : {
+            "type" : "string",
+            "default" : "InvalidSearchQuery"
+          },
+          "expectedOperators" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "expectedValues" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "errorStartPosition" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "query" : {
+            "type" : "string"
+          }
+        }
+      } ],
+      "x-spl-supertype-ref" : "#/definitions/ApiError"
+    },
+    "TenantLoginDto" : {
+      "required" : [ "_type", "defaultLoginTenant" ],
+      "properties" : {
+        "_type" : {
+          "type" : "string",
+          "default" : "TenantLoginDto"
+        },
+        "defaultLoginTenant" : {
+          "type" : "boolean",
+          "description" : "True if this tenant is the default login tenant of the currently logged in user."
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "The name of the tenant"
+        },
+        "id" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "The tenant's primary key (ID)"
+        }
+      },
+      "description" : "Tenant Login DTO"
+    },
+    "UserLoginDto" : {
+      "required" : [ "_type", "requiresInitialSetup", "requiresNewPassword", "tracing", "userMayChangePassword" ],
+      "properties" : {
+        "_type" : {
+          "type" : "string",
+          "default" : "UserLoginDto"
+        },
+        "version" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "A version number used for internal purposes (object locking). Always leave this number as it is."
+        },
+        "id" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "tenant" : {
+          "description" : "The tenant the user is associated with",
+          "$ref" : "#/definitions/TenantLoginDto"
+        },
+        "attachmentFile" : {
+          "description" : "The attachment file holding the user's attachments",
+          "$ref" : "#/definitions/AttachmentFileDto"
+        },
+        "timezone" : {
+          "$ref" : "#/definitions/TimezoneDto"
+        },
+        "firstname" : {
+          "type" : "string"
+        },
+        "middlename" : {
+          "type" : "string"
+        },
+        "lastname" : {
+          "type" : "string"
+        },
+        "email" : {
+          "type" : "string",
+          "description" : "The email address"
+        },
+        "department" : {
+          "type" : "string",
+          "description" : "The organization's department the user is working at"
+        },
+        "businessLanguage" : {
+          "type" : "string",
+          "description" : "The user's business language"
+        },
+        "defaultPortfolioId" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "loginname" : {
+          "type" : "string"
+        },
+        "fullname" : {
+          "type" : "string"
+        },
+        "lastStatusChangeDate" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "The date the user's status changed most recently"
+        },
+        "phone" : {
+          "type" : "string",
+          "description" : "The user's phone number"
+        },
+        "requiresNewPassword" : {
+          "type" : "boolean",
+          "description" : "Enforces the users to change his password. If set to TRUE the user needs to change the password before he<br>         is able to login again."
+        },
+        "accountCreationDate" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "The date the user account has been created"
+        },
+        "lastLoginDate" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "The user's last login date"
+        },
+        "traceUntilDate" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Represents the time until which tracing is in effect for this user"
+        },
+        "defaultLoginTenant" : {
+          "$ref" : "#/definitions/TenantDto"
+        },
+        "userMayChangePassword" : {
+          "type" : "boolean",
+          "description" : "The flag is set to TRUE if the user is allowed to change his password. E.g. if LDAP authentication is in<br>         use this flag is set to FALSE."
+        },
+        "licenseType" : {
+          "type" : "string",
+          "description" : "The concurrent-user license type the logged-in user consumed",
+          "enum" : [ "NONE", "VIEW_ONLY_PERMISSION", "MODIFY_PERMISSION", "VIEW_ONLY_PERMISSION_OVERDRAFT", "MODIFY_PERMISSION_OVERDRAFT", "TECHNICAL" ],
+          "x-spl-enum-type" : "ConcurrentUserLicenseType"
+        },
+        "tracing" : {
+          "type" : "boolean",
+          "description" : "If set to TRUE all the ServicePlanet calls executed in the context of the user will be traced in the backend."
+        },
+        "requiresInitialSetup" : {
+          "type" : "boolean"
+        },
+        "organization" : {
+          "type" : "string",
+          "description" : "The organization the user is employed at"
+        },
+        "language" : {
+          "type" : "string",
+          "description" : "The user's main language"
+        },
+        "location" : {
+          "type" : "string",
+          "description" : "The location the user is working at"
+        }
+      },
+      "description" : "User Login Data",
+      "x-spl-entity" : true
+    },
+    "AttachmentFileDto" : {
+      "required" : [ "_type", "attachmentCount", "sealed" ],
+      "properties" : {
+        "_type" : {
+          "type" : "string",
+          "default" : "AttachmentFileDto"
+        },
+        "version" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "A version number used for internal purposes (object locking). Always leave this number as it is."
+        },
+        "id" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "attachmentCount" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "The number of attachments in this file.<br><br> Considers attachments except the ones of the categories<br> <ul><br> <li>AttachmentCategory.THUMBNAIL_IMAGE</li><br> <li>AttachmentCategory.COMPANY_LOGO<br> </ul>"
+        },
+        "sealed" : {
+          "type" : "boolean",
+          "description" : "'true' if this file is not modifiable"
+        }
+      },
+      "description" : "A file holding all attachments",
+      "x-spl-entity" : true
+    },
+    "TimezoneDto" : {
+      "required" : [ "_type", "active", "displayName", "name", "standardOffsetMillis" ],
+      "properties" : {
+        "_type" : {
+          "type" : "string",
+          "default" : "TimezoneDto"
+        },
+        "version" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "A version number used for internal purposes (object locking). Always leave this number as it is."
+        },
+        "id" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "active" : {
+          "type" : "boolean"
+        },
+        "standardOffsetMillis" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "name" : {
+          "type" : "string",
+          "minLength" : 1,
+          "maxLength" : 50
+        },
+        "displayName" : {
+          "$ref" : "#/definitions/MultiLingualStringDto"
+        }
+      },
+      "description" : "Represents a Timezone",
+      "x-spl-entity" : true
+    },
+    "MultiLingualStringDto" : {
+      "required" : [ "_type" ],
+      "properties" : {
+        "_type" : {
+          "type" : "string",
+          "default" : "MultiLingualStringDto"
+        },
+        "defaultText" : {
+          "type" : "string",
+          "description" : "The default text that best matches the caller's locale.<br> This is an output-only field.<br> It cannot be set by the caller (it will be ignored).<br> Instead it is only derived from the map entries (based upon the locale chain)<br> when a multi-lingual string is returned to the caller."
+        },
+        "map" : {
+          "type" : "object",
+          "description" : "The localized texts",
+          "additionalProperties" : {
+            "type" : "string"
+          },
+          "x-spl-map-key" : {
+            "type" : "string"
+          }
+        }
+      },
+      "description" : "Multilingual string DTO - A multi-lingual text"
+    },
+    "TenantDto" : {
+      "required" : [ "_type", "currency", "lastStatusChangeDate", "name", "status" ],
+      "properties" : {
+        "_type" : {
+          "type" : "string",
+          "default" : "TenantDto"
+        },
+        "version" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "A version number used for internal purposes (object locking). Always leave this number as it is."
+        },
+        "id" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "lastStatusChangeDate" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "currency" : {
+          "type" : "string",
+          "pattern" : "[A-Z]{3}"
+        },
+        "status" : {
+          "type" : "string",
+          "enum" : [ "ACTIVE", "INACTIVE" ],
+          "x-spl-enum-type" : "TenantStatus"
+        },
+        "name" : {
+          "type" : "string",
+          "minLength" : 3,
+          "maxLength" : 100
+        }
+      },
+      "description" : "Represents a tenant",
+      "x-spl-entity" : true
+    }
+  }
+}

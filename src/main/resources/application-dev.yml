@@ -1,0 +1,55 @@
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    #password: bla
+  cloud:
+   gateway:
+    globalcors:
+      cors-configurations:
+        '[/**]':
+         allowedOrigins: "*"          
+    routes:
+#service-planet    
+      - id: spl
+        uri: ${SPL_BASEURL}/serviceplanet/remote/service
+        predicates:
+         - Path=/smdb/**
+        filters:
+         - KeyCloakFilter=requiredRole,service_read
+         - ServicePlanetFilter
+         - RewritePath=/smdb/(?<segment>.*), /serviceplanet/remote/service/$\{segment}
+#dsl recherche
+      - id: dsl-api
+        uri: https://secure.mk-netzdienste.de/kundenportal
+        predicates:
+         - Path=/dslrecherche/**
+        filters:
+          - KeyCloakFilter=requiredRole,service_read
+          - RemoveRequestHeader=Authorization    
+          - BasicAuthFilter=${MK_USER},${MK_PASS}
+          - RewritePath=/dslrecherche/(?<segment>.*), /kundenportal/$\{segment}
+#camunda
+      - id: camunda-rest-api
+        uri: http://camundaengine:8080/engine-rest
+        #uri: http://camunda.witcom-dev.services/engine-rest
+        predicates:
+         - Path=/camunda/**
+        filters:
+          - RewritePath=/camunda/(?<segment>.*), /engine-rest/$\{segment}
+#fake api server
+      - id: fake-api
+        uri: http://json-server:3000
+        predicates:
+         - Path=/api/**
+        filters:
+          - KeyCloakFilter=requiredRole,portal-base
+          - RewritePath=/api/(?<segment>.*), /$\{segment}
+#formio
+      - id: formio-api
+        uri: http://formio-api-app:3001
+        predicates:
+         - Path=/forms/**
+        filters:
+          - RewritePath=/forms/(?<segment>.*), /$\{segment}
+    
