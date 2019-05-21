@@ -1,34 +1,53 @@
 pipeline {
   agent none
   environment {
-	  PROJECT="pipelinetest"
-	  APPNAME="witcom-api-gateway"
   }  
   stages {
-      stage('Init'){
-	  agent { label 'master' }
-          steps {
-            echo 'Hello on ${BRANCH_NAME}...'
-            sh 'printenv'
-          }
-          
-      }
-      stage('Build & Test'){
+      stage('Process Pull-Request'){
          when {
              expression { env.CHANGE_ID != null }
          } 
-		 agent { label 'master' }
-         steps {
-            sh 'echo Building ${BRANCH_NAME}...'
-            sh 'mvn clean compile -Pdev -DskipTests=true'
-            sh 'mvn test'
-         }
+		 stages {
+			stage('Build & test'){
+				agent { label 'maven' }
+				steps {
+					sh 'mvn clean compile -Pdev -DskipTests=true'
+					sh 'mvn test'
+				}
+			}
+			stage('Verify'){
+				steps {
+					script {
+						def userInput
+						try {
+							userInput = input(
+								id: 'Proceed1', message: 'Kann der Merge durchgefuehrt werden ?', parameters: [
+								[$class: 'BooleanParameterDefinition', defaultValue: true, description: '', name: 'Bitte bestaetigen']
+								])
+						} catch(err) { // input false
+							userInput = false
+							echo "This Job has been Aborted"
+						}
+						if (userInput != true) {
+							throw "Pull-request not confirmed"
+						}
+					}
+				}
+			}
+		 }
       }
       stage('Deployment to Master') {
           when {
               branch 'master'
           }
 		  stages {
+		    stage('Init'){
+				steps {
+					script {
+						openshift.setLockName('openshift-deploy-witcom-api-gateway')
+					}
+				}
+			}
 			stage('Build JAR'){
 				agent { label 'maven' }
 					steps {
@@ -42,11 +61,16 @@ pipeline {
 				steps {
 				unstash name:"jar"
 				script {
-					configFileProvider([configFile(fileId: '59897b24-bba7-42d4-8edc-98995d9f7b81', variable: 'buildPropertiesFile')]) {
-						def jsonfile = readJSON file: "${buildPropertiesFile}"
-						def targetProject = jsonfile.devProject
-						env.PROJECT = jsonfile.devProject
-						echo "Target-Project for Master: ${env.PROJECT}"
+					try {
+						configFileProvider([configFile(fileId: '59897b24-bba7-42d4-8edc-98995d9f7b81', variable: 'buildPropertiesFile')]) {
+							def jsonfile = readJSON file: "${buildPropertiesFile}"
+							env.PROJECT = jsonfile.devProject
+						}
+					} catch (err){
+						echo "in catch block for config-file provider"
+						echo "Caught: ${err}"
+						currentBuild.result = 'FAILURE'
+						throw err
 					}
 					timeout(time: 20, unit: 'MINUTES') {
 						openshift.withCluster() {
@@ -68,10 +92,5 @@ pipeline {
 
       }
   }
-}
-
-
-def isPr() {
-    env.CHANGE_ID != null
 }
 
