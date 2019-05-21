@@ -45,7 +45,7 @@ pipeline {
 					configFileProvider([configFile(fileId: '59897b24-bba7-42d4-8edc-98995d9f7b81', variable: 'buildPropertiesFile')]) {
 						def jsonfile = readJSON file: "${buildPropertiesFile}"
 						echo "Target-Project for Master: ${jsonfile.devProject}"
-						def targetProject = ${jsonfile.devProject}
+						def targetProject = jsonfile.devProject
 					}
 					timeout(time: 20, unit: 'MINUTES') {
 						openshift.withCluster() {
