@@ -1,0 +1,69 @@
+def isPr() {
+    env.CHANGE_ID != null
+}
+
+pipeline {
+  agent none
+  environment {
+	  PROJECT="pipelinetest"
+	  APPNAME="witcom-api-gateway"
+  }  
+  stages {
+      stage('Init'){
+          steps {
+            echo 'Hello on ${BRANCH_NAME}...'
+            sh 'printenv'
+          }
+          
+      }
+      stage('Build & Test'){
+         when {
+             expression { env.CHANGE_ID != null }
+         } 
+         steps {
+            sh 'echo Building ${BRANCH_NAME}...'
+            sh 'mvn clean compile'
+            sh 'mvn test'
+         }
+      }
+      stage('Deployment to Master') {
+          when {
+              branch 'master'
+          }
+		  stages {
+			stage('Build JAR'){
+				agent { label 'maven' }
+					steps {
+						sh "mvn clean package -Pprod -DskipTests=true"
+						sh "mv target/witcom-api-gateway-1.0.0.jar target/app.jar"
+						stash name:"jar", includes:"target/app.jar"
+					}
+			}
+			stage('Building image in target project'){
+				agent { label 'master' }
+				steps {
+				unstash name:"jar"
+				script {
+					timeout(time: 20, unit: 'MINUTES') {
+						openshift.withCluster() {
+						  openshift.withProject(env.PROJECT) {
+						    def bc = openshift.selector('bc', [deployment: 'dev', app: 'witcom-api-gateway'])
+							def buildSelector = bc.startBuild("--from-file=target/app.jar")
+						    //openshift.startBuild("${env.APPNAME}-docker", "--from-file=target/app.jar")
+							//def bc = openshift.selector('bc', "${env.APPNAME}-docker")
+							echo "Found ${bc.count()} buildconfig - expecting 1"
+							def blds = bc.related('builds')
+							blds.untilEach {
+							  return it.object().status.phase == "Complete"
+							}
+						  }
+						}  
+					}
+				}
+			}
+			}
+		  }		  
+
+      }
+  }
+}
