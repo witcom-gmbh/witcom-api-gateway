@@ -1,7 +1,7 @@
 pipeline {
   agent none
   environment {
-	  PROJECT="pipelinetest-fail"
+	  PROJECT="pipelinetest"
 	  APPNAME="witcom-api-gateway"
   }  
   stages {
@@ -46,11 +46,10 @@ pipeline {
 						def jsonfile = readJSON file: "${buildPropertiesFile}"
 						def targetProject = jsonfile.devProject
 						env.PROJECT = jsonfile.devProject
-						echo "Target-Project for Master: ${targetProject}"
+						echo "Target-Project for Master: ${env.PROJECT}"
 					}
 					timeout(time: 20, unit: 'MINUTES') {
 						openshift.withCluster() {
-						  echo "Target-Project for Master 2: ${targetProject}"
 						  openshift.withProject(env.PROJECT) {
 						    def bc = openshift.selector('bc', [deployment: 'dev', app: 'witcom-api-gateway'])
 							def buildSelector = bc.startBuild("--from-file=target/app.jar")
