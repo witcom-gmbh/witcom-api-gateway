@@ -1,7 +1,3 @@
-def isPr() {
-    env.CHANGE_ID != null
-}
-
 pipeline {
   agent none
   environment {
@@ -12,7 +8,7 @@ pipeline {
       stage('Init'){
 	  agent { label 'master' }
           steps {
-            sh 'echo Hello on ${BRANCH_NAME}...'
+            echo 'Hello on ${BRANCH_NAME}...'
             sh 'printenv'
           }
           
@@ -21,7 +17,7 @@ pipeline {
          when {
              expression { env.CHANGE_ID != null }
          } 
-		 agent { label 'maven' }
+		 agent { label 'master' }
          steps {
             sh 'echo Building ${BRANCH_NAME}...'
             sh 'mvn clean compile -Pdev -DskipTests=true'
@@ -46,11 +42,16 @@ pipeline {
 				steps {
 				unstash name:"jar"
 				script {
+					configFileProvider([configFile(fileId: '59897b24-bba7-42d4-8edc-98995d9f7b81', variable: 'buildPropertiesFile')]) {
+						def jsonfile = readJSON file: "${buildPropertiesFile}"
+						echo "Target-Project for Master: ${jsonfile.devProject}"
+						def targetProject = ${jsonfile.devProject}
+					}
 					timeout(time: 20, unit: 'MINUTES') {
 						openshift.withCluster() {
-						  openshift.withProject(env.PROJECT) {
+						  openshift.withProject(targetProject) {
 						    def bc = openshift.selector('bc', [deployment: 'dev', app: 'witcom-api-gateway'])
-							def buildSelector = bc.startBuild("--from-file=target/app.jar")
+						    def buildSelector = bc.startBuild("--from-file=target/app.jar")
 						    //openshift.startBuild("${env.APPNAME}-docker", "--from-file=target/app.jar")
 							//def bc = openshift.selector('bc', "${env.APPNAME}-docker")
 							echo "Found ${bc.count()} buildconfig - expecting 1"
@@ -69,3 +70,9 @@ pipeline {
       }
   }
 }
+
+
+def isPr() {
+    env.CHANGE_ID != null
+}
+
