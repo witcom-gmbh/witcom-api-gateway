@@ -44,16 +44,15 @@ pipeline {
 				script {
 					configFileProvider([configFile(fileId: '59897b24-bba7-42d4-8edc-98995d9f7b81', variable: 'buildPropertiesFile')]) {
 						def jsonfile = readJSON file: "${buildPropertiesFile}"
-						echo "Target-Project for Master: ${jsonfile.devProject}"
 						def targetProject = jsonfile.devProject
+						echo "Target-Project for Master: ${targetProject}"
 					}
 					timeout(time: 20, unit: 'MINUTES') {
 						openshift.withCluster() {
+						  echo "Target-Project for Master 2: ${targetProject}"
 						  openshift.withProject(targetProject) {
 						    def bc = openshift.selector('bc', [deployment: 'dev', app: 'witcom-api-gateway'])
-						    def buildSelector = bc.startBuild("--from-file=target/app.jar")
-						    //openshift.startBuild("${env.APPNAME}-docker", "--from-file=target/app.jar")
-							//def bc = openshift.selector('bc', "${env.APPNAME}-docker")
+							def buildSelector = bc.startBuild("--from-file=target/app.jar")
 							echo "Found ${bc.count()} buildconfig - expecting 1"
 							def blds = bc.related('builds')
 							blds.untilEach {
