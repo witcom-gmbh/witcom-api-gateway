@@ -10,8 +10,9 @@ pipeline {
   }  
   stages {
       stage('Init'){
+	  agent { label 'master' }
           steps {
-            echo 'Hello on ${BRANCH_NAME}...'
+            sh 'echo Hello on ${BRANCH_NAME}...'
             sh 'printenv'
           }
           
@@ -20,9 +21,10 @@ pipeline {
          when {
              expression { env.CHANGE_ID != null }
          } 
+		 agent { label 'maven' }
          steps {
             sh 'echo Building ${BRANCH_NAME}...'
-            sh 'mvn clean compile'
+            sh 'mvn clean compile -Pdev -DskipTests=true'
             sh 'mvn test'
          }
       }
