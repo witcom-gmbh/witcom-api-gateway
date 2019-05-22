@@ -33,11 +33,55 @@ pipeline {
 			}
 		 }
       }
+      stage('Build from OpenShift - Init'){
+        when {
+          environment name: 'BUILD_FROM', value: 'openshift'
+        }
+        steps {
+        script {
+          openshift.setLockName('openshift-deploy-witcom-api-gateway')
+        }
+        }
+      }
+      stage('Build from OpenShift - Build JAR'){
+        when {
+          environment name: 'BUILD_FROM', value: 'openshift'
+        }
+        agent { label 'maven' }
+				steps {
+						sh "mvn clean package -Pprod -DskipTests=true"
+						sh "mv target/witcom-api-gateway-1.0.0.jar target/app.jar"
+						stash name:"jar", includes:"target/app.jar"
+				}
+      }
+      stage('Build from OpenShift - Start building Runtime-Image'){
+        when {
+          environment name: 'BUILD_FROM', value: 'openshift'
+        }
+        agent { label 'master' }
+        steps {
+          unstash name:"jar"
+          script {
+            timeout(time: 20, unit: 'MINUTES') {
+              openshift.withCluster() {
+                openshift.withProject() {
+                  def bc = openshift.selector('bc', [deployment: 'dev', app: 'witcom-api-gateway'])
+                  def buildSelector = bc.startBuild("--from-file=target/app.jar")
+                  echo "Found ${bc.count()} buildconfig - expecting 1"
+                  def blds = bc.related('builds')
+                  blds.untilEach {
+                    return it.object().status.phase == "Complete"
+                  }
+                }
+              }  
+            }
+          }
+        }        
+      }
       stage('Deployment to Master') {
           when {
 		  anyOf {
 			  branch 'master'
-			  environment name: 'DEPLOY_TO', value: 'openshift'
 		  }
           }
 		  stages {
