@@ -1,0 +1,666 @@
+{
+	"kind": "Template",
+	"apiVersion": "template.openshift.io/v1",
+	"metadata": {
+		"name": "witcom-api-gateway-chained-build",
+		"creationTimestamp": null
+	},
+	"objects": [{
+			"apiVersion": "v1",
+			"kind": "ImageStream",
+			"metadata": {
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				},
+				"name": "${APP_NAME}-builder"
+			},
+			"spec": {},
+			"status": {
+				"dockerImageRepository": ""
+			}
+		},
+		{
+			"kind": "BuildConfig",
+			"apiVersion": "build.openshift.io/v1",
+			"metadata": {
+				"name": "${APP_NAME}-builder",
+				"creationTimestamp": null,
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				}
+			},
+			"spec": {
+				"triggers": [{
+						"type": "GitHub",
+						"github": {
+							"secret": "${WEBHOOK_SECRET}"
+						}
+					},
+					{
+						"type": "Generic",
+						"generic": {
+							"secret": "${WEBHOOK_SECRET}"
+						}
+					},
+					{
+						"type": "ConfigChange"
+					},
+					{
+						"type": "ImageChange",
+						"imageChange": {}
+					}
+				],
+				"source": {
+					"type": "Git",
+					"git": {
+						"uri": "${GIT_URI}",
+						"ref": "${GIT_REF}"
+					}
+				},
+				"strategy": {
+					"type": "Source",
+					"sourceStrategy": {
+						"from": {
+							"kind": "ImageStreamTag",
+							"namespace": "openshift",
+							"name": "springboot-java:latest"
+						}
+					}
+				},
+				"output": {
+					"to": {
+						"kind": "ImageStreamTag",
+						"name": "${APP_NAME}-builder:latest"
+					}
+				},
+				"resources": {},
+				"postCommit": {},
+				"nodeSelector": null
+			},
+			"status": {
+				"lastVersion": 0
+			}
+		},
+		{
+			"apiVersion": "v1",
+			"kind": "ImageStream",
+			"metadata": {
+
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				},
+				"name": "${APP_NAME}"
+			},
+			"spec": {},
+			"status": {
+				"dockerImageRepository": ""
+			}
+		},
+		{
+			"apiVersion": "v1",
+			"kind": "BuildConfig",
+			"metadata": {
+
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				},
+				"name": "${APP_NAME}-docker"
+			},
+			"spec": {
+				"output": {
+					"to": {
+						"kind": "ImageStreamTag",
+						"name": "${APP_NAME}:latest"
+					}
+				},
+				"resources": {},
+				"runPolicy": "Serial",
+				"source": {
+					"type": "Dockerfile",
+					"dockerfile": "FROM docker-registry.default.svc:5000/openshift/springboot-java-run:latest\nCOPY app.jar /opt/openshift/app.jar\nCMD [\"./run\"]",
+					"images": [{
+						"from": {
+							"kind": "ImageStreamTag",
+							"name": "${APP_NAME}-builder:latest"
+						},
+						"as": null,
+						"paths": [{
+							"sourcePath": "/opt/openshift/app.jar",
+							"destinationDir": "."
+						}]
+					}]
+				},
+				"strategy": {
+					"dockerStrategy": {
+						"from": {
+							"kind": "ImageStreamTag",
+							"name": "springboot-java-run:latest",
+							"namespace": "openshift"
+						}
+					},
+					"type": "Docker"
+				}
+			},
+			"triggers": [{
+					"type": "imageChange",
+					"imageChange": {
+						"from": {
+							"kind": "ImageStreamTag",
+							"name": "witcom-api-gateway-builder:latest"
+						}
+					}
+				}
+
+			]
+		},
+		{
+			"apiVersion": "v1",
+			"kind": "DeploymentConfig",
+			"metadata": {
+
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				},
+				"name": "${APP_NAME}"
+			},
+			"spec": {
+				"replicas": 1,
+				"selector": {
+					"app": "witcom-api-gateway",
+					"name": "${APP_NAME}",
+					"deploymentconfig": "${APP_NAME}"
+				},
+				"strategy": {
+					"rollingParams": {
+						"intervalSeconds": 1,
+						"maxSurge": "25%",
+						"maxUnavailable": "25%",
+						"timeoutSeconds": 600,
+						"updatePeriodSeconds": 1
+					},
+					"type": "Rolling"
+				},
+				"template": {
+					"metadata": {
+						"labels": {
+							"app": "witcom-api-gateway",
+							"name": "${APP_NAME}",
+							"deploymentconfig": "${APP_NAME}",
+							"deployment": "${DEPLOYMENT}"
+						}
+					},
+					"spec": {
+						"containers": [{
+							"env": [{
+									"name": "KEYCLOAK_SERVER_URL",
+									"value": "${KEYCLOAK_SERVER_URL}"
+								},
+								{
+									"name": "KEYCLOAK_REALM_ID",
+									"value": "${KEYCLOAK_REALM_ID}"
+								},
+								{
+									"name": "SPL_BASEURL",
+									"value": "${SPL_BASEURL}"
+								},
+								{
+									"name": "SPL_USER",
+									"value": "${SPL_USER}"
+								},
+								{
+									"name": "SPL_PASSWORD",
+									"valueFrom": {
+										"secretKeyRef": {
+											"key": "spl-password",
+											"name": "${APP_NAME}"
+										}
+									}
+								},
+								{
+									"name": "SPRING_CLOUD_CONSUL_HOST",
+									"valueFrom": {
+										"fieldRef": {
+											"apiVersion": "v1",
+											"fieldPath": "status.hostIP"
+										}
+									}
+								},
+								{
+									"name": "REDIS_PASSWORD",
+									"valueFrom": {
+										"secretKeyRef": {
+											"key": "database-password",
+											"name": "${APP_NAME}-redis"
+										}
+									}
+								},
+								{
+									"name": "REDIS_HOST",
+									"value": "${APP_NAME}-redis"
+								},
+								{
+									"name": "SPRING_CLOUD_CONSUL_CONFIG_ACL_TOKEN",
+									"valueFrom": {
+										"secretKeyRef": {
+											"key": "consul-token",
+											"name": "${APP_NAME}"
+										}
+									}
+								},
+								{
+									"name": "APP_OPTIONS",
+									"value": "--spring.profiles.active=${BUILD_PROFILE}"
+								}
+							],
+							"image": "${APP_NAME}:latest",
+							"imagePullPolicy": "Always",
+							"livenessProbe": {
+								"failureThreshold": 3,
+								"httpGet": {
+									"path": "/gateway/health",
+									"port": 8080,
+									"scheme": "HTTP"
+								},
+								"initialDelaySeconds": 10,
+								"periodSeconds": 10,
+								"successThreshold": 1,
+								"timeoutSeconds": 2
+							},
+							"name": "${APP_NAME}",
+							"ports": [{
+								"containerPort": 8080,
+								"protocol": "TCP"
+							}],
+							"readinessProbe": {
+								"failureThreshold": 3,
+								"httpGet": {
+									"path": "/gateway/health",
+									"port": 8080,
+									"scheme": "HTTP"
+								},
+								"initialDelaySeconds": 30,
+								"periodSeconds": 10,
+								"successThreshold": 1,
+								"timeoutSeconds": 2
+							},
+							"resources": {},
+							"terminationMessagePath": "/dev/termination-log"
+						}],
+						"dnsPolicy": "ClusterFirst",
+						"restartPolicy": "Always",
+						"securityContext": {},
+						"terminationGracePeriodSeconds": 30
+					}
+				},
+				"test": false,
+				"triggers": [{
+						"type": "ConfigChange"
+					},
+					{
+						"imageChangeParams": {
+							"automatic": true,
+							"containerNames": [
+								"${APP_NAME}"
+							],
+							"from": {
+								"kind": "ImageStreamTag",
+								"name": "${APP_NAME}:latest"
+							}
+						},
+						"type": "ImageChange"
+					}
+				]
+			}
+		},
+		{
+			"apiVersion": "v1",
+			"kind": "Secret",
+			"metadata": {
+
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				},
+				"name": "${APP_NAME}"
+			},
+			"stringData": {
+				"consul-token": "${SPRING_CLOUD_CONSUL_CONFIG_ACL_TOKEN}",
+				"spl-password": "${SPL_PASSWORD}"
+			}
+		},
+		{
+			"apiVersion": "v1",
+			"kind": "Service",
+			"metadata": {
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				},
+				"name": "${APP_NAME}"
+			},
+			"spec": {
+				"ports": [{
+					"name": "http",
+					"nodePort": 0,
+					"port": 8080,
+					"protocol": "TCP",
+					"targetPort": 8080
+				}],
+				"selector": {
+					"name": "${APP_NAME}"
+				},
+				"sessionAffinity": "None",
+				"type": "ClusterIP"
+			},
+			"status": {
+				"loadBalancer": {}
+			}
+		},
+		{
+			"kind": "Route",
+			"apiVersion": "route.openshift.io/v1",
+			"metadata": {
+				"annotations": {
+					"kubernetes.io/tls-acme": "true"
+				},
+				"name": "${APP_NAME}-route",
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				}
+			},
+			"spec": {
+				"host": "${ROUTE_FQDN}",
+				"to": {
+					"kind": "Service",
+					"name": "${APP_NAME}",
+					"weight": 100
+				},
+				"port": {
+					"targetPort": "http"
+				},
+				"tls": {
+					"termination": "edge",
+					"insecureEdgeTerminationPolicy": "Allow"
+				},
+				"wildcardPolicy": "None"
+			}
+		},
+		{
+			"apiVersion": "v1",
+			"kind": "Secret",
+			"metadata": {
+				"annotations": {
+					"template.openshift.io/expose-password": "{.data['database-password']}"
+				},
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				},
+				"name": "${APP_NAME}-redis"
+			},
+			"stringData": {
+				"database-password": "${REDIS_PASSWORD}"
+			}
+		},
+		{
+			"apiVersion": "v1",
+			"kind": "Service",
+			"metadata": {
+				"annotations": {
+					"template.openshift.io/expose-uri": "redis://{.spec.clusterIP}:{.spec.ports[?(.name==\"redis\")].port}"
+				},
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				},
+				"name": "${APP_NAME}-redis"
+			},
+			"spec": {
+				"ports": [{
+					"name": "redis",
+					"nodePort": 0,
+					"port": 6379,
+					"protocol": "TCP",
+					"targetPort": 6379
+				}],
+				"selector": {
+					"name": "${APP_NAME}-redis"
+				},
+				"sessionAffinity": "None",
+				"type": "ClusterIP"
+			},
+			"status": {
+				"loadBalancer": {}
+			}
+		},
+		{
+			"apiVersion": "v1",
+			"kind": "PersistentVolumeClaim",
+			"metadata": {
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				},
+				"name": "${APP_NAME}-redis"
+			},
+			"spec": {
+				"accessModes": [
+					"ReadWriteOnce"
+				],
+				"resources": {
+					"requests": {
+						"storage": "1Gi"
+					}
+				}
+			}
+		},
+		{
+			"apiVersion": "v1",
+			"kind": "DeploymentConfig",
+			"metadata": {
+				"annotations": {
+					"template.alpha.openshift.io/wait-for-ready": "true"
+				},
+				"labels": {
+					"app": "witcom-api-gateway",
+					"deployment": "${DEPLOYMENT}"
+				},
+				"name": "${APP_NAME}-redis"
+			},
+			"spec": {
+				"replicas": 1,
+				"selector": {
+					"name": "${APP_NAME}-redis"
+				},
+				"strategy": {
+					"type": "Recreate"
+				},
+				"template": {
+					"metadata": {
+						"labels": {
+							"name": "${APP_NAME}-redis",
+							"app": "witcom-api-gateway",
+							"deployment": "${DEPLOYMENT}"
+						}
+					},
+					"spec": {
+						"containers": [{
+							"capabilities": {},
+							"env": [{
+								"name": "REDIS_PASSWORD",
+								"valueFrom": {
+									"secretKeyRef": {
+										"key": "database-password",
+										"name": "${APP_NAME}-redis"
+									}
+								}
+							}],
+							"image": " ",
+							"imagePullPolicy": "IfNotPresent",
+							"livenessProbe": {
+								"initialDelaySeconds": 30,
+								"tcpSocket": {
+									"port": 6379
+								},
+								"timeoutSeconds": 1
+							},
+							"name": "redis",
+							"ports": [{
+								"containerPort": 6379,
+								"protocol": "TCP"
+							}],
+							"readinessProbe": {
+								"exec": {
+									"command": [
+										"/bin/sh",
+										"-i",
+										"-c",
+										"test \"$(redis-cli -h 127.0.0.1 -a $REDIS_PASSWORD ping)\" == \"PONG\""
+									]
+								},
+								"initialDelaySeconds": 5,
+								"timeoutSeconds": 1
+							},
+							"resources": {
+								"limits": {
+									"memory": "512Mi"
+								}
+							},
+							"securityContext": {
+								"capabilities": {},
+								"privileged": false
+							},
+							"terminationMessagePath": "/dev/termination-log",
+							"volumeMounts": [{
+								"mountPath": "/var/lib/redis/data",
+								"name": "${APP_NAME}-redis-data"
+							}]
+						}],
+						"dnsPolicy": "ClusterFirst",
+						"restartPolicy": "Always",
+						"volumes": [{
+							"name": "${APP_NAME}-redis-data",
+							"persistentVolumeClaim": {
+								"claimName": "${APP_NAME}-redis"
+							}
+						}]
+					}
+				},
+				"triggers": [{
+						"imageChangeParams": {
+							"automatic": true,
+							"containerNames": [
+								"redis"
+							],
+							"from": {
+								"kind": "ImageStreamTag",
+								"name": "redis:3.2",
+								"namespace": "openshift"
+							},
+							"lastTriggeredImage": ""
+						},
+						"type": "ImageChange"
+					},
+					{
+						"type": "ConfigChange"
+					}
+				]
+			},
+			"status": {}
+		}
+	],
+	"parameters": [{
+			"name": "APP_NAME",
+			"displayName": "Application Name",
+			"description": "Application name",
+			"value": "witcom-api-gateway"
+		},
+		{
+			"name": "ROUTE_FQDN",
+			"displayName": "FQDN fuer Route",
+			"description": "Hostname fuer exponierten Service",
+			"required": true
+		},
+		{
+			"name": "DEPLOYMENT",
+			"displayName": "Deployment-Type",
+			"description": "dev ODER stage",
+			"value": "dev"
+		},
+		{
+			"description": "Passwort fuer REDIS",
+			"displayName": "Redis Connection Password",
+			"from": "[a-zA-Z0-9]{16}",
+			"generate": "expression",
+			"name": "REDIS_PASSWORD",
+			"required": true
+		},
+		{
+			"name": "KEYCLOAK_SERVER_URL",
+			"displayName": "Keycloak Server-URL",
+			"description": "Keycloak Server-URL",
+			"required": true
+		},
+		{
+			"name": "KEYCLOAK_REALM_ID",
+			"displayName": "Keycloak REALM",
+			"description": "Keycloak REALM",
+			"value": "witcom"
+		},
+		{
+			"name": "SPL_BASEURL",
+			"displayName": "SMDB Basis-URL",
+			"description": "SMDB Basis-URL",
+			"required": true
+		},
+		{
+			"name": "SPL_USER",
+			"displayName": "SMDB User",
+			"description": "SMDB User",
+			"required": true
+		},
+		{
+			"name": "SPL_PASSWORD",
+			"displayName": "SMDB Passwort",
+			"description": "SMDB Passwort",
+			"required": true
+		},
+		{
+			"name": "SPRING_CLOUD_CONSUL_CONFIG_ACL_TOKEN",
+			"displayName": "Consul ACL-Token",
+			"description": "Consul ACL-Token",
+			"required": true
+		},
+		{
+			"name": "GIT_URI",
+			"displayName": "Git Repository containing application source code",
+			"description": "GIT URL pointing to the repository containing application source code for Java Spring Boot Application",
+			"value": "https://github.com/witcom-gmbh/witcom-api-gateway"
+		},
+		{
+			"name": "GIT_REF",
+			"description": "Git branch/tag reference",
+			"value": "master"
+		},
+		{
+			"description": "Passwort fuer GIT-Webhooks",
+			"displayName": "Passwort fuer GIT-Webhooks",
+			"from": "[a-zA-Z0-9]{16}",
+			"generate": "expression",
+			"name": "WEBHOOK_SECRET",
+			"required": true
+		},
+		{
+			"name": "BUILD_PROFILE",
+			"displayName": "Build Type",
+			"description": "Specify build type - prod OR stage",
+			"value": "prod"
+		}
+	]
+}
