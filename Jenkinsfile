@@ -35,7 +35,10 @@ pipeline {
       }
       stage('Deployment to Master') {
           when {
-              branch 'master'
+		  anyOf {
+			  branch 'master'
+			  environment name: 'DEPLOY_TO', value: 'openshift'
+		  }
           }
 		  stages {
 		    stage('Init'){
