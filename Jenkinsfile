@@ -10,7 +10,6 @@ pipeline {
 				agent { label 'maven' }
 				steps {
 					sh 'mvn clean compile -Pdev -DskipTests=true'
-					sh 'mvn test'
 				}
 			}
 			stage('Verify'){

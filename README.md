@@ -8,8 +8,8 @@ Routen & Filter werden ueber Spring-Boot konfiguriert, und zwar ueber Consul.
 Wird zum Zugriff auf einen Consul-Agent ein ACL-Token, benoetigt und/oder laeuft der Agent nicht auf localhost,
 so kann der Consul-Client per Umgebungsvariable erfolgen
 
-SPRING_CLOUD_CONSUL_HOST=IP-ODER-HOSTNAME
-SPRING_CLOUD_CONSUL_CONFIG_ACL_TOKEN=****
+* SPRING_CLOUD_CONSUL_HOST=IP-ODER-HOSTNAME
+* SPRING_CLOUD_CONSUL_CONFIG_ACL_TOKEN=****
 
 Die Konfiguation wird im Consul-KV unter dem KV-Key **applicationconfig/witcom-api-gateway** erwartet.
 Profilspezifische Konfiguration 
@@ -24,8 +24,8 @@ Erfordert ein gueltiges JWT Bearer-Token, sowie die Mitgliedschaft einer konfigu
 ## Globale Einstellungen
 Die zu verwendende Keycloak-Instanz wird global mit den folgenden Umgebungsvariablen konfiguriert
 
-KEYCLOAK_SERVER_URL=https://FQDN/auth
-KEYCLOAK_REALM_ID=REALM-NAME
+* KEYCLOAK_SERVER_URL=https://FQDN/auth
+* KEYCLOAK_REALM_ID=REALM-NAME
 
 ## Filter-Konfiguration
 Der Filter wird wie folgt konfiguriert
@@ -63,7 +63,7 @@ SPL_USER=User der zur anmeldung verwendet wird
 SPL_PASSWORD=Passwort
 SPL_TENANT=Mandandt - optional
 
-Per Default verbindet sich das API-Gateway zu einer REDIS-Instanz mit dem Hostnamen redis-apigw. Das Kennwort zur Instanz wird
+Per Default verbindet sich das API-Gateway zu einer REDIS-Instanz deren Hostname in der Umgebungsvariable REDIS_HOST erwartet wird. Das Kennwort zur Instanz wird
 in der Umgebungsvariablen REDIS_PASSWORD erwartet.
 
 Diese Konfiguration kann ueber Consul angepasst werden.
