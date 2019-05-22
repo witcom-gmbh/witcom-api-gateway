@@ -12,7 +12,7 @@ spring:
     routes:
 #service-planet    
       - id: spl
-        uri: ${SPL_BASEURL}/serviceplanet/remote/service
+        uri: ${SPL_BASEURL:http://localhost}/serviceplanet/remote/service
         predicates:
          - Path=/smdb/**
         filters:
