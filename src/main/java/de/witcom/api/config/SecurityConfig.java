@@ -13,18 +13,22 @@ import de.witcom.api.filter.KeyCloakFilterException;
 public class SecurityConfig {
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
+	@Value("${KEYCLOAK_SERVER_URL:#{null}}")
+	String keycloakServerUrl;
+	
+	@Value("${KEYCLOAK_REALM_ID:#{null}}")
+	String keycloakRealmId;
+	
 
 	@Bean
-	public KeycloakProperties initKeyCloak(@Value("${KEYCLOAK_SERVER_URL}") String keycloakServerUrl, @Value("${KEYCLOAK_REALM_ID}") String keycloakRealmId) throws KeyCloakFilterException{
+	public KeycloakProperties initKeyCloak() throws KeyCloakFilterException{
 		
 		logger.debug("Init keycloak....");
 		if (StringUtils.isEmpty(keycloakServerUrl)){
-			logger.error("No keycloakServerUrl configured");
-			throw new KeyCloakFilterException("No keycloakServerUrl configured");
+			logger.warn("No keycloakServerUrl configured");
 		}
 		if (StringUtils.isEmpty(keycloakRealmId)){
-			logger.error("No keycloakRealmId configured");
-			throw new KeyCloakFilterException("No keycloakRealmId configured");
+			logger.warn("No keycloakRealmId configured");
 		}
 		return new KeycloakProperties().keycloakRealmId(keycloakRealmId).keycloakServerUrl(keycloakServerUrl);
 	}

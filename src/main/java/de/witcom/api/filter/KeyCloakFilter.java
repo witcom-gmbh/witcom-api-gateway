@@ -212,6 +212,14 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 	}
 	
 	private String getRealmUrl() {
+	    if (StringUtils.isEmpty(keycloakProperties.getKeycloakServerUrl())){
+			logger.error("No keycloakServerUrl configured - filter won't work");
+			return "";
+		}
+		if (StringUtils.isEmpty(keycloakProperties.getKeycloakRealmId())){
+			logger.error("No keycloakRelam configured - filter won't work");
+			return "";
+		}
 		return keycloakProperties.getKeycloakServerUrl().trim() + "/realms/" + keycloakProperties.getKeycloakRealmId().trim();
 	}
 

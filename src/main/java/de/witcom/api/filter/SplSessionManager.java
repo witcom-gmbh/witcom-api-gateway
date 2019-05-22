@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.apache.commons.lang3.StringUtils;
 
 import de.witcom.api.model.Session;
 import de.witcom.api.repo.SessionRepository;
@@ -28,11 +29,11 @@ import de.witcom.api.swagger.model.UserLoginDto;
 @Service
 public class SplSessionManager {
 	
-	@Value("${SPL_BASEURL}")
+	@Value("${SPL_BASEURL:#{null}}")
 	private String splBaseUrl;
-	@Value("${SPL_USER}")
+	@Value("${SPL_USER:#{null}}")
 	private String splUser;
-	@Value("${SPL_PASSWORD}")
+	@Value("${SPL_PASSWORD:#{null}}")
 	private String splPassword;
 	@Value("${SPL_TENANT:#{null}}")
 	private String splTenant;
@@ -101,6 +102,19 @@ public class SplSessionManager {
 	}
 	
 	private void login() {
+	    
+	    if (StringUtils.isEmpty(splBaseUrl)){
+	        logger.error("SPL BaseURL is empty - unable to login");
+	        return;
+        }
+   	    if (StringUtils.isEmpty(splUser)){
+	        logger.error("SPL User is empty - unable to login");
+	        return;
+        }
+   	    if (StringUtils.isEmpty(splPassword)){
+	        logger.error("SPL Password is empty - unable to login");
+	        return;
+        }        
 
 		String url = splBaseUrl + "/serviceplanet/remote/service/v1/login/authenticate";
 
