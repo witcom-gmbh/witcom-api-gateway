@@ -96,13 +96,24 @@
 	</dependencyManagement>
 
 	<build>
-		<resources>
+<!--		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
-		</resources>
+		</resources>-->
+		
 		<plugins>
+		<!--<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>2.22.0</version>
+    <configuration>
+      <systemPropertyVariables>
+        <spring.profiles.active>dev</spring.profiles.active>
+      </systemPropertyVariables>
+    </configuration>
+  </plugin>-->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -168,6 +179,18 @@
 				<logback.loglevel>DEBUG</logback.loglevel>
 				<!-- default Spring profiles -->
 				<spring.profiles.active>dev</spring.profiles.active>
+			</properties>
+		</profile>
+		<profile>
+			<id>stage</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<!-- log configuration -->
+				<logback.loglevel>DEBUG</logback.loglevel>
+				<!-- default Spring profiles -->
+				<spring.profiles.active>stage</spring.profiles.active>
 			</properties>
 		</profile>
 		<profile>

@@ -13,12 +13,13 @@ spring:
     active: #spring.profiles.active#
   cloud:
     consul:
+      enabled: false
       discovery:
         enabled: false
       port: 8500                
       config:
-        enabled: true
-        fail-fast: true
+        enabled: false
+        fail-fast: false
         prefix: applicationconfig
         format: yaml
         profile-separator: "::"
