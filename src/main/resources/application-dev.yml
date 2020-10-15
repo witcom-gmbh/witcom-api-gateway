@@ -16,7 +16,7 @@ spring:
         predicates:
          - Path=/smdb/**
         filters:
-         - KeyCloakFilter=requiredRole,service_read
+#         - KeyCloakFilter=requiredRole,service_read
          - ServicePlanetFilter
          - RewritePath=/smdb/(?<segment>.*), /serviceplanet/remote/service/$\{segment}
 #dsl recherche
@@ -45,4 +45,15 @@ spring:
         filters:
           - KeyCloakFilter=requiredRole,samplewebservice01:samplewebservice01_resource_a_read
           - AddRequestHeader=X-Some-Header, custom-header
-    
+
+application:
+  keycloak-config:
+    keycloak-realm-id: ${KEYCLOAK_REALM_ID:#{null}}
+    keycloak-server-url: ${KEYCLOAK_SERVER_URL:#{null}}
+  spl-config:
+    spl-base-url: ${SPL_BASEURL:#{null}}
+    spl-tenant: ${SPL_TENANT:}
+    spl-user: ${SPL_USER:#{null}}
+    spl-password: ${SPL_PASSWORD:#{null}} 
+
+       

@@ -11,4 +11,11 @@ public class OIDCKey {
     public String n;
     public String e;
     
+	@Override
+	public String toString() {
+		return "OIDCKey [kid=" + kid + ", kty=" + kty + ", alg=" + alg + ", use=" + use + ", n=" + n + ", e=" + e + "]";
+	}
+    
+    
+    
 }
