@@ -65,7 +65,6 @@ Globale Filtereinstellungen über die application-properties konfiguriert. Diese
 
 ```yaml
 application:
-application:
   spl-config:
     spl-base-url: http://spl-url
     spl-tenant: optional
@@ -79,7 +78,7 @@ in der Umgebungsvariablen REDIS_PASSWORD erwartet
 ## Beispiel
 Im Idealfall kombiniert man den ServicePlanet-Filter mit dem KeyCloakFilter um eine Authorisierung zu erreichen.
 
-
+```yaml
 spring:
   cloud:
    gateway:
@@ -96,7 +95,7 @@ spring:
          - KeyCloakFilter=requiredRole,spl:service_read
          - ServicePlanetFilter
          - RewritePath=/smdb/(?<segment>.*), /serviceplanet/remote/service/$\{segment}
-`
+```
 
 # Custom Filter - Basic-Auth
 Fuegt einem Request eine Basic-Authentifizierugn hinzu. Falls der eingehende Request bereits einen Authorization-Header hat,
