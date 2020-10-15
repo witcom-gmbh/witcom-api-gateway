@@ -9,6 +9,7 @@ Wird zum Zugriff auf einen Consul-Agent ein ACL-Token, benoetigt und/oder laeuft
 so kann der Consul-Client per Umgebungsvariable erfolgen
 
 * SPRING_CLOUD_CONSUL_HOST=IP-ODER-HOSTNAME
+* SPRING_CLOUD_CONSUL_PORT=443
 * SPRING_CLOUD_CONSUL_CONFIG_ACL_TOKEN=****
 
 Die Konfiguation wird im Consul-KV unter dem KV-Key **applicationconfig/witcom-api-gateway** erwartet.
@@ -22,10 +23,14 @@ Profilspezifische Konfiguration
 Erfordert ein gueltiges JWT Bearer-Token, sowie die Mitgliedschaft einer konfigurierbaren Rolle.
 
 ## Globale Einstellungen
-Die zu verwendende Keycloak-Instanz wird global mit den folgenden Umgebungsvariablen konfiguriert
+Die zu verwendende Keycloak-Instanz wird über die application-properties konfiguriert. Diese Properties können natürlich auch aus Consul geladen werden. Es ist auch nöglich dort Umgebungsvariablemn zu referenzieren 
 
-* KEYCLOAK_SERVER_URL=https://FQDN/auth
-* KEYCLOAK_REALM_ID=REALM-NAME
+```yaml
+application:
+  keycloak-config:
+    keycloak-realm-id: ${KEYCLOAK_REALM_ID}
+    keycloak-server-url: http:/my-url/auth
+```
 
 ## Filter-Konfiguration
 Der Filter wird wie folgt konfiguriert
@@ -37,7 +42,7 @@ RESOURCE ist dabei die Keycloak-Applikation (Client) die die Rolle definiert, RO
 Beispiel - zum Zugriff auf den Pfad /get muss der zugreifende User/Client die Rolle
 samplewebservice01_resource_a_read in der Resource samplewebservice01 besitzen
 
-`
+```yaml
 spring:
   cloud:
    gateway:
@@ -48,7 +53,7 @@ spring:
          - Path=/get/**
         filters:
            - KeyCloakFilter=requiredRole,samplewebservice01:samplewebservice01_resource_a_read
-`
+```
 
 # Custom Filter - Service-Planet
 Ein Filter der jeden Zugriff auf die Service-Planet-API mit einer gueltigen Session versieht.
@@ -56,22 +61,25 @@ Der Filter fuehrt einen Login bei Service-Planet durch um eine Session zu erhalt
 wird in einem REDIS Key-Value-Store abgespeichert, um mehrere Instanzen des API-Gateways laufen zu lassen.
 
 ## Globale Einstellungen
-Der Filter wird global mit den folgenden Umgebungsvariablen konfiguriert
+Globale Filtereinstellungen über die application-properties konfiguriert. Diese Properties können natürlich auch aus Consul geladen werden. Es ist auch nöglich dort Umgebungsvariablemn zu referenzieren
 
-SPL_BASEURL=https://smdb-dev.workspace.witcom.de
-SPL_USER=User der zur anmeldung verwendet wird
-SPL_PASSWORD=Passwort
-SPL_TENANT=Mandandt - optional
+```yaml
+application:
+application:
+  spl-config:
+    spl-base-url: http://spl-url
+    spl-tenant: optional
+    spl-user: user
+    spl-password: ${SPL_PASSWORD} 
+```
 
 Per Default verbindet sich das API-Gateway zu einer REDIS-Instanz deren Hostname in der Umgebungsvariable REDIS_HOST erwartet wird. Das Kennwort zur Instanz wird
-in der Umgebungsvariablen REDIS_PASSWORD erwartet.
-
-Diese Konfiguration kann ueber Consul angepasst werden.
+in der Umgebungsvariablen REDIS_PASSWORD erwartet
 
 ## Beispiel
 Im Idealfall kombiniert man den ServicePlanet-Filter mit dem KeyCloakFilter um eine Authorisierung zu erreichen.
 
-`
+
 spring:
   cloud:
    gateway:
@@ -92,7 +100,7 @@ spring:
 
 # Custom Filter - Basic-Auth
 Fuegt einem Request eine Basic-Authentifizierugn hinzu. Falls der eingehende Request bereits einen Authorization-Header hat,
-muss dieser mit dme RemoveRequestHeader entfernt werden.
+muss dieser mit dem Filter RemoveRequestHeader entfernt werden.
 
 ## Konfiguration & Beispiel
 Der Filter erwartet Benutzername & Passwort
@@ -101,7 +109,7 @@ BasicAuthFilter=USER,PASSWORD
 
 Es ist moeglich Benutzername & Passwort aus Umgebungsvariablen zu beziehen.
 
-`
+```yaml
 spring:
   cloud:
    gateway:
@@ -118,7 +126,7 @@ spring:
           - KeyCloakFilter=requiredRole,service_read
           - RemoveRequestHeader=Authorization    
           - BasicAuthFilter=${MK_USER},${MK_PASS}
-`
+```
 
 # OpenShift - Deployment Produktiv
 
