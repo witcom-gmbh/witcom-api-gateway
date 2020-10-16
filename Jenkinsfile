@@ -1,10 +1,11 @@
 pipeline {
-  def mvnHome
-  def jdk
-  mvnHome = tool 'M3'
-  jdk = tool name: 'OPENJDK11'
-  env.JAVA_HOME = "${jdk}"
-  env.JAVA_TOOL_OPTIONS = "-XX:+UnlockExperimentalVMOptions -Dsun.zip.disableMemoryMapping=true"
+    tools {
+        maven 'M3'
+        jdk 'OPENJDK11'
+    }
+    environment { 
+        JAVA_TOOL_OPTIONS = '-XX:+UnlockExperimentalVMOptions -Dsun.zip.disableMemoryMapping=true'
+    }
 
   agent none
   stages {
@@ -16,7 +17,7 @@ pipeline {
 			stage('Build & test'){
 				agent { label 'maven' }
 				steps {
-				    sh "'${mvnHome}/bin/mvn' clean compile -Pdev -DskipTests=true"
+				    sh 'mvn clean compile -Pdev -DskipTests=true'
 				}
 			}
 			stage('Verify'){
