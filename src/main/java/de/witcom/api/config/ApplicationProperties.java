@@ -1,7 +1,9 @@
 package de.witcom.api.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
 @ConfigurationProperties(prefix = "application", ignoreUnknownFields = false)
 public class ApplicationProperties {
     
@@ -40,6 +42,11 @@ public class ApplicationProperties {
         public void setSplTenant(String splTenant){
             this.splTenant=splTenant;
         }
+		@Override
+		public String toString() {
+			return "SplConfig [splBaseUrl=" + splBaseUrl + ", splUser=" + splUser + ", splPassword=" + splPassword
+					+ ", splTenant=" + splTenant + "]";
+		}
     }
     
     public static class DslPortalConfig {

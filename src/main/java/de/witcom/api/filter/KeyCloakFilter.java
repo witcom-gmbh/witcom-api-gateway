@@ -35,7 +35,7 @@ import org.keycloak.common.VerificationException;
 import org.keycloak.jose.jws.JWSHeader;
 import org.keycloak.representations.AccessToken;
 
-import de.witcom.api.config.KeycloakProperties;
+import de.witcom.api.config.ApplicationProperties;
 import reactor.core.publisher.Mono;
 
 import org.springframework.web.client.RestTemplate;
@@ -51,7 +51,7 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
-	KeycloakProperties keycloakProperties;
+	ApplicationProperties appProperties;
 
 	@Override
 	public GatewayFilter apply(NameValueConfig config) {
@@ -131,6 +131,7 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 			  .verify() //
 			  .getToken();
 		  } catch (VerificationException e) {
+			  logger.error(e.getMessage());
 			  logger.error("ERROR: Unable to load JWT Secret: {}",e.getLocalizedMessage());
 			  throw new KeyCloakFilterException("Unable to load JWT Secret");
 		  }
@@ -179,10 +180,9 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 		try {
 		  OIDCKey keyInfo = null;	    
 		  RestTemplate restTemplate = new RestTemplate();
+		
 	      OIDCCerts response = restTemplate.getForObject(getRealmCertsUrl(), OIDCCerts.class);
-    	  
     	  for (OIDCKey key:response.keys){
-    	     
     	        String kid=key.kid;
     	        if (jwsHeader.getKeyId().equals(kid)) {
     			  keyInfo = key;
@@ -206,21 +206,22 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 		  return keyFactory.generatePublic(new RSAPublicKeySpec(modulus, publicExponent));
 
 		} catch (Exception e) {
-			logger.error("Unable to get public key from certendpoints " + e.getMessage());
+			logger.error("Unable to get public key from certendpoint "+getRealmCertsUrl()+ ":" + e.getMessage());
 		}
 		return null;
 	}
 	
 	private String getRealmUrl() {
-	    if (StringUtils.isEmpty(keycloakProperties.getKeycloakServerUrl())){
+	    if (StringUtils.isEmpty(appProperties.getKeycloakConfig().getKeycloakServerUrl())){
 			logger.error("No keycloakServerUrl configured - filter won't work");
 			return "";
 		}
-		if (StringUtils.isEmpty(keycloakProperties.getKeycloakRealmId())){
+		if (StringUtils.isEmpty(appProperties.getKeycloakConfig().getKeycloakRealmId())){
 			logger.error("No keycloakRelam configured - filter won't work");
 			return "";
 		}
-		return keycloakProperties.getKeycloakServerUrl().trim() + "/realms/" + keycloakProperties.getKeycloakRealmId().trim();
+		//logger.debug(appProperties.getKeycloakConfig().getKeycloakServerUrl().trim() + "/realms/" + appProperties.getKeycloakConfig().getKeycloakRealmId().trim());
+		return appProperties.getKeycloakConfig().getKeycloakServerUrl().trim() + "/realms/" + appProperties.getKeycloakConfig().getKeycloakRealmId().trim();
 	}
 
 	private String getRealmCertsUrl() {
@@ -234,6 +235,7 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
                 "error_description=\"%s\" ",  msg);
     }
 	
+	/*
 	public static class Config {
 		
 		private String requiredRole;
@@ -246,7 +248,7 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 			this.requiredRole = requiredRole;
 		}
 		
-	}
+	}*/
 	
 
 }

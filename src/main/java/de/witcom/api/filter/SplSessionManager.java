@@ -21,6 +21,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.apache.commons.lang3.StringUtils;
 
+import de.witcom.api.config.ApplicationProperties;
 import de.witcom.api.model.Session;
 import de.witcom.api.repo.SessionRepository;
 import de.witcom.api.swagger.model.BooleanHolder;
@@ -29,20 +30,25 @@ import de.witcom.api.swagger.model.UserLoginDto;
 @Service
 public class SplSessionManager {
 	
+	/*
 	@Value("${SPL_BASEURL:#{null}}")
 	private String splBaseUrl;
 	@Value("${SPL_USER:#{null}}")
 	private String splUser;
 	@Value("${SPL_PASSWORD:#{null}}")
 	private String splPassword;
-	@Value("${SPL_TENANT:#{null}}")
+	@Value("${application.spl-config.spl-tenant:#{null}}")
 	private String splTenant;
-	
+	*/
+
 	private static final String APP_ID = "SERVICEPLANET";
 	
     @Autowired
     SessionRepository sessionRepo;
-    
+
+	@Autowired
+	ApplicationProperties appProperties;
+
 
 	Logger logger = LoggerFactory.getLogger(SplSessionManager.class);
 	
@@ -70,7 +76,7 @@ public class SplSessionManager {
 		// logger.debug("Check if Session {} is active",this.sessionId);
 		
 		
-		String url = splBaseUrl + "/serviceplanet/remote/service/v1/login/logged_in_user/active";
+		String url = appProperties.getSplConfig().getSplBaseUrl() + "/serviceplanet/remote/service/v1/login/logged_in_user/active";
 		RestTemplate restTemplate = new RestTemplate();
 
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -103,20 +109,20 @@ public class SplSessionManager {
 	
 	private void login() {
 	    
-	    if (StringUtils.isEmpty(splBaseUrl)){
+	    if (StringUtils.isEmpty(appProperties.getSplConfig().getSplBaseUrl())){
 	        logger.error("SPL BaseURL is empty - unable to login");
 	        return;
         }
-   	    if (StringUtils.isEmpty(splUser)){
+   	    if (StringUtils.isEmpty(appProperties.getSplConfig().getSplUser())){
 	        logger.error("SPL User is empty - unable to login");
 	        return;
         }
-   	    if (StringUtils.isEmpty(splPassword)){
+   	    if (StringUtils.isEmpty(appProperties.getSplConfig().getSplPassword())){
 	        logger.error("SPL Password is empty - unable to login");
 	        return;
         }        
 
-		String url = splBaseUrl + "/serviceplanet/remote/service/v1/login/authenticate";
+		String url = appProperties.getSplConfig().getSplBaseUrl() + "/serviceplanet/remote/service/v1/login/authenticate";
 
 		RestTemplate restTemplate = new RestTemplate();
 
@@ -124,12 +130,13 @@ public class SplSessionManager {
 		requestHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-		map.add("loginname", splUser);
-		map.add("password", splPassword);
+		map.add("loginname", appProperties.getSplConfig().getSplUser());
+		map.add("password", appProperties.getSplConfig().getSplPassword());
 		map.add("allowDropOldestSession","true");
-		if (splTenant!=null){
-		    map.add("tenant", splTenant);
+		if (!StringUtils.isEmpty(appProperties.getSplConfig().getSplTenant())){
+			map.add("tenant", appProperties.getSplConfig().getSplTenant());
 		}
+		
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map,
 				requestHeaders);
 		try {
