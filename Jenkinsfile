@@ -117,6 +117,7 @@ pipeline {
                     agent { label 'master' }
                     steps {
                         script {
+				unstash name:"jar"
 		                    timeout(time: 20, unit: 'MINUTES') {
                             openshift.withCluster() {
                                 openshift.withProject() {
@@ -141,6 +142,7 @@ pipeline {
                     agent { label 'master' }
                     steps {
                         script {
+				unstash name:"jar"
                         timeout(time: 20, unit: 'MINUTES') {
                             openshift.withCluster() {
                                 openshift.withProject() {
