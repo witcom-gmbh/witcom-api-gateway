@@ -9,8 +9,6 @@ pipeline {
     }
     environment { 
         JAVA_TOOL_OPTIONS = '-XX:+UnlockExperimentalVMOptions -Dsun.zip.disableMemoryMapping=true'
-        CHANGE_ID='bla'
-        BUILD_FROM='openshift'
     }
 
     agent none
