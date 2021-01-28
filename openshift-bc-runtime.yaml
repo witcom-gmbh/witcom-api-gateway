@@ -27,6 +27,9 @@ spec:
     type: Dockerfile
   strategy:
     dockerStrategy:
+      env:
+        - name: MAVEN_ARGS_APPEND
+          value: '-Pprod'
       from:
         kind: ImageStreamTag
         name: 'springboot-java-run:openjdk11'
