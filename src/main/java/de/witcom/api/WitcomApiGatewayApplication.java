@@ -8,8 +8,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableAutoConfiguration
-@EnableConfigurationProperties
 public class WitcomApiGatewayApplication {
 
 	public static void main(String[] args) {

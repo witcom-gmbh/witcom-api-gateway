@@ -11,7 +11,7 @@ spring:
       discovery:
         enabled: false
       port: 443
-      scheme:  https                      
+      scheme:  http                      
       config:
         enabled: true
         fail-fast: true
@@ -24,14 +24,10 @@ spring:
   profiles: dev
   cloud:
     consul:
-      enabled: true
+      port: 8500
+      enabled: false
       config:
-        enabled: true
-        fail-fast: true
-        prefix: applicationconfig
-        format: yaml
-        profile-separator: "::"
-
+        enabled: false
 
 info:
     project:
