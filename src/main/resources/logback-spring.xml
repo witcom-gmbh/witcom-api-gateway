@@ -28,5 +28,4 @@
         <appender-ref ref="ConsoleSimple" />
     </logger>
 
-
 </configuration>

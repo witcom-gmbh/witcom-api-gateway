@@ -24,8 +24,13 @@ spring:
   profiles: dev
   cloud:
     consul:
+      enabled: true
       config:
-        enabled: false
+        enabled: true
+        fail-fast: true
+        prefix: applicationconfig
+        format: yaml
+        profile-separator: "::"
 
 
 info:

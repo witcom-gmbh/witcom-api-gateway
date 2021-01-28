@@ -1,10 +1,12 @@
 package de.witcom.api.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = "application", ignoreUnknownFields = false)
+@RefreshScope
 public class ApplicationProperties {
     
     private final KeycloakConfig keycloakConfig = new KeycloakConfig();

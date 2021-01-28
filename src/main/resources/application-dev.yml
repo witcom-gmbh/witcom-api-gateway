@@ -56,4 +56,8 @@ application:
     spl-user: ${SPL_USER:#{null}}
     spl-password: ${SPL_PASSWORD:#{null}} 
 
+logging:
+  level:
+    ROOT: INFO
+    org.springframework.cloud.config: DEBUG
        
