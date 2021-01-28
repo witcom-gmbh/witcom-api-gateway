@@ -21,6 +21,7 @@
 		<keycloak.version>11.0.3</keycloak.version>
 		<version.swagger.codegen>2.4.0</version.swagger.codegen>
 		<yaml.file>${project.basedir}/src/main/resources/splapi.yaml</yaml.file>
+		<command-yaml.file>${project.basedir}/src/main/resources/fntcommand-login-api.yml</command-yaml.file>
 		<generated-sources-path>${project.build.directory}/generated-sources</generated-sources-path>
 		<generated-sources-java-path>main/java</generated-sources-java-path>
 	</properties>
@@ -145,28 +146,49 @@
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-codegen-maven-plugin</artifactId>
 				<version>${version.swagger.codegen}</version>
-				<configuration>
-					<inputSpec>${yaml.file}</inputSpec>
-					<configOptions>
-						<sourceFolder>${generated-sources-java-path}</sourceFolder>
-					</configOptions>
-					<output>${generated-sources-path}</output>
-				</configuration>
 				<executions>
 					<execution>
-						<id>generate-swagger-spring</id>
+						<id>generate-spl-api</id>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>generate</goal>
 						</goals>
 						<configuration>
+											<inputSpec>${yaml.file}</inputSpec>
+					<configOptions>
+						<sourceFolder>${generated-sources-java-path}</sourceFolder>
+					</configOptions>
+					<output>${generated-sources-path}</output>
+						
 							<library>spring-cloud</library>
 							<language>spring</language>
 							<generateApis>false</generateApis>
 							<generateSupportingFiles>false</generateSupportingFiles>
-							<modelPackage>${project.groupId}.api.swagger.model</modelPackage>
-							<apiPackage>${project.groupId}.api.swagger.api</apiPackage>
-							<invokerPackage>${project.groupId}.api.swagger.invoker</invokerPackage>
+							<modelPackage>${project.groupId}.api.spl.swagger.model</modelPackage>
+							<apiPackage>${project.groupId}.api.spl.swagger.api</apiPackage>
+							<invokerPackage>${project.groupId}.api.spl.swagger.invoker</invokerPackage>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>generate-command-api</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+											<inputSpec>${command-yaml.file}</inputSpec>
+					<configOptions>
+						<sourceFolder>${generated-sources-java-path}</sourceFolder>
+					</configOptions>
+					<output>${generated-sources-path}</output>
+							<library>spring-cloud</library>
+							<language>spring</language>
+							<generateApis>true</generateApis>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<modelPackage>${project.groupId}.api.command.swagger.model</modelPackage>
+							<apiPackage>${project.groupId}.api.command.swagger.api</apiPackage>
+							<invokerPackage>${project.groupId}.api.command.swagger.invoker</invokerPackage>
 						</configuration>
 					</execution>
 				</executions>

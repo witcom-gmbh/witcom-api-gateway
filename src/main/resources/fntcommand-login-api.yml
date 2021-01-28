@@ -1,0 +1,84 @@
+swagger: '2.0'
+info:
+  description: Swagger API for FNT Command Business Gateway
+  version: 12.10.3
+  title: Swagger for Command BGE
+host: rmdb.workspace.witcom.de
+basePath: /axis
+schemes:
+  - https
+paths:
+  /api/rest/businessGateway/login:
+    post:
+      tags:
+        - REST
+      operationId: login
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/LoginRequest'
+      responses:
+        '200':
+          description: returns LoginResponse
+          schema:
+            $ref: '#/definitions/LoginResponse'
+  /api/rest/businessGateway/logout:
+    post:
+      tags:
+        - REST
+      operationId: logout
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: sessionId
+          in: query
+          description: Session-ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: returns LogoutResponse
+          schema:
+            $ref: '#/definitions/ServiceStatusData'
+definitions:
+  LoginRequest:
+    type: object
+    properties:
+      password:
+        type: string
+      userGroupName:
+        type: string
+      manId:
+        type: string
+      user:
+        type: string
+    title: LoginRequest
+  LoginResponse:
+    type: object
+    properties:
+      sessionId:
+        type: string
+      status:
+        $ref: '#/definitions/ServiceStatusData'
+    title: LoginResponse
+  ServiceStatusData:
+    type: object
+    properties:
+      success:
+        type: boolean
+      errorCode:
+        type: integer
+        format: int32
+      subErrorCode:
+        type: string
+      message:
+        type: string
+    title: ServiceStatusData
