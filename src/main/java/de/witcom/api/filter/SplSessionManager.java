@@ -93,7 +93,7 @@ public class SplSessionManager {
 				return response.getBody().isValue();
 			}
 		} catch (Exception e) {
-			logger.error("Error when trying to validate session in SPL: {}", e.getMessage());
+			logger.error("Error when trying to validate session in SPL {} : {}", url, e.getMessage());
 		}
 
 		return false;
@@ -142,7 +142,7 @@ public class SplSessionManager {
 		try {
 			ResponseEntity<Object> response = restTemplate.postForEntity(url, request, Object.class);
 			if (!response.getStatusCode().equals(HttpStatus.OK)) {
-				logger.error("Login to ServicePlanet was not successful - got Status : {}", response.getStatusCode());
+				logger.error("Login to ServicePlanet at {} was not successful - got Status : {}",url, response.getStatusCode());
 			} else {
 				if (response.getHeaders().get("Set-Cookie").isEmpty()) {
 					logger.error("Unable to extract sessionid - got no cookies");
@@ -164,7 +164,7 @@ public class SplSessionManager {
 			}
 
 		} catch (Exception e) {
-			logger.error("Error when trying to login to SPL: {}", e.getMessage());
+			logger.error("Error when trying to login to SPL at {} : {}",url, e.getMessage());
 
 		}
 	}
