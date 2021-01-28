@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>de.witcom</groupId>
 	<artifactId>witcom-api-gateway</artifactId>
-	<version>1.1.2</version>
+	<version>1.1.3</version>
 	<name>witcom-api-gateway</name>
 	<description>API-Gateway</description>
 
@@ -44,12 +44,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-logging</artifactId>
 		</dependency>
-
+<!-- 
 		<dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-consul-config</artifactId>
         </dependency>
-
+ -->
 		<dependency>
 			<groupId>com.github.joschi.jackson</groupId>
 			<artifactId>jackson-datatype-threetenbp</artifactId>
@@ -215,6 +215,12 @@
 				<!-- default Spring profiles -->
 				<spring.profiles.active>prod</spring.profiles.active>
 			</properties>
+			<dependencies>
+					<dependency>
+			            <groupId>org.springframework.cloud</groupId>
+			            <artifactId>spring-cloud-starter-consul-config</artifactId>
+			        </dependency>
+			</dependencies>
 		</profile>
 	</profiles>
 
