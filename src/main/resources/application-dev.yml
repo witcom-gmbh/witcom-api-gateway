@@ -43,7 +43,7 @@ spring:
         predicates:
          - Path=/get/**
         filters:
-          - KeyCloakFilter=requiredRole,samplewebservice01:samplewebservice01_resource_a_read
+          - KeyCloakFilter=requiredRole,rmdb-api-server:test-role
           - AddRequestHeader=X-Some-Header, custom-header
 
 application:

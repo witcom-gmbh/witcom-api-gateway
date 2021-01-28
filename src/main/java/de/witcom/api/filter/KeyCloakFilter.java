@@ -1,7 +1,6 @@
 package de.witcom.api.filter;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
-import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.cloud.gateway.filter.factory.AbstractNameValueGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -14,14 +13,8 @@ import org.springframework.web.server.ServerWebExchange;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.math.BigInteger;
 import java.net.URL;
-import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.security.spec.RSAPublicKeySpec;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Base64.Decoder;
 import java.util.List;
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -30,17 +23,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.keycloak.RSATokenVerifier;
 import org.keycloak.common.VerificationException;
 import org.keycloak.jose.jws.JWSHeader;
 import org.keycloak.representations.AccessToken;
 
+
+import org.keycloak.TokenVerifier;
+import org.keycloak.jose.jwk.JSONWebKeySet;
+import org.keycloak.jose.jwk.JWK;
+import org.keycloak.jose.jwk.JWKParser;
 import de.witcom.api.config.ApplicationProperties;
 import reactor.core.publisher.Mono;
-
-import org.springframework.web.client.RestTemplate;
-import de.witcom.api.model.OIDCCerts;
-import de.witcom.api.model.OIDCKey;
 
 @Component
 public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
@@ -63,6 +56,7 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 
                 if (!StringUtils.isEmpty(config.getValue()) && config.getName().equals("requiredRole") ) {
                 	if (!this.hasAccess(accessToken,config.getValue())) {
+                		logger.warn("No {} access to resource {}",exchange.getRequest().getMethod().name(),exchange.getRequest().getPath());
                     	return this.onError(exchange,"No access to the requested resource");
                     }
                 }
@@ -115,29 +109,29 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 		return false;
 	}
 	
-	private AccessToken extractAccessToken(String token) throws KeyCloakFilterException {
+private AccessToken extractAccessToken(String tokenString) throws KeyCloakFilterException {
 		
-		if (token == null) {
+		if (tokenString == null) {
 			logger.error("ERROR: Access-token is null");
 			throw new KeyCloakFilterException("Access-token is null");
 		}
 		
+		AccessToken token;
 		try {
-			RSATokenVerifier verifier = RSATokenVerifier.create(token);
-			PublicKey publicKey = retrievePublicKeyFromCertsEndpoint( verifier.getHeader());
+			@SuppressWarnings("unchecked")
+			TokenVerifier<AccessToken> verfifier = TokenVerifier
+					.create(tokenString, AccessToken.class)
+					.withChecks(org.keycloak.TokenVerifier.SUBJECT_EXISTS_CHECK,org.keycloak.TokenVerifier.IS_ACTIVE);
 			
-			return verifier.realmUrl(getRealmUrl()) //
-			  .publicKey(publicKey) //
-			  .verify() //
-			  .getToken();
-		  } catch (VerificationException e) {
-			  logger.error(e.getMessage());
-			  logger.error("ERROR: Unable to load JWT Secret: {}",e.getLocalizedMessage());
-			  throw new KeyCloakFilterException("Unable to load JWT Secret");
-		  }
-		
-	
-	
+			return verfifier
+					.publicKey(this.retrievePublicKeyFromCertsEndpoint(verfifier.getHeader()))
+					.verify()
+					.getToken();
+			
+		} catch (VerificationException e) {
+			logger.debug(e.getMessage());
+			throw new KeyCloakFilterException("Unable to verify token " +e.getMessage());
+		}
 	}
 	
 	private String extractJWTToken(ServerHttpRequest request) throws KeyCloakFilterException
@@ -164,47 +158,29 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 
         return components[1].trim();
     }
-
-	
-	private Mono<Void> onError(ServerWebExchange exchange, String err)
-    {
-        ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        response.getHeaders().add(WWW_AUTH_HEADER, this.formatErrorMsg(err));
-
-        return response.setComplete();
-}	
 	
 	private PublicKey retrievePublicKeyFromCertsEndpoint(JWSHeader jwsHeader) {
-	    
-		try {
-		  OIDCKey keyInfo = null;	    
-		  RestTemplate restTemplate = new RestTemplate();
 		
-	      OIDCCerts response = restTemplate.getForObject(getRealmCertsUrl(), OIDCCerts.class);
-    	  for (OIDCKey key:response.keys){
-    	        String kid=key.kid;
+		try {
+	        ObjectMapper om = new ObjectMapper();
+	        
+	        JSONWebKeySet certInfos = om.readValue(new URL(getRealmCertsUrl()).openStream(),JSONWebKeySet.class);
+	        
+	        JWK keyInfo = null;
+			for ( JWK key:certInfos.getKeys()){
+    	        String kid=key.getKeyId();
     	        if (jwsHeader.getKeyId().equals(kid)) {
-    			  keyInfo = key;
+    			  keyInfo  = key;
     			  break;
     			}
-    	  }
-
-		  if (keyInfo == null) {
-			return null;
-		  }
-
-		  KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-		  String modulusBase64 = keyInfo.n;
-		  String exponentBase64 = keyInfo.e;
-
-		  // see org.keycloak.jose.jwk.JWKBuilder#rs256
-		  Decoder urlDecoder = Base64.getUrlDecoder();
-		  BigInteger modulus = new BigInteger(1, urlDecoder.decode(modulusBase64));
-		  BigInteger publicExponent = new BigInteger(1, urlDecoder.decode(exponentBase64));
-
-		  return keyFactory.generatePublic(new RSAPublicKeySpec(modulus, publicExponent));
-
+			}
+			if (keyInfo == null) {
+				logger.error("Unable to get public key from certendpoint "+getRealmCertsUrl());
+				return null;
+			}
+			
+			return JWKParser.create(keyInfo).toPublicKey();
+	        
 		} catch (Exception e) {
 			logger.error("Unable to get public key from certendpoint "+getRealmCertsUrl()+ ":" + e.getMessage());
 		}
@@ -220,7 +196,6 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 			logger.error("No keycloakRelam configured - filter won't work");
 			return "";
 		}
-		//logger.debug(appProperties.getKeycloakConfig().getKeycloakServerUrl().trim() + "/realms/" + appProperties.getKeycloakConfig().getKeycloakRealmId().trim());
 		return appProperties.getKeycloakConfig().getKeycloakServerUrl().trim() + "/realms/" + appProperties.getKeycloakConfig().getKeycloakRealmId().trim();
 	}
 
@@ -228,27 +203,24 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 		return getRealmUrl() + "/protocol/openid-connect/certs";
 	}
 	
-	private String formatErrorMsg(String msg)
+
+	
+	private Mono<Void> onError(ServerWebExchange exchange, String err)
     {
-        return String.format("Bearer realm=\""+getRealmUrl()+"\", " +
-                "error=\"https://tools.ietf.org/html/rfc7519\", " +
-                "error_description=\"%s\" ",  msg);
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(HttpStatus.UNAUTHORIZED);
+        response.getHeaders().add(WWW_AUTH_HEADER, this.formatErrorMsg(err));
+
+        return response.setComplete();
     }
 	
-	/*
-	public static class Config {
-		
-		private String requiredRole;
-
-		public String getRequiredRole() {
-			return requiredRole;
-		}
-
-		public void setRequiredRole(String requiredRole) {
-			this.requiredRole = requiredRole;
-		}
-		
-	}*/
+	private String formatErrorMsg(String msg)
+    {
+        return String.format("Bearer realm=\""+appProperties.getKeycloakConfig().getKeycloakRealmId().trim()+"\", " +
+                "error=\"https://tools.ietf.org/html/rfc7519\", " +
+                "error_description=\"%s\" ",  msg);
+    }	
+	
 	
 
 }
