@@ -8,6 +8,114 @@ basePath: /axis
 schemes:
   - https
 paths:
+  /api/rest/entity/login/getMandatorsAndUserGroups:
+    post:
+      tags:
+        - login
+      summary: 'Mandators, users and groups'
+      description: Queries all possible mandators and their users / groups
+      operationId: LoginGetMandatorsAndUserGroups
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: sessionId
+          in: query
+          description: Session-ID
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/LoginGetMandatorsAndUserGroupsRequest'
+      responses:
+        '200':
+          description: returns LoginGetMandatorsAndUserGroupsResponse
+          schema:
+            $ref: '#/definitions/LoginGetMandatorsAndUserGroupsResponse'
+  /api/rest/entity/login/getActiveMandator:
+    post:
+      tags:
+        - login
+      summary: Active mandator and user / group
+      description: Queries the active mandator and the user / group
+      operationId: LoginGetActiveMandator
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: sessionId
+          in: query
+          description: Session-ID
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/LoginGetActiveMandatorRequest'
+      responses:
+        '200':
+          description: returns LoginGetActiveMandatorResponse
+          schema:
+            $ref: '#/definitions/LoginGetActiveMandatorResponse'
+  /api/rest/entity/login/foreignLogin:
+    post:
+      tags:
+        - login
+      summary: Foreign login
+      description: Allows you to create a session for an arbitrary user using a technical user.
+      operationId: ForeignLoginLogin
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: sessionId
+          in: query
+          description: Session-ID
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ForeignLoginLoginRequestData'
+      responses:
+        '200':
+          description: returns ForeignLoginLoginResponse
+          schema:
+            $ref: '#/definitions/ForeignLoginLoginResponse'
+  /api/rest/entity/login/changeMandator:
+    post:
+      tags:
+        - login
+      summary: Change mandator / group
+      description: Modifies the active mandator
+      operationId: ChangeMandatorLogin
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: sessionId
+          in: query
+          description: Session-ID
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ChangeMandatorLoginRequestData'
+      responses:
+        '200':
+          description: returns ChangeMandatorLoginResponse
+          schema:
+            $ref: '#/definitions/ChangeMandatorLoginResponse'
   /api/rest/businessGateway/login:
     post:
       tags:
@@ -49,6 +157,28 @@ paths:
           schema:
             $ref: '#/definitions/ServiceStatusData'
 definitions:
+  ChangeMandatorLoginResponse:
+    type: object
+    properties:
+      status:
+        $ref: '#/definitions/ServiceStatusData'
+  LoginGetActiveMandatorResponseData:
+    type: object
+    properties:
+      groupName:
+        type: string
+      userGroupElid:
+        type: string
+      manId:
+        type: number
+        format: BigDecimal
+      description:
+        type: string
+      userElid:
+        type: string
+      userName:
+        type: string
+    title: LoginGetActiveMandatorResponseData
   LoginRequest:
     type: object
     properties:
@@ -61,6 +191,52 @@ definitions:
       user:
         type: string
     title: LoginRequest
+  LoginGetMandatorsAndUserGroupsReturnAttribute:
+    type: array
+    items:
+      type: string
+  LoginGetActiveMandatorResponse:
+    type: object
+    properties:
+      returnData:
+        type: array
+        items:
+          $ref: '#/definitions/LoginGetActiveMandatorResponseData'
+      status:
+        $ref: '#/definitions/ServiceStatusData'
+  LoginGetMandatorsAndUserGroupsRestriction:
+    type: object
+    title: LoginGetMandatorsAndUserGroupsRestriction
+  LoginGetMandatorsAndUserGroupsResponse:
+    type: object
+    properties:
+      returnData:
+        type: array
+        items:
+          $ref: '#/definitions/LoginGetMandatorsAndUserGroupsResponseData'
+      status:
+        $ref: '#/definitions/ServiceStatusData'
+  loginmandatorGroup:
+    type: object
+    properties:
+      groupName:
+        type: string
+      userGroupElid:
+        type: string
+    title: loginmandatorGroup
+  LoginGetActiveMandatorReturnAttribute:
+    type: array
+    items:
+      type: string
+  ChangeMandatorLoginRequestData:
+    type: object
+    properties:
+      userGroupName:
+        type: string
+      manId:
+        type: number
+        format: BigDecimal
+    title: ChangeMandatorLoginRequestData
   LoginResponse:
     type: object
     properties:
@@ -69,6 +245,76 @@ definitions:
       status:
         $ref: '#/definitions/ServiceStatusData'
     title: LoginResponse
+  LoginGetMandatorsAndUserGroupsRequest:
+    type: object
+    properties:
+      returnAttributes:
+        $ref: '#/definitions/LoginGetMandatorsAndUserGroupsReturnAttribute'
+      restrictions:
+        $ref: '#/definitions/LoginGetMandatorsAndUserGroupsRestriction'
+  ForeignLoginLoginResponse:
+    type: object
+    properties:
+      returnData:
+        $ref: '#/definitions/ForeignLoginLoginResponseData'
+      status:
+        $ref: '#/definitions/ServiceStatusData'
+  loginmandatorUser:
+    type: object
+    properties:
+      userElid:
+        type: string
+      userName:
+        type: string
+    title: loginmandatorUser
+  ForeignLoginLoginRequestData:
+    type: object
+    properties:
+      internalUserPassword:
+        type: string
+      internalUserName:
+        type: string
+      userGroupName:
+        type: string
+      manId:
+        type: number
+        format: BigDecimal
+      userName:
+        type: string
+    title: ForeignLoginLoginRequestData
+  ForeignLoginLoginResponseData:
+    type: object
+    properties:
+      sessionId:
+        type: string
+    title: ForeignLoginLoginResponseData
+  LoginGetActiveMandatorRestriction:
+    type: object
+    title: LoginGetActiveMandatorRestriction
+  LoginGetMandatorsAndUserGroupsResponseData:
+    type: object
+    properties:
+      manId:
+        type: number
+        format: BigDecimal
+      description:
+        type: string
+      groups:
+        type: array
+        items:
+          $ref: '#/definitions/loginmandatorGroup'
+      users:
+        type: array
+        items:
+          $ref: '#/definitions/loginmandatorUser'
+    title: LoginGetMandatorsAndUserGroupsResponseData
+  LoginGetActiveMandatorRequest:
+    type: object
+    properties:
+      returnAttributes:
+        $ref: '#/definitions/LoginGetActiveMandatorReturnAttribute'
+      restrictions:
+        $ref: '#/definitions/LoginGetActiveMandatorRestriction'
   ServiceStatusData:
     type: object
     properties:

@@ -16,40 +16,76 @@ public class ApplicationProperties {
 
     public static class CommandConfig {
         
-		private String commandBaseUrl="";
-        private String commandUser="";
-        private String commandPassword="";
-        private String commandGroup=null;
-        
-		public String getCommandBaseUrl() {
-			return commandBaseUrl;
-		}
-		public void setCommandBaseUrl(String commandBaseUrl) {
-			this.commandBaseUrl = commandBaseUrl;
-		}
-		public String getCommandUser() {
-			return commandUser;
-		}
-		public void setCommandUser(String commandUser) {
-			this.commandUser = commandUser;
-		}
-		public String getCommandPassword() {
-			return commandPassword;
-		}
-		public void setCommandPassword(String commandPassword) {
-			this.commandPassword = commandPassword;
-		}
-		public String getCommandGroup() {
-			return commandGroup;
-		}
-		public void setCommandGroup(String commandGroup) {
-			this.commandGroup = commandGroup;
+		private String baseUrl="";
+        private String user="";
+        private String password="";
+        private String group=null;
+        private String mandant=null;
+
+		public String getBaseUrl() {
+			return baseUrl;
 		}
 
-        @Override
+
+
+		public void setBaseUrl(String baseUrl) {
+			this.baseUrl = baseUrl;
+		}
+
+
+
+		public String getUser() {
+			return user;
+		}
+
+
+
+		public void setUser(String user) {
+			this.user = user;
+		}
+
+
+
+		public String getMandant() {
+			return mandant;
+		}
+
+
+
+		public void setMandant(String mandant) {
+			this.mandant = mandant;
+		}
+
+
+
+		public String getGroup() {
+			return group;
+		}
+
+
+
+		public void setGroup(String group) {
+			this.group = group;
+		}
+
+
+
+		public String getPassword() {
+			return password;
+		}
+
+
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+
+
+
+		@Override
 		public String toString() {
-			return "CommandConfig [commandBaseUrl=" + commandBaseUrl + ", commandUser=" + commandUser
-					+ ", commandPassword=" + commandPassword + ", commandGroup=" + commandGroup + "]";
+			return "CommandConfig [baseUrl=" + baseUrl + ", user=" + user + ", password=" + password + ", group="
+					+ group + ", mandant=" + mandant + "]";
 		}
 		
         

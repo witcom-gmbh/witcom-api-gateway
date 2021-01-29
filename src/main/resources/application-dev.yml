@@ -43,10 +43,27 @@ spring:
         predicates:
          - Path=/get/**
         filters:
-          - KeyCloakFilter=requiredRole,rmdb-api-server:test-role
-          - AddRequestHeader=X-Some-Header, custom-header
+          #- KeyCloakFilter=requiredRole,rmdb-api-server:test-role
+          #- AddRequestHeader=X-Some-Header, custom-header
+          - CommandFilter
+#command    
+      - id: command
+        uri: ${RMDB_BASEURL:http://localhost:8080/axis}
+        predicates:
+         - Path=/rmdb/**
+        filters:
+#         - KeyCloakFilter=requiredRole,service_read
+         - CommandFilter
+         - RewritePath=/rmdb/(?<segment>.*), /axis/$\{segment}
 
 application:
+  command-config:
+#https://rmdb.workspace.witcom.de/axis  
+    base-url: ${RMDB_BASEURL:http://localhost:8080/axis}
+    user: ${RMDB_USER}
+    password: ${RMDB_PASSWORD}
+    group: ${RMDB_GROUP}
+    mandant: ${RMDB_MANDANT}
   keycloak-config:
     keycloak-realm-id: ${KEYCLOAK_REALM_ID:#{null}}
     keycloak-server-url: ${KEYCLOAK_SERVER_URL:#{null}}

@@ -35,6 +35,11 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-gateway</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
 		
 		<dependency>
             <groupId>org.springframework.boot</groupId>
@@ -87,6 +92,14 @@
             <artifactId>keycloak-core</artifactId>
 			<version>${keycloak.version}</version>            
         </dependency>
+        
+		<!-- https://mvnrepository.com/artifact/com.netflix.feign/feign-jackson -->
+		<dependency>
+		    <groupId>com.netflix.feign</groupId>
+		    <artifactId>feign-jackson</artifactId>
+		    <version>8.18.0</version>
+		</dependency>
+        
 
 
 
@@ -184,8 +197,8 @@
 					<output>${generated-sources-path}</output>
 							<library>spring-cloud</library>
 							<language>spring</language>
-							<generateApis>true</generateApis>
-							<generateSupportingFiles>true</generateSupportingFiles>
+							<generateApis>false</generateApis>
+							<generateSupportingFiles>false</generateSupportingFiles>
 							<modelPackage>${project.groupId}.api.command.swagger.model</modelPackage>
 							<apiPackage>${project.groupId}.api.command.swagger.api</apiPackage>
 							<invokerPackage>${project.groupId}.api.command.swagger.invoker</invokerPackage>
