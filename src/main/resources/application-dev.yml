@@ -52,8 +52,9 @@ spring:
         predicates:
          - Path=/rmdb/**
         filters:
-#         - KeyCloakFilter=requiredRole,service_read
-         - CommandFilter
+         - name: KeycloakCommandFilter
+           args:
+             resource-id: rmdb-resource-server
          - RewritePath=/rmdb/(?<segment>.*), /axis/$\{segment}
 
 application:
@@ -72,6 +73,9 @@ application:
     spl-tenant: ${SPL_TENANT:}
     spl-user: ${SPL_USER:#{null}}
     spl-password: ${SPL_PASSWORD:#{null}} 
+
+server:
+  port: 8081
 
 logging:
   level:

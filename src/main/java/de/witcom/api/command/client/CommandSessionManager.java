@@ -34,7 +34,7 @@ public class CommandSessionManager {
 	
 	private String lastSession;
 	
-	private static final String APP_ID = "SERVICEPLANET";
+	private static final String APP_ID = "COMMAND";
 	
     @Autowired
     SessionRepository sessionRepo;
@@ -57,7 +57,7 @@ public class CommandSessionManager {
 	    }
 	    
 	    //Keine Session-ID da -> Login
-	    logger.debug("Perfom login");
+	    logger.debug("Perform login");
 	    this.login();
 	    
 	    session = this.loadSessionFromCache();
