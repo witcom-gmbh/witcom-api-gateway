@@ -12,7 +12,86 @@ public class ApplicationProperties {
     private final KeycloakConfig keycloakConfig = new KeycloakConfig();
     private final SplConfig splConfig = new SplConfig();
     private final DslPortalConfig dslPortalConfig = new DslPortalConfig();
+    private final CommandConfig commandConfig = new CommandConfig();
 
+    public static class CommandConfig {
+        
+		private String baseUrl="";
+        private String user="";
+        private String password="";
+        private String group=null;
+        private String mandant=null;
+
+		public String getBaseUrl() {
+			return baseUrl;
+		}
+
+
+
+		public void setBaseUrl(String baseUrl) {
+			this.baseUrl = baseUrl;
+		}
+
+
+
+		public String getUser() {
+			return user;
+		}
+
+
+
+		public void setUser(String user) {
+			this.user = user;
+		}
+
+
+
+		public String getMandant() {
+			return mandant;
+		}
+
+
+
+		public void setMandant(String mandant) {
+			this.mandant = mandant;
+		}
+
+
+
+		public String getGroup() {
+			return group;
+		}
+
+
+
+		public void setGroup(String group) {
+			this.group = group;
+		}
+
+
+
+		public String getPassword() {
+			return password;
+		}
+
+
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+
+
+
+		@Override
+		public String toString() {
+			return "CommandConfig [baseUrl=" + baseUrl + ", user=" + user + ", password=" + password + ", group="
+					+ group + ", mandant=" + mandant + "]";
+		}
+		
+        
+    }
+
+    
     public static class SplConfig {
         
         private String splBaseUrl="";
@@ -107,6 +186,9 @@ public class ApplicationProperties {
     public DslPortalConfig getDslPortalConfig(){
         return dslPortalConfig;
     }
+	public CommandConfig getCommandConfig() {
+		return commandConfig;
+	}
     
     
 }

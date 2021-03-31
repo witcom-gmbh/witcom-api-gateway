@@ -43,10 +43,40 @@ spring:
         predicates:
          - Path=/get/**
         filters:
-          - KeyCloakFilter=requiredRole,rmdb-api-server:test-role
-          - AddRequestHeader=X-Some-Header, custom-header
+          #- KeyCloakFilter=requiredRole,rmdb-api-server:test-role
+          #- AddRequestHeader=X-Some-Header, custom-header
+          - CommandFilter
+#command    
+      - id: command-base
+        uri: ${RMDB_BASEURL:http://localhost:8080/axis}
+        predicates:
+         - Path=/rmdb/api/rest/entity/campus/**,/rmdb/api/rest/entity/building/**,/rmdb/api/rest/entity/floor/**,/rmdb/api/rest/entity/room/**
+        filters:
+         - name: KeycloakCommandFilter
+           args:
+             resource-id: rmdb-resource-server
+             role-work: base-work
+             role-read: read
+         - RewritePath=/rmdb/(?<segment>.*), /axis/$\{segment}
+      - id: command-default
+        uri: ${RMDB_BASEURL:http://localhost:8080/axis}
+        predicates:
+         - Path=/rmdb/**
+        filters:
+         - name: KeycloakCommandFilter
+           args:
+             resource-id: rmdb-resource-server
+             role-work: super-work
+             role-read: read             
+         - RewritePath=/rmdb/(?<segment>.*), /axis/$\{segment}
 
 application:
+  command-config:
+    base-url: ${RMDB_BASEURL:http://localhost:8080/axis}
+    user: ${RMDB_USER}
+    password: ${RMDB_PASSWORD}
+    group: ${RMDB_GROUP}
+    mandant: ${RMDB_MANDANT}
   keycloak-config:
     keycloak-realm-id: ${KEYCLOAK_REALM_ID:#{null}}
     keycloak-server-url: ${KEYCLOAK_SERVER_URL:#{null}}

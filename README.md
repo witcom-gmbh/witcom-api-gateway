@@ -127,6 +127,108 @@ spring:
           - BasicAuthFilter=${MK_USER},${MK_PASS}
 ```
 
+# Custom Filter - FNT-Command mit Keycloak-Authorisierung
+Ein Filter der jeden Zugriff auf die Command-Business-Gateway-API mit einer gueltigen Session versieht.
+Der Filter fuehrt einen Login bei FNT Command durch um eine Session zu erhalten. Die Session-ID
+wird in einem REDIS Key-Value-Store abgespeichert, um mehrere Instanzen des API-Gateways laufen zu lassen.
+
+## Globale Einstellungen
+Globale Filtereinstellungen über die application-properties konfiguriert. Diese Properties können natürlich auch aus Consul geladen werden. Es ist auch möglich dort Umgebungsvariablemn zu referenzieren
+
+```yaml
+application:
+  command-config:
+    base-url: ${RMDB_BASEURL:http://localhost:8080/axis}
+    user: ${RMDB_USER}
+    password: ${RMDB_PASSWORD}
+    group: ${RMDB_GROUP}
+    mandant: ${RMDB_MANDANT}
+  keycloak-config:
+    keycloak-realm-id: ${KEYCLOAK_REALM_ID}
+    keycloak-server-url: http:/my-url/auth
+```
+
+Per Default verbindet sich das API-Gateway zu einer REDIS-Instanz deren Hostname in der Umgebungsvariable REDIS_HOST erwartet wird. Das Kennwort zur Instanz wird
+in der Umgebungsvariablen REDIS_PASSWORD erwartet
+
+## Authorisierung 
+Sehr simple Authorisierung die zwischen READ & WORK Rollen unterscheidet. Die Unterscheidung wird anhand des API-Paths getroffen. Das Schema ist hierbei wie folgt
+
+*  /PATH/api/rest/entity/ENTITYNAME/query* -> READ
+*  /PATH/api/rest/entity/ENTITYNAME/ELID/Operation-mit-Grossbuchstaben -> READ, da Relation
+* der Rest erfordert WORK Rechte.
+
+## Vorbereitung Keycloak
+Keycloak Resource-Server anlegen (als Confidential-Client, ohne Standard-Flow). Es werden mindestens 2 Rollen benötigt
+
+* read
+* work
+
+## Beispiel
+Sehr simple Konfiguration die nicht zwischen Entitäts-Klassen unterscheidet. Es werden die Default-rollen verwendet
+
+* read = lesen
+* work = arbeiten ;-)
+
+```yaml
+spring:
+  cloud:
+   gateway:
+    globalcors:
+      cors-configurations:
+        '[/**]':
+         allowedOrigins: "*"          
+    routes:
+      - id: command
+        uri: ${RMDB_BASEURL:http://localhost:8080/axis}
+        predicates:
+         - Path=/rmdb/**
+        filters:
+         - name: KeycloakCommandFilter
+           args:
+             resource-id: rmdb-resource-server
+         - RewritePath=/rmdb/(?<segment>.*), /axis/$\{segment}
+```
+
+Eine etwas granularere Konfiguration die der Rolle base-work Work-Rechte für einige Entitäts-Klassen gibt. Für den Rest wird eine andere Rolle benötigt
+Kann man machen sofern es nicht zu granular = unübersichtlich wird. Dafür sollte man dann lieber auf Keycloak-Authorization-Services wechseln  
+
+```yaml
+spring:
+  cloud:
+   gateway:
+    globalcors:
+      cors-configurations:
+        '[/**]':
+         allowedOrigins: "*"          
+    routes:
+      - id: command-base
+        uri: ${RMDB_BASEURL:http://localhost:8080/axis}
+        predicates:
+         - Path=/rmdb/api/rest/entity/campus/**,/rmdb/api/rest/entity/building/**,/rmdb/api/rest/entity/floor/**,/rmdb/api/rest/entity/room/**
+        filters:
+         - name: KeycloakCommandFilter
+           args:
+             resource-id: rmdb-resource-server
+             role-work: base-work
+             role-read: read
+         - RewritePath=/rmdb/(?<segment>.*), /axis/$\{segment}
+#catch-all
+      - id: command-default
+        uri: ${RMDB_BASEURL:http://localhost:8080/axis}
+        predicates:
+         - Path=/rmdb/**
+        filters:
+         - name: KeycloakCommandFilter
+           args:
+             resource-id: rmdb-resource-server
+             role-work: super-work
+             role-read: read             
+         - RewritePath=/rmdb/(?<segment>.*), /axis/$\{segment}
+```
+
+
+
 # OpenShift - Deployment Produktiv
 
 Erfordert Springboot-S2I Image (https://github.com/iceman91176/openshift-s2i-springboot-java) im Openshift-Namespace

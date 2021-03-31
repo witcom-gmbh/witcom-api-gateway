@@ -24,8 +24,8 @@ import org.apache.commons.lang3.StringUtils;
 import de.witcom.api.config.ApplicationProperties;
 import de.witcom.api.model.Session;
 import de.witcom.api.repo.SessionRepository;
-import de.witcom.api.swagger.model.BooleanHolder;
-import de.witcom.api.swagger.model.UserLoginDto;
+import de.witcom.api.spl.swagger.model.BooleanHolder;
+import de.witcom.api.spl.swagger.model.UserLoginDto;
 
 @Service
 public class SplSessionManager {
