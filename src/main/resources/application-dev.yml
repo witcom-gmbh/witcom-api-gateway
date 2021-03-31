@@ -47,7 +47,18 @@ spring:
           #- AddRequestHeader=X-Some-Header, custom-header
           - CommandFilter
 #command    
-      - id: command
+      - id: command-base
+        uri: ${RMDB_BASEURL:http://localhost:8080/axis}
+        predicates:
+         - Path=/rmdb/api/rest/entity/campus/**,/rmdb/api/rest/entity/building/**,/rmdb/api/rest/entity/floor/**,/rmdb/api/rest/entity/room/**
+        filters:
+         - name: KeycloakCommandFilter
+           args:
+             resource-id: rmdb-resource-server
+             role-work: base-work
+             role-read: read
+         - RewritePath=/rmdb/(?<segment>.*), /axis/$\{segment}
+      - id: command-default
         uri: ${RMDB_BASEURL:http://localhost:8080/axis}
         predicates:
          - Path=/rmdb/**
@@ -55,11 +66,12 @@ spring:
          - name: KeycloakCommandFilter
            args:
              resource-id: rmdb-resource-server
+             role-work: super-work
+             role-read: read             
          - RewritePath=/rmdb/(?<segment>.*), /axis/$\{segment}
 
 application:
   command-config:
-#https://rmdb.workspace.witcom.de/axis  
     base-url: ${RMDB_BASEURL:http://localhost:8080/axis}
     user: ${RMDB_USER}
     password: ${RMDB_PASSWORD}
@@ -73,9 +85,6 @@ application:
     spl-tenant: ${SPL_TENANT:}
     spl-user: ${SPL_USER:#{null}}
     spl-password: ${SPL_PASSWORD:#{null}} 
-
-server:
-  port: 8081
 
 logging:
   level:

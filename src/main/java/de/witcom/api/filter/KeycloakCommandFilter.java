@@ -128,7 +128,7 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
 			readRole=config.getRoleRead();
 		}
 		if (!StringUtils.isEmpty(config.getRoleWork())) {
-			readRole=config.getRoleWork();
+			workRole=config.getRoleWork();
 		}
 		
 		String originalPath = uri.getRawPath();
@@ -138,14 +138,18 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
 		//basic query operations for all entities
 		pattern = "/\\w*/api/rest/entity/(\\w*)/(query.*)";
 		boolean queryBasic = Pattern.matches(pattern, originalPath);
-		//relations - start with uppercase-letter 
+		//logger.debug("queryBasic {}",queryBasic);
+		//relations - starting with uppercase-letter 
 		pattern = "/\\w*/api/rest/entity/(\\w*)/(\\w*)/([A-Z]\\w*)";
 		boolean queryRelation = Pattern.matches(pattern, originalPath);
+		//logger.debug("queryRelation {}",queryRelation);
 		
 		if (queryBasic || queryRelation) {
+			logger.debug("Check read-access for {}",originalPath);
 			return this.hasRole(accessToken, audience, readRole);
 		}
 		//all other request require work role.... 
+		logger.debug("Check work-access for {}",originalPath);
 		return this.hasRole(accessToken, audience, workRole);
 
 	}
