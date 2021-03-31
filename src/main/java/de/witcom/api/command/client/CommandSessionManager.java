@@ -164,7 +164,8 @@ public class CommandSessionManager {
 		this.login();
 	}
 	
-	@Scheduled(cron = "0 0/5 * * * ?")
+	//@Scheduled(cron = "0 0/5 * * * ?")
+	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
 	private void autoRefreshSession() {
 	    logger.info("Refreshing session with Command");
 	    Session session = loadSessionFromCache();

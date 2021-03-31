@@ -169,7 +169,8 @@ public class SplSessionManager {
 		}
 	}
 	
-	@Scheduled(cron = "0 0/5 * * * ?")
+	//@Scheduled(cron = "0 0/5 * * * ?")
+	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
 	private void refreshSession() {
 	    logger.info("Refreshing session with SPL");
 	    Session session = loadSessionFromCache();
