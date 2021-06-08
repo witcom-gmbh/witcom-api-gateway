@@ -18,7 +18,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<spring-cloud.version>Hoxton.SR8</spring-cloud.version>
-		<keycloak.version>11.0.3</keycloak.version>
+		<keycloak.version>13.0.0</keycloak.version>
 		<version.swagger.codegen>2.4.0</version.swagger.codegen>
 		<yaml.file>${project.basedir}/src/main/resources/splapi.yaml</yaml.file>
 		<command-yaml.file>${project.basedir}/src/main/resources/fntcommand-login-api.yml</command-yaml.file>
