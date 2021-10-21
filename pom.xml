@@ -20,6 +20,8 @@
 		<spring-cloud.version>Hoxton.SR8</spring-cloud.version>
 		<keycloak.version>11.0.3</keycloak.version>
 		<version.swagger.codegen>2.4.0</version.swagger.codegen>
+		<jodatime-version>2.7</jodatime-version>
+		<jackson-version>2.11.4</jackson-version>
 		<yaml.file>${project.basedir}/src/main/resources/splapi.yaml</yaml.file>
 		<command-yaml.file>${project.basedir}/src/main/resources/fntcommand-login-api.yml</command-yaml.file>
 		<generated-sources-path>${project.build.directory}/generated-sources</generated-sources-path>
@@ -99,7 +101,48 @@
 		    <artifactId>feign-jackson</artifactId>
 		    <version>8.18.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-okhttp</artifactId>
+			<version>10.2.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.github.scribejava</groupId>
+			<artifactId>scribejava-core</artifactId>
+			<version>8.3.1</version>
+		</dependency>
+
+		<!-- @Nullable annotation -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<version>3.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openapitools</groupId>
+			<artifactId>jackson-databind-nullable</artifactId>
+			<version>0.2.1</version>
+		</dependency>		
+		<!-- Joda time: if you use it -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-joda</artifactId>
+			<version>${jackson-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>${jodatime-version}</version>
+		</dependency>		
         
+		<!-- https://mvnrepository.com/artifact/org.openapitools/openapi-generator -->
+		<dependency>
+			<groupId>org.openapitools</groupId>
+			<artifactId>openapi-generator</artifactId>
+			<version>5.2.1</version>
+		</dependency>
 
 
 
@@ -111,13 +154,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-configuration-processor</artifactId>
-			<optional>true</optional>
-		</dependency>
+			<artifactId>spring-boot-devtools</artifactId>
+		</dependency>		
 	</dependencies>
 
 	<dependencyManagement>
@@ -206,6 +247,40 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>5.2.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>${project.basedir}/src/main/resources/mcp-tron.yml</inputSpec>
+							<generatorName>java</generatorName>
+							<modelPackage>${project.groupId}.api.mcp.tron.model</modelPackage>
+							<apiPackage>${project.groupId}.api.mcp.tron.api</apiPackage>
+							<invokerPackage>${project.groupId}.api.mcp.tron</invokerPackage>
+							<basePackage>${project.groupId}.api.mcp.tron</basePackage>
+							<configOptions>
+								<sourceFolder>${generated-sources-java-path}</sourceFolder>
+								<dateLibrary>joda</dateLibrary>
+							</configOptions>
+							<output>${generated-sources-path}</output>
+							<environmentVariables>
+								<models />
+								<apis></apis>
+								<supportingFiles></supportingFiles>
+								<apiTests>false</apiTests>
+								<modelTests>false</modelTests>
+							</environmentVariables>
+							<openApiNullable>false</openApiNullable>
+							<library>feign</library>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>			
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
