@@ -270,7 +270,7 @@
 							<output>${generated-sources-path}</output>
 							<environmentVariables>
 								<models />
-								<apis></apis>
+								<apis>false</apis>
 								<supportingFiles></supportingFiles>
 								<apiTests>false</apiTests>
 								<modelTests>false</modelTests>
