@@ -13,7 +13,48 @@ public class ApplicationProperties {
     private final SplConfig splConfig = new SplConfig();
     private final DslPortalConfig dslPortalConfig = new DslPortalConfig();
     private final CommandConfig commandConfig = new CommandConfig();
+    private final McpConfig mcpConfig = new McpConfig();
 
+    public static class McpConfig {
+        private String baseUrl="";
+        @Deprecated
+        private String apiKey="";
+        private String user="";
+        private String password="";
+        
+        public String getBaseUrl() {
+            return baseUrl;
+        }
+        public String getPassword() {
+            return password;
+        }
+        public void setPassword(String password) {
+            this.password = password;
+        }
+        public String getUser() {
+            return user;
+        }
+        public void setUser(String user) {
+            this.user = user;
+        }
+        @Deprecated
+        public String getApiKey() {
+            return apiKey;
+        }
+        @Deprecated
+        public void setApiKey(String apiKey) {
+            this.apiKey = apiKey;
+        }
+        public void setBaseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
+        }
+
+        @Override
+        public String toString() {
+            return "McpConfig [apiKey=" + apiKey + ", baseUrl=" + baseUrl + "]";
+        }
+        
+    }
     public static class CommandConfig {
         
 		private String baseUrl="";
@@ -178,6 +219,9 @@ public class ApplicationProperties {
     
     public KeycloakConfig getKeycloakConfig(){
         return keycloakConfig;
+    }
+    public McpConfig getMcpConfig() {
+        return mcpConfig;
     }
     public SplConfig getSplConfig(){
         return splConfig;
