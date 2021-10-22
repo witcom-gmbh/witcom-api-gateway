@@ -1,3 +1,10 @@
+#spring.cloud.gateway.httpclient.ssl.use-insecure-trust-manager
+#feign:
+#  client:
+#    config:
+#      default:
+#        logger-level: full
+        
 spring:
   redis:
     host: localhost
@@ -5,6 +12,10 @@ spring:
     #password: bla
   cloud:
    gateway:
+    gateway:
+      httpclient:
+        ssl:
+          use-insecure-trust-manager: true
     globalcors:
       cors-configurations:
         '[/**]':
@@ -46,6 +57,18 @@ spring:
           #- KeyCloakFilter=requiredRole,rmdb-api-server:test-role
           #- AddRequestHeader=X-Some-Header, custom-header
           - CommandFilter
+#mcp
+      - id: mcp-default
+        uri: ${application.mcp-config.base-url}
+        predicates:
+         - Path=/mcp/**
+        filters:
+         - name: KeycloakMcpFilter
+           args:
+             resource-id: mcp-resource-server
+             role-work: super-work
+             role-read: read
+         - RewritePath=/mcp/(?<segment>.*), /$\{segment}
 #command    
       - id: command-base
         uri: ${RMDB_BASEURL:http://localhost:8080/axis}
@@ -85,12 +108,16 @@ application:
     spl-tenant: ${SPL_TENANT:}
     spl-user: ${SPL_USER:#{null}}
     spl-password: ${SPL_PASSWORD:#{null}} 
+  mcp-config:
+    base-url: ${MCP_BASEURL:#{null}} 
+    user: ${MCP_USER:#{null}}
+    password: ${MCP_PASSWORD:#{null}}
 
 logging:
   level:
     ROOT: INFO
     org.springframework.cloud.config: DEBUG
+    feign.Logger: DEBUG
 
 server:
   port: 8082
-         

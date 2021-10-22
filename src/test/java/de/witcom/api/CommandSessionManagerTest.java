@@ -7,10 +7,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import de.witcom.api.command.client.CommandSessionManager;
 
-@SpringBootTest
+//@SpringBootTest
 public class CommandSessionManagerTest {
 
-	@Autowired
+	//@Autowired
 	private CommandSessionManager sessionManager;
 	
 	@Test
