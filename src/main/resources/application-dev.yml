@@ -54,9 +54,9 @@ spring:
         predicates:
          - Path=/get/**
         filters:
-          #- KeyCloakFilter=requiredRole,rmdb-api-server:test-role
+          - KeyCloakFilter=requiredRole,rmdb-resource-server:base-work
           #- AddRequestHeader=X-Some-Header, custom-header
-          - CommandFilter
+          #- CommandFilter
 #mcp
       - id: mcp-default
         uri: ${application.mcp-config.base-url}
@@ -95,23 +95,26 @@ spring:
 
 application:
   command-config:
-    base-url: ${RMDB_BASEURL:http://localhost:8080/axis}
-    user: ${RMDB_USER}
-    password: ${RMDB_PASSWORD}
-    group: ${RMDB_GROUP}
-    mandant: ${RMDB_MANDANT}
+    enabled: false
+    base-url: ${RMDB_BASEURL:http://localhost:8080}
+    #user: ${RMDB_USER}
+    #password: ${RMDB_PASSWORD}
+    #group: ${RMDB_GROUP}
+    #mandant: ${RMDB_MANDANT}
   keycloak-config:
     keycloak-realm-id: ${KEYCLOAK_REALM_ID:#{null}}
     keycloak-server-url: ${KEYCLOAK_SERVER_URL:#{null}}
   spl-config:
-    spl-base-url: ${SPL_BASEURL:#{null}}
-    spl-tenant: ${SPL_TENANT:}
-    spl-user: ${SPL_USER:#{null}}
-    spl-password: ${SPL_PASSWORD:#{null}} 
+    enabled: false
+    spl-base-url: ${SPL_BASEURL:http://localhost:8080}
+    #spl-tenant: ${SPL_TENANT:}
+    #spl-user: ${SPL_USER:#{null}}
+    #spl-password: ${SPL_PASSWORD:#{null}} 
   mcp-config:
-    base-url: ${MCP_BASEURL:#{null}} 
-    user: ${MCP_USER:#{null}}
-    password: ${MCP_PASSWORD:#{null}}
+    enabled: false
+    base-url: ${MCP_BASEURL:http://localhost:8080} 
+    #user: ${MCP_USER:#{null}}
+    #password: ${MCP_PASSWORD:#{null}}
 
 logging:
   level:
@@ -120,4 +123,4 @@ logging:
     feign.Logger: DEBUG
 
 server:
-  port: 8082
+  port: 8080

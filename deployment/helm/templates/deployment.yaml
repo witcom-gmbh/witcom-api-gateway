@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "witcom-api-gateway.fullname" . }}
+  labels:
+    {{- include "witcom-api-gateway.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "witcom-api-gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "witcom-api-gateway.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "witcom-api-gateway.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: SPRING_CLOUD_CONSUL_HOST
+              value: {{ .Values.config.consul.host }}
+            - name: SPRING_CLOUD_CONSUL_SCHEME
+              value: {{ .Values.config.consul.scheme }}
+            - name: SPRING_CLOUD_CONSUL_PORT
+              value: '{{ .Values.config.consul.port }}'
+            {{- if .Values.config.consul.token.secretName }}
+            - name: SPRING_CLOUD_CONSUL_CONFIG_ACL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.config.consul.token.secretKey }}
+                  name: {{ .Values.config.consul.token.secretName }}
+            {{- end }}
+            {{- if .Values.config.redis.secret.name }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.config.redis.secret.key }} 
+                  name: {{ .Values.config.redis.secret.name }}
+            {{- end }}
+            - name: REDIS_HOST
+              value: {{ .Values.config.redis.host }}
+            - name: APP_OPTIONS
+              value: '--spring.profiles.active=prod'
+            {{- if .Values.extraEnvs }}
+{{ toYaml .Values.extraEnvs | indent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /gateway/health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /gateway/health
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -159,11 +159,11 @@ public class KeycloakMcpFilter extends AbstractGatewayFilterFactory<KeycloakMcpF
 
 	private boolean hasRole(AccessToken accessToken,String resource,String role) {
 		
-		logger.debug ("Looking for role {} in resource {}",role,resource);
+		//logger.debug ("Looking for role {} in resource {}",role,resource);
 		Map<String,AccessToken.Access> resAccess = accessToken.getResourceAccess();
 		if (resAccess.containsKey(resource)){
 			Set<String> roles = resAccess.get(resource).getRoles();
-			logger.debug("Found resource-roles in token {}",roles.toString());
+			//logger.debug("Found resource-roles in token {}",roles.toString());
 			if (roles.contains(role)) {
 				return true;
 			}

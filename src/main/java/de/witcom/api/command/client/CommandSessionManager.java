@@ -167,6 +167,11 @@ public class CommandSessionManager {
 	//@Scheduled(cron = "0 0/5 * * * ?")
 	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
 	private void autoRefreshSession() {
+
+		if (!appProperties.getCommandConfig().isEnabled()){
+			return;
+		}
+
 	    logger.info("Refreshing session with Command");
 	    Session session = loadSessionFromCache();
 	    if (session != null){
@@ -188,6 +193,11 @@ public class CommandSessionManager {
 	
 	@PreDestroy
 	private void shutdown() {
+
+		if (!appProperties.getCommandConfig().isEnabled()){
+			return;
+		}
+
 		logger.debug("Perform logout from command");
 		
 		String sessionId=this.lastSession;

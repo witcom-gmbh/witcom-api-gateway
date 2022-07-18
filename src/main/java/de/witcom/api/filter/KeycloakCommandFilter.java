@@ -145,18 +145,18 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
 		//logger.debug("queryRelation {}",queryRelation);
 		
 		if (queryBasic || queryRelation) {
-			logger.debug("Check read-access for {}",originalPath);
+			//logger.debug("Check read-access for {}",originalPath);
 			return this.hasRole(accessToken, audience, readRole);
 		}
 		//all other request require work role.... 
-		logger.debug("Check work-access for {}",originalPath);
+		//logger.debug("Check work-access for {}",originalPath);
 		return this.hasRole(accessToken, audience, workRole);
 
 	}
 	
 	private boolean hasRole(AccessToken accessToken,String resource,String role) {
 		
-		logger.debug ("Looking for role {} in resource {}",role,resource);
+		//logger.debug ("Looking for role {} in resource {}",role,resource);
 		Map<String,AccessToken.Access> resAccess = accessToken.getResourceAccess();
 		if (resAccess.containsKey(resource)){
 			Set<String> roles = resAccess.get(resource).getRoles();
