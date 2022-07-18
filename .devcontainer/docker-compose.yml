@@ -1,0 +1,42 @@
+---
+version: '3'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      # [Optional] You can use build args to set options. e.g. 'VARIANT' below affects the image in the Dockerfile
+      args: 
+        VARIANT: 11-buster
+        INSTALL_MAVEN: "true"
+        MAVEN_VERSION: "3.8.4"
+        INSTALL_GRADLE: "false"
+        NODE_VERSION": "none"
+        INSTALL_NGROK: "false"
+    volumes:
+      # Forwards the local Docker socket to the container.
+      # - /var/run/docker.sock:/var/run/docker-host.sock     
+      # This is where VS Code should expect to find your project's source code and the value of "workspaceFolder" in .devcontainer/devcontainer.json
+      - ..:/workspace:cached
+
+      # Uncomment the next line to use Docker from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker-compose for details.
+      # - /var/run/docker.sock:/var/run/docker.sock 
+
+    # Overrides default command so things don't shut down after the process ends.
+    command: /bin/sh -c "while sleep 1000; do :; done"  
+
+    user: vscode
+
+    # Runs app on the same network as the service container, allows "forwardPorts" in devcontainer.json function.
+    #network_mode: service
+    network_mode: service:apigw_redis
+
+  apigw_redis:
+    image: redis:6.0
+    hostname: redis
+    container_name: apigw_redis
+    ports:
+      - "6379:6379"
+#    environment:
+
