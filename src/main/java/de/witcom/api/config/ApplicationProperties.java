@@ -4,9 +4,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
 
+import lombok.Data;
+
 @Configuration
 @ConfigurationProperties(prefix = "application", ignoreUnknownFields = false)
 @RefreshScope
+//@Data
 public class ApplicationProperties {
     
     private final KeycloakConfig keycloakConfig = new KeycloakConfig();
@@ -21,7 +24,14 @@ public class ApplicationProperties {
         private String apiKey="";
         private String user="";
         private String password="";
+        private boolean enabled=true;
         
+        public boolean isEnabled() {
+            return enabled;
+        }
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
         public String getBaseUrl() {
             return baseUrl;
         }
@@ -51,13 +61,15 @@ public class ApplicationProperties {
 
         @Override
         public String toString() {
-            return "McpConfig [apiKey=" + apiKey + ", baseUrl=" + baseUrl + "]";
+            return "McpConfig [apiKey=" + apiKey + ", baseUrl=" + baseUrl + ", enabled=" + enabled + ", password="
+                    + password + ", user=" + user + "]";
         }
         
     }
     public static class CommandConfig {
         
-		private String baseUrl="";
+        private boolean enabled=true;
+        private String baseUrl="";
         private String user="";
         private String password="";
         private String group=null;
@@ -121,14 +133,21 @@ public class ApplicationProperties {
 			this.password = password;
 		}
 
+		public boolean isEnabled() {
+            return enabled;
+        }
 
+
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }        
 
 		@Override
-		public String toString() {
-			return "CommandConfig [baseUrl=" + baseUrl + ", user=" + user + ", password=" + password + ", group="
-					+ group + ", mandant=" + mandant + "]";
-		}
-		
+        public String toString() {
+            return "CommandConfig [baseUrl=" + baseUrl + ", enabled=" + enabled + ", group=" + group + ", mandant="
+                    + mandant + ", password=" + password + ", user=" + user + "]";
+        }
         
     }
 
@@ -139,7 +158,14 @@ public class ApplicationProperties {
         private String splUser="";
         private String splPassword="";
         private String splTenant=null;
+        private boolean enabled=true;
         
+        public boolean isEnabled() {
+            return enabled;
+        }
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
         public String getSplBaseUrl(){
             return splBaseUrl;
         }
@@ -165,10 +191,10 @@ public class ApplicationProperties {
             this.splTenant=splTenant;
         }
 		@Override
-		public String toString() {
-			return "SplConfig [splBaseUrl=" + splBaseUrl + ", splUser=" + splUser + ", splPassword=" + splPassword
-					+ ", splTenant=" + splTenant + "]";
-		}
+        public String toString() {
+            return "SplConfig [enabled=" + enabled + ", splBaseUrl=" + splBaseUrl + ", splPassword=" + splPassword
+                    + ", splTenant=" + splTenant + ", splUser=" + splUser + "]";
+        }
     }
     
     public static class DslPortalConfig {
@@ -230,9 +256,11 @@ public class ApplicationProperties {
     public DslPortalConfig getDslPortalConfig(){
         return dslPortalConfig;
     }
+
 	public CommandConfig getCommandConfig() {
 		return commandConfig;
 	}
+
     
     
 }

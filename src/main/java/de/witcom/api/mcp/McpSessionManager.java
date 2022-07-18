@@ -204,6 +204,9 @@ public class McpSessionManager {
 
 	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
 	private void autoRefreshSession() {
+		if (!appProperties.getMcpConfig().isEnabled()){
+			return;
+		}
 	    logger.info("Refreshing session with MCP");
 	    Session session = loadSessionFromCache();
 	    if (session != null){
@@ -217,6 +220,9 @@ public class McpSessionManager {
 
 	@PreDestroy
 	private void shutdown() {
+		if (!appProperties.getMcpConfig().isEnabled()){
+			return;
+		}
 		logger.debug("Perform logout from MCP");
 		
 		String sessionId=this.lastSession;

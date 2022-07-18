@@ -96,12 +96,12 @@ public class KeyCloakFilter extends AbstractNameValueGatewayFilterFactory {
 	        logger.warn("Malformed role {} -  either provide role or audience:role",requiredRole);
 	        return false;
 	    }
-	    logger.debug ("Looking for role {} in audience {}",role,audience);
+	    //logger.debug ("Looking for role {} in audience {}",role,audience);
 
 		Map<String,AccessToken.Access> resAccess = accessToken.getResourceAccess();
 		if (resAccess.containsKey(audience)){
 			Set<String> roles = resAccess.get(audience).getRoles();
-			logger.debug("Found resource-roles in token {}",roles.toString());
+			//logger.debug("Found resource-roles in token {}",roles.toString());
 			if (roles.contains(role)) {
 				return true;
 			}

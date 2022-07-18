@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Profile;
 import redis.embedded.RedisServer;
 
 @Configuration
-@Profile("dev")
+@Profile("redis-embedded")
 public class EmbeddedRedisConfig {
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());

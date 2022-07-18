@@ -11,17 +11,18 @@
 	</parent>
 	<groupId>de.witcom</groupId>
 	<artifactId>witcom-api-gateway</artifactId>
-	<version>1.3.1</version>
+	<version>1.4.0</version>
 	<name>witcom-api-gateway</name>
 	<description>API-Gateway</description>
 
 	<properties>
 		<java.version>11</java.version>
 		<spring-cloud.version>Hoxton.SR8</spring-cloud.version>
-		<keycloak.version>13.0.0</keycloak.version>
+		<keycloak.version>17.0.1</keycloak.version>
 		<version.swagger.codegen>2.4.0</version.swagger.codegen>
 		<jodatime-version>2.7</jodatime-version>
 		<jackson-version>2.11.4</jackson-version>
+		<org.projectlombok.version>1.18.22</org.projectlombok.version>
 		<yaml.file>${project.basedir}/src/main/resources/splapi.yaml</yaml.file>
 		<command-yaml.file>${project.basedir}/src/main/resources/fntcommand-login-api.yml</command-yaml.file>
 		<generated-sources-path>${project.build.directory}/generated-sources</generated-sources-path>
@@ -144,6 +145,13 @@
 			<version>5.2.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${org.projectlombok.version}</version>
+			<optional>true</optional>
+		</dependency>		
+
 
 
 		<dependency>
@@ -195,6 +203,14 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>io.swagger</groupId>
@@ -299,6 +315,22 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${org.projectlombok.version}</version>
+                            </path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>				
 		</plugins>
 	</build>
 	<profiles>

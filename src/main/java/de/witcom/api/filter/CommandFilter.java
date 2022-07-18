@@ -55,7 +55,7 @@ public class CommandFilter extends AbstractGatewayFilterFactory{
 
 				try {
 					URI newUri = UriComponentsBuilder.fromUri(uri).replaceQuery(query.toString()).build(true).toUri();
-					logger.debug("URI is now " + newUri.toString());
+					//logger.debug("URI is now " + newUri.toString());
 					ServerHttpRequest request = exchange.getRequest().mutate().uri(newUri).build();
 					return chain.filter(exchange.mutate().request(request).build()).then(Mono.fromRunnable(() -> {
 						ServerHttpResponse response = exchange.getResponse();
