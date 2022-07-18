@@ -41,10 +41,10 @@ EOF
 s2i build . ${builderImage} ${dockerRepo}:latest --inject ${TMP_DIR} -e MAVEN_ARGS_APPEND=" --s /opt/app-root/src/.m2/settings.xml -Pprod"
 
 docker tag ${dockerRepo}:latest ${dockerRepo}:${RELEASE}
-#docker push ${dockerRepo}:latest
-#docker push ${dockerRepo}:${RELEASE}
+docker push ${dockerRepo}:latest
+docker push ${dockerRepo}:${RELEASE}
 
-#docker rmi ${dockerRepo}:latest
-#docker rmi ${dockerRepo}:${RELEASE}
+docker rmi ${dockerRepo}:latest
+docker rmi ${dockerRepo}:${RELEASE}
 
 rm -rf ${TMP_DIR}
