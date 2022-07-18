@@ -100,7 +100,7 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
 
 				try {
 					URI newUri = UriComponentsBuilder.fromUri(uri).replaceQuery(query.toString()).build(true).toUri();
-					logger.debug("URI is now " + newUri.toString());
+					//logger.debug("URI is now " + newUri.toString());
 					ServerHttpRequest request = exchange.getRequest().mutate().uri(newUri).build();
 					return chain.filter(exchange.mutate().request(request).build()).then(Mono.fromRunnable(() -> {
 						ServerHttpResponse response = exchange.getResponse();
@@ -132,7 +132,7 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
 		}
 		
 		String originalPath = uri.getRawPath();
-		logger.debug(originalPath);
+		//logger.debug(originalPath);
 		String pattern = "";
 		//very basic pattern matching
 		//basic query operations for all entities
@@ -160,7 +160,7 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
 		Map<String,AccessToken.Access> resAccess = accessToken.getResourceAccess();
 		if (resAccess.containsKey(resource)){
 			Set<String> roles = resAccess.get(resource).getRoles();
-			logger.debug("Found resource-roles in token {}",roles.toString());
+			//logger.debug("Found resource-roles in token {}",roles.toString());
 			if (roles.contains(role)) {
 				return true;
 			}
