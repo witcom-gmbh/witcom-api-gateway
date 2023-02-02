@@ -136,11 +136,11 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
 		String pattern = "";
 		//very basic pattern matching
 		//basic query operations for all entities
-		pattern = "/\\w*/api/rest/entity/(\\w*)/(query.*)";
+		pattern = "/\\w*/api/rest/(entity|entity/custom)/(\\w*)/(query.*)";
 		boolean queryBasic = Pattern.matches(pattern, originalPath);
 		//logger.debug("queryBasic {}",queryBasic);
 		//relations - starting with uppercase-letter 
-		pattern = "/\\w*/api/rest/entity/(\\w*)/(\\w*)/([A-Z]\\w*)";
+		pattern = "/\\w*/api/rest/(entity|entity/custom)/(\\w*)/(\\w*)/([A-Z]\\w*)";
 		boolean queryRelation = Pattern.matches(pattern, originalPath);
 		//logger.debug("queryRelation {}",queryRelation);
 		

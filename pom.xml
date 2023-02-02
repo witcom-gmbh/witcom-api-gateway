@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>de.witcom</groupId>
 	<artifactId>witcom-api-gateway</artifactId>
-	<version>1.4.1</version>
+	<version>1.4.2</version>
 	<name>witcom-api-gateway</name>
 	<description>API-Gateway</description>
 
@@ -71,11 +71,13 @@
 			<version>1.5.21</version>
 		</dependency>
 
+<!--
 		<dependency>
 			<groupId>it.ozimov</groupId>
 			<artifactId>embedded-redis</artifactId>
 			<version>0.7.2</version>
 		</dependency>
+-->		
 
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
 		<dependency>
@@ -163,10 +165,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>		
+		-->
 	</dependencies>
 
 	<dependencyManagement>
