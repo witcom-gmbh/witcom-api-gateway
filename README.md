@@ -1,6 +1,6 @@
 WITCOM API Gateway
 ===============
-Gateway fuer APIS&Microservices auf Basis von Spring-Cloud-Gateway
+Gateway fuer APIS & Microservices auf Basis von Spring-Cloud-Gateway
 
 # Bootstrapping
 Routen & Filter werden ueber Spring-Boot konfiguriert, und zwar ueber Consul.
