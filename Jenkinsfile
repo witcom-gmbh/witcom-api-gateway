@@ -14,10 +14,10 @@ pipeline {
     agent none
   
     stages {
-        stage('Process Pull-Request'){
-            when {
-                expression { env.CHANGE_ID != null }
-            } 
+        stage('Process commit'){
+            //when {
+            //    expression { env.CHANGE_ID != null }
+            //} 
 		    stages {
 			    stage('Build & test'){
 				    agent { label 'maven' }
