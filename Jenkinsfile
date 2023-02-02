@@ -52,7 +52,7 @@ pipeline {
         }
         stage('Create and publish docker-image from master') {
             when {
-                branch 'master'
+                branch 'main'
             }
             stages {
                 stage('Init build'){
