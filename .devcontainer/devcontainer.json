@@ -25,7 +25,7 @@
 	"forwardPorts": [8080],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postStartCommand": "./.devcontainer/update-maven-settings.sh",
+	"postStartCommand": "./.devcontainer/update-maven-settings.sh && git config core.hooksPath '.git-hooks'",
 
 	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
