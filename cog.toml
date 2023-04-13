@@ -1,0 +1,22 @@
+from_latest_tag = false
+ignore_merge_commits = true
+branch_whitelist = ["main"]
+pre_bump_hooks = []
+post_bump_hooks = []
+pre_package_bump_hooks = []
+post_package_bump_hooks = []
+
+[commit_types]
+
+[changelog]
+path = "CHANGELOG.md"
+remote = "github.com"
+repository = "witcom-api-gateway"
+owner = "witcom-gmbh"
+authors = [
+    { signature = "Carsten Buchberger", username = "iceman91176" }
+]
+
+[bump_profiles]
+
+[packages]

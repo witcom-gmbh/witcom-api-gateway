@@ -19,8 +19,12 @@ RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/
 ARG INSTALL_NGROK="false"
 RUN if [ "${INSTALL_NGROK}" = "true" ]; then su vscode -c "umask 0002 && mkdir -p /home/vscode/.local/bin && wget -qO- https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz | tar xvz -C /home/vscode/.local/bin && chmod +x /home/vscode/.local/bin/ngrok"; fi
 
-COPY ./ca-certs/* /usr/local/share/ca-certificates/
-RUN update-ca-certificates
+ARG INSTALL_COCOGITTO="true"
+ARG COCOGITTO_VERSION="5.3.1"
+
+RUN if [ "${INSTALL_COCOGITTO}" = "true" ]; then \
+    su vscode -c "umask 0002 && mkdir -p /home/vscode/.local/bin && wget -qO- https://github.com/cocogitto/cocogitto/releases/download/${COCOGITTO_VERSION}/cocogitto-${COCOGITTO_VERSION}-x86_64-unknown-linux-musl.tar.gz | tar xvz -C /home/vscode/.local/bin && chmod +x /home/vscode/.local/bin/cog"; \
+    fi
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
