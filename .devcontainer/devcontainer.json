@@ -7,17 +7,32 @@
 	"workspaceFolder": "/workspace",
 
 	// Set *default* container specific settings.json values on container create.
-	"settings": { 
-		"java.home": "/docker-java-home",
-		"maven.executable.path": "/usr/local/sdkman/candidates/maven/current/bin/mvn"
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": { 
+				"java.jdt.ls.java.home": "/usr/lib/jvm/msopenjdk-current",
+				"maven.executable.path": "/usr/local/sdkman/candidates/maven/current/bin/mvn",
+				"java.configuration.runtimes": [
+					{
+					"name": "JavaSE-11",
+					"path": "/usr/local/sdkman/candidates/java/11.0.18-ms",
+					"default": true
+					},
+					{
+					"name": "JavaSE-17",
+					"path": "/usr/lib/jvm/msopenjdk-current"
+					}
+				]
+			},
+			"extensions": [
+				"vscjava.vscode-java-pack",
+				"gabrielbb.vscode-lombok",
+				"Pivotal.vscode-boot-dev-pack"
+			]
+		}
 	},
-	
-	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": [
-		"vscjava.vscode-java-pack",
-		"gabrielbb.vscode-lombok",
-		"Pivotal.vscode-boot-dev-pack"
-	],
 
 	//"runArgs": ["--network=confluent-platform_default"],
 

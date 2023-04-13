@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
       # [Optional] You can use build args to set options. e.g. 'VARIANT' below affects the image in the Dockerfile
       args: 
-        VARIANT: 11-buster
+        VARIANT: 17-buster
         INSTALL_MAVEN: "true"
         MAVEN_VERSION: "3.8.4"
         INSTALL_GRADLE: "false"
