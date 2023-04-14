@@ -29,6 +29,12 @@ RUN if [ "${INSTALL_COCOGITTO}" = "true" ]; then \
     su vscode -c "umask 0002 && mkdir -p /home/vscode/.local/bin && wget -qO- https://github.com/cocogitto/cocogitto/releases/download/${COCOGITTO_VERSION}/cocogitto-${COCOGITTO_VERSION}-x86_64-unknown-linux-musl.tar.gz | tar xvz -C /home/vscode/.local/bin && chmod +x /home/vscode/.local/bin/cog"; \
     fi
 
+ARG INSTALL_YQ="false"
+ARG YQ_VERSION="latest"
+RUN if [ "${INSTALL_YQ}" = "true" ]; then \
+    su vscode -c "umask 0002 && mkdir -p /home/vscode/.local/bin && wget -qO/home/vscode/.local/bin/yq https://github.com/mikefarah/yq/releases/${YQ_VERSION}/download/yq_linux_amd64  && chmod a+x /home/vscode/.local/bin/yq"; \
+    fi
+
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 #     && apt-get -y install --no-install-recommends <your-package-list-here>
