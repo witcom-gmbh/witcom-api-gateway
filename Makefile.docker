@@ -29,7 +29,7 @@ docker_push_default: docker_push_release
 
 docker_clean_default:
 	# Cleanup builder images
-	$(DOCKER_CMD) rmi $(PROJECT_NAME):latest
+	-$(DOCKER_CMD) rmi $(PROJECT_NAME):latest
 
 docker_%: docker_%_default
 	@  true
