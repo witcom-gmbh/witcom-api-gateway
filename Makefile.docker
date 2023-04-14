@@ -1,0 +1,35 @@
+TOPDIR=$(dir $(lastword $(MAKEFILE_LIST)))
+DOCKERFILE_DIR     ?= ./
+DOCKER_CMD         ?= docker
+DOCKER_REGISTRY    ?= artifactory.witcom.services
+DOCKER_ORG         ?= itsm
+BUILD_TAG          ?= latest
+S2I_IMAGE          ?= artifactory.witcom.services/witcom-s2i/springboot-java:jdk11
+RELEASE            ?= $(shell $(DOCKER_CMD) run --rm --name xmlparser -v "$(CURDIR)":/apps -w /apps alpine/xml sh -c "xq -r .project.version < pom.xml")
+
+docker_build_default:
+	#Perform S2I-build
+	s2i build . $(S2I_IMAGE) $(PROJECT_NAME):latest --inject $(TOPDIR)tools -e MAVEN_ARGS_APPEND=" --s /opt/app-root/src/.m2/settings.xml -Pprod"
+
+docker_tag_release:
+	# Tag the image we built with the given $(RELEASE) tag
+	$(DOCKER_CMD) tag $(PROJECT_NAME):latest $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(RELEASE)
+
+docker_tag_default: docker_tag_release
+	# Tag the image we built with the latest tag
+	$(DOCKER_CMD) tag $(PROJECT_NAME):latest $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):latest
+
+docker_push_release:
+	# Push the $(RELEASE)-tagged image to the registry
+	$(DOCKER_CMD) push $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(RELEASE)
+
+docker_push_default: docker_push_release
+	# Push the latest-tagged image to the registry
+	$(DOCKER_CMD) push $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):latest
+
+docker_clean_default:
+	# Cleanup builder images
+	$(DOCKER_CMD) rmi $(PROJECT_NAME):latest
+
+docker_%: docker_%_default
+	@  true

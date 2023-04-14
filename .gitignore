@@ -60,3 +60,4 @@ buildNumber.properties
 hs_err_pid*
 /.attach_pid15444
 .vscode/settings.json
+deployment/helm/*.tgz
