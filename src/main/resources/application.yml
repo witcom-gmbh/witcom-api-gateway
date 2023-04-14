@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: witcom-api-gateway
   cloud:
    gateway:
     globalcors:

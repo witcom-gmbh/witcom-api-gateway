@@ -9,9 +9,16 @@ spring:
   redis:
     host: redis
     port: 6379
-    #password: bla
+
   cloud:
-   gateway:
+    consul:
+      discovery:
+        enabled: false
+      port: 443
+      scheme:  http                      
+      config:
+        enabled: false
+
     gateway:
       httpclient:
         ssl:

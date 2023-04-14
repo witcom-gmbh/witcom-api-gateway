@@ -9,6 +9,7 @@ import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFac
 import org.springframework.cloud.gateway.filter.factory.AbstractNameValueGatewayFilterFactory;
 import org.springframework.cloud.gateway.filter.factory.GatewayFilterFactory;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import java.net.URI;
 import org.springframework.util.StringUtils;
@@ -26,10 +27,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class CommandFilter extends AbstractGatewayFilterFactory{
 	
-	@Autowired
-	private CommandSessionManager sessionManager;
-	
+	//@Autowired
+	private final CommandSessionManager sessionManager;
+
 	Logger logger = LoggerFactory.getLogger(CommandFilter.class);
+
+	public CommandFilter(CommandSessionManager sessionManager){
+		//super(Config.c)
+		this.sessionManager = sessionManager;
+	}
 
 	@Override
 	public GatewayFilter apply(Object config) {

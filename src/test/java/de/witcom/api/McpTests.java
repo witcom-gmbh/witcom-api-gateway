@@ -14,7 +14,6 @@ import java.util.Locale;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -28,7 +27,6 @@ public class McpTests {
 	ApplicationProperties appProperties;    
 
     @Test
-    @Ignore
     void simpleTest(){
 
         Oauth2Api tokensApi = mcpAuthClient.buildClient(Oauth2Api.class);

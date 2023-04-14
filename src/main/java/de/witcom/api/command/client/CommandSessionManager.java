@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,23 +27,30 @@ import de.witcom.api.repo.SessionRepository;
 @Service
 public class CommandSessionManager {
 	
-	@Autowired
-	private RestApiClient apiClient;
+	//@Autowired
+	private final RestApiClient apiClient;
 	
-	@Autowired
-	private LoginApiClient loginClient;
+	//@Autowired
+	private final LoginApiClient loginClient;
 	
 	private String lastSession;
 	
 	private static final String APP_ID = "COMMAND";
 	
-    @Autowired
-    SessionRepository sessionRepo;
+    //@Autowired
+    private final SessionRepository sessionRepo;
 
-	@Autowired
-	ApplicationProperties appProperties;
+	//@Autowired
+	private final ApplicationProperties appProperties;
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	public CommandSessionManager(@Lazy RestApiClient apiClient,@Lazy LoginApiClient loginClient,SessionRepository sessionRepo,ApplicationProperties appProperties){
+		this.apiClient = apiClient;
+		this.appProperties = appProperties;
+		this.sessionRepo = sessionRepo;
+		this.loginClient = loginClient;
+	}
 
 	public String getSessionId() {
 	    
