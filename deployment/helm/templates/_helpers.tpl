@@ -60,3 +60,12 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create a default consul app name. (which is CHARTNAME-RELEASENAME)
+*/}}
+{{- define "witcom-api-gateway.consulname" -}}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- printf "%s-%s" $name .Release.Name }}
+{{- end }}
+

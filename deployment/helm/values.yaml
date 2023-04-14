@@ -7,6 +7,10 @@ config:
     host: localhost
     scheme: http
     port: 8500
+    # KV path prefix, defaults to applicationconfig
+    prefix: applicationconfig
+    # defaults to full-name
+    applicationName: 
     token:
       secretKey: "token"
       secretName: "" 

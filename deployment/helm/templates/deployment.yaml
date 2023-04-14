@@ -34,6 +34,10 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: SPRING_CLOUD_CONSUL_CONFIG_PREFIX
+              value: {{ .Values.config.consul.prefix | default "applicationconfig" }}
+            - name: SPRING_APPLICATION_NAME
+              value: {{ .Values.config.consul.applicationName | default (printf "%s" (include "witcom-api-gateway.consulname" .)) }}
             - name: SPRING_CLOUD_CONSUL_HOST
               value: {{ .Values.config.consul.host }}
             - name: SPRING_CLOUD_CONSUL_SCHEME
