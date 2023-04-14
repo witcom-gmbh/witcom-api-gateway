@@ -23,7 +23,7 @@ config:
 replicaCount: 1
 
 image:
-  repository: pub-registry.dev.witcom.services/witcom/witcom-api-gateway
+  repository: artifactory.witcom.services/witcom/witcom-api-gateway
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
