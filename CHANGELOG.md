@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 1.5.1 - 2023-04-14
+#### Bug Fixes
+- in-place update of chart.yml - (15ca030) - iceman91176
+
+- - -
+
 ## 1.5.0 - 2023-04-14
 #### Continuous Integration
 - align chart and application versioning - (6c701b2) - iceman91176
