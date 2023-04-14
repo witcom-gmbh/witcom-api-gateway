@@ -59,7 +59,7 @@ spec:
                   name: {{ .Values.config.redis.secret.name }}
             {{- end }}
             - name: REDIS_HOST
-              value: {{ .Values.config.redis.host }}
+              value: {{ required "A valid config.redis.host entry is required!" .Values.config.redis.host }}
             - name: APP_OPTIONS
               value: '--spring.profiles.active=prod'
             {{- if .Values.extraEnvs }}
