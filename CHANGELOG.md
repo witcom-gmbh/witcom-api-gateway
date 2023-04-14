@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 2.0.0 - 2023-04-14
+#### Bug Fixes
+- **(helm)** make redis-host a required variable - (b49bf7c) - *iceman91176*
+- **(helm)** correct outdated image-repository - (c300847) - *iceman91176*
+#### Continuous Integration
+- Improve build-process - (e706d22) - iceman91176
+#### Features
+- **(helm)** make kv-consul-path configurable - (af09f3c) - *iceman91176*
+
+- - -
+
 ## 1.5.1 - 2023-04-14
 #### Bug Fixes
 - in-place update of chart.yml - (15ca030) - iceman91176
