@@ -2,8 +2,8 @@ WITCOM API Gateway
 ===============
 Gateway fuer APIS & Microservices auf Basis von Spring-Cloud-Gateway
 
-# Bootstrapping
-Routen & Filter werden ueber Spring-Boot konfiguriert, und zwar ueber Consul.
+# Konfiguration mit Consul-KV
+Routen & Filter werden ueber Spring-Cloud-Config konfiguriert. Die Konfiguration muss dabei in einem Consul-KV-Store vorgehalten werden.
 
 Wird zum Zugriff auf einen Consul-Agent ein ACL-Token, benoetigt und/oder laeuft der Agent nicht auf localhost,
 so kann der Consul-Client per Umgebungsvariable erfolgen
@@ -12,11 +12,18 @@ so kann der Consul-Client per Umgebungsvariable erfolgen
 * SPRING_CLOUD_CONSUL_PORT=443
 * SPRING_CLOUD_CONSUL_CONFIG_ACL_TOKEN=****
 
-Die Konfiguation wird im Consul-KV unter dem KV-Key **applicationconfig/witcom-api-gateway** erwartet.
-Profilspezifische Konfiguration 
+Die Konfiguration erwartet die Applikation unter dem KV-Key **applicationconfig/witcom-api-gateway/data**
 
-* applicationconfig/witcom-api-gateway::dev
-* applicationconfig/witcom-api-gateway::prod
+Es kann daher durchaus Sinn ergeben diese Parameter mit Umgebungsvariablen anzupassen
+
+* SPRING_CLOUD_CONSUL_CONFIG_PREFIX=alternatives-prefix
+* SPRING_APPLICATION_NAME=gw-release-2
+
+Mit diesen Parametern wird die Konfiguration unter **alternatives-prefix/gw-release-2/data** erwartet
+
+# K8S-Deployment
+
+Erfolgt uber ein Helm-Chart, Details siehe WiTCOM Wiki ;-)
 
 # Custom Filter - KeyCloak
 
@@ -329,31 +336,6 @@ spring:
          - RewritePath=/mcp/(?<segment>.*), /$\{segment}
 ```
 
-# OpenShift - Deployment Produktiv
-
-Erfordert Springboot-S2I Image (https://github.com/iceman91176/openshift-s2i-springboot-java) im Openshift-Namespace
-
-## SSH-Key zu Private-Repository als Github-Secret verfuegbar machen
-Das Repository ist ein private Repository, daher wird ein SSH-Key benoetigt um das Image zu bauen.
-
-Detaillierte Anleitung hier https://blog.openshift.com/private-git-repositories-part-2a-repository-ssh-keys/
-
-Kurzfassung
-
-* Private Key in Secret importieren `oc secrets new-sshauth repo-at-github --ssh-privatekey=PRIVATE-KEY-FILE`
-* Secret mit dem Builder verlinken `oc secrets link builder repo-at-github`
-* Secret fuer Build aus diesem Repo verfuegbar machen `oc annotate secret/repo-at-github 'build.openshift.io/source-secret-match-uri-1=ssh://github.com/PFAD-ZUM-REPO'`
-
-## Deploy REDIS
-Standard Template verwenden, Servicename redis-apigw
-
-## Deploy API-Gateway
-Das Template openshift-template.json verwenden. 
-Wenn alles richtig gemacht wurde, wird die Applikation gebaut, startet & laeuft ;-)
-
-## Routen & Filter in Consul konfigurieren
-In der konfigurierten Consul-Instanz muss unter applicationconfig/witcom-api-gateway::prod/data die benötigte Konfiguration 
-abgelegt werden. Aenderungen werden direkt uebernommen.
 
 
 
