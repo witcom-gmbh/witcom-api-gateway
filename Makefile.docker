@@ -19,11 +19,11 @@ docker_tag_default: docker_tag_release
 	# Tag the image we built with the latest tag
 	$(DOCKER_CMD) tag $(PROJECT_NAME):latest $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):latest
 
-docker_push_release:
+docker_push_release: docker_tag_release
 	# Push the $(RELEASE)-tagged image to the registry
 	$(DOCKER_CMD) push $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(RELEASE)
 
-docker_push_default: docker_push_release
+docker_push_default: docker_tag_default docker_push_release
 	# Push the latest-tagged image to the registry
 	$(DOCKER_CMD) push $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):latest
 
