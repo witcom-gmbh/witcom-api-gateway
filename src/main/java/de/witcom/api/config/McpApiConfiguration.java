@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import de.witcom.api.config.properties.ApplicationProperties;
 import de.witcom.api.mcp.tron.ApiClient;
 
 import java.text.DateFormat;

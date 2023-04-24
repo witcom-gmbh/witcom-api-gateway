@@ -21,7 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.witcom.api.config.ApplicationProperties;
+import de.witcom.api.config.properties.ApplicationProperties;
 import de.witcom.api.mcp.client.Oauth2Api;
 import de.witcom.api.mcp.client.Oauth2ApiClient;
 import de.witcom.api.mcp.tron.ApiClient;

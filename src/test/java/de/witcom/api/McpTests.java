@@ -2,7 +2,7 @@ package de.witcom.api;
 
 import org.springframework.boot.test.context.SpringBootTest;
 
-import de.witcom.api.config.ApplicationProperties;
+import de.witcom.api.config.properties.ApplicationProperties;
 import de.witcom.api.mcp.client.Oauth2Api;
 import de.witcom.api.mcp.tron.ApiClient;
 

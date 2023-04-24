@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.witcom.api.config.ApplicationProperties;
+import de.witcom.api.config.properties.ApplicationProperties;
 
 @Service
 public class KeyCloakTokenService {

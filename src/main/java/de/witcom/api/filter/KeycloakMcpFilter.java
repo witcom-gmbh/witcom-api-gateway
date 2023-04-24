@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 import org.springframework.util.StringUtils;
 
 import de.witcom.api.command.client.CommandSessionManager;
-import de.witcom.api.config.ApplicationProperties;
+import de.witcom.api.config.properties.ApplicationProperties;
 import de.witcom.api.mcp.McpSessionManager;
 import reactor.core.publisher.Mono;
 
