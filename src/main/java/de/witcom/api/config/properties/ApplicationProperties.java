@@ -2,11 +2,13 @@ package de.witcom.api.config.properties;
 
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 import lombok.Data;
 
@@ -14,6 +16,7 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "application")
 @RefreshScope
 @Data
+@Validated
 public class ApplicationProperties {
     
 
@@ -45,14 +48,37 @@ public class ApplicationProperties {
     @Data
     public static class SplConfig {
         
+        @Deprecated
         private String splBaseUrl="";
-        private String splUser="";
+        @Deprecated
+        private String splUser;
+        @Deprecated
         private String splPassword="";
+        @Deprecated
         private String splTenant=null;
+
         private boolean enabled=true;
+        //@NotEmpty
+        private List<ServicePlanetTenantConfiguration> tenants;
         
 
     }
+
+    @Data
+    public static class ServicePlanetTenantConfiguration {
+
+        private String splTenant;
+        @NotNull
+        private String splBaseUrl="";
+        @NotNull
+        private String splUser="";
+        @NotNull
+        private String splPassword="";
+        @NotNull
+        private String tenantName;
+        private boolean defaultTenant;
+
+    }    
     
     @Data
     public static class DslPortalConfig {
@@ -75,6 +101,7 @@ public class ApplicationProperties {
     private DslPortalConfig dslPortalConfig;
     private CommandConfig commandConfig;
     private McpConfig mcpConfig;
+    //private List<ServicePlanetTenantConfiguration> splConfiguration;
 
     
     
