@@ -63,20 +63,30 @@ spring:
 ```
 
 # Custom Filter - Service-Planet
-Ein Filter der jeden Zugriff auf die Service-Planet-API mit einer gueltigen Session versieht.
+Ein Filter der jeden Zugriff auf die Service-Planet-API mit einer gueltigen Session versieht. 
 Der Filter fuehrt einen Login bei Service-Planet durch um eine Session zu erhalten. Die Session-ID
 wird in einem REDIS Key-Value-Store abgespeichert, um mehrere Instanzen des API-Gateways laufen zu lassen.
+Der Filter ist Mehr-Mandatenfähig, d.h. in einer API-Gateway-Instanz können mehrere Mandanten angesprochen werden.
 
 ## Globale Einstellungen
-Globale Filtereinstellungen über die application-properties konfiguriert. Diese Properties können natürlich auch aus Consul geladen werden. Es ist auch nöglich dort Umgebungsvariablemn zu referenzieren
+Globale Filtereinstellungen über die application-properties konfiguriert. Diese Properties können natürlich auch aus Consul geladen werden. Es ist auch nöglich dort Umgebungsvariablen zu referenzieren
 
 ```yaml
 application:
   spl-config:
-    spl-base-url: http://spl-url
-    spl-tenant: optional
-    spl-user: user
-    spl-password: ${SPL_PASSWORD} 
+    tenants:
+    - spl-base-url: http://spl-url
+      spl-tenant: optional-ansosnten-wird-default-tenant-des-SPL-users-verwendet
+      spl-user: user
+      spl-password: ${SPL_PASSWORD} 
+      spl-tenant-name: TEST01
+      default-tenant: true
+    - spl-base-url: http://spl-url
+      spl-tenant: optional
+      spl-user: user2
+      spl-password: ${SPL_PASSWORD} 
+      spl-tenant-name: TEST02
+      default-tenant: true
 ```
 
 Per Default verbindet sich das API-Gateway zu einer REDIS-Instanz deren Hostname in der Umgebungsvariable REDIS_HOST erwartet wird. Das Kennwort zur Instanz wird
@@ -94,14 +104,27 @@ spring:
         '[/**]':
          allowedOrigins: "*"          
     routes:
-      - id: spl
-        uri: ${SPL_BASEURL}/serviceplanet/remote/service
+      - id: spl-tenant-1
+        uri: ${application.spl-config.tenants[0].spl-base-url}/serviceplanet/remote/service
         predicates:
-         - Path=/smdb/**
+         - Path=/smdb01/**
         filters:
          - KeyCloakFilter=requiredRole,spl:service_read
-         - ServicePlanetFilter
-         - RewritePath=/smdb/(?<segment>.*), /serviceplanet/remote/service/$\{segment}
+         - name: ServicePlanetFilter
+           args:
+             # ohne angabe des Tenants wird der default-tenan verwendet
+             tenant: TEST01 
+         - RewritePath=/smdb01/(?<segment>.*), /serviceplanet/remote/service/$\{segment}
+      - id: spl-tenant-2
+        uri: ${application.spl-config.tenants[1].spl-base-url}/serviceplanet/remote/service
+        predicates:
+         - Path=/smdb02/**
+        filters:
+         - KeyCloakFilter=requiredRole,spl:service_read
+         - name: ServicePlanetFilter
+           args:
+             tenant: TEST02
+         - RewritePath=/smdb02/(?<segment>.*), /serviceplanet/remote/service/$\{segment}         
 ```
 
 # Custom Filter - Basic-Auth
