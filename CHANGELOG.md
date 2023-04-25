@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 2.2.1 - 2023-04-25
+#### Bug Fixes
+- No forced session refresh in SPL-filter - (df59551) - iceman91176
+
+- - -
+
 ## 2.2.0 - 2023-04-25
 #### Features
 - Trigger session-refresh for filters - (8808c9b) - iceman91176
