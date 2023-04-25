@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 2.1.0 - 2023-04-25
+#### Continuous Integration
+- fix wrong docker-org - (170b9c1) - iceman91176
+- fix logical errors in makefile - (0cf2692) - iceman91176
+- ignore errors in cleanup - (c10fd53) - iceman91176
+#### Documentation
+- Updated docs for multi-tenancy - (47523a8) - iceman91176
+- update docs for 2.0.0 - (b793ad6) - iceman91176
+#### Features
+- Add SPL multi-tenancy - (fa000e7) - iceman91176
+#### Refactoring
+- Refactor application properties - (54da69f) - iceman91176
+
+- - -
+
 ## 2.0.0 - 2023-04-14
 #### Bug Fixes
 - **(helm)** make redis-host a required variable - (b49bf7c) - *iceman91176*
