@@ -20,7 +20,7 @@ import de.witcom.api.command.swagger.model.LoginGetActiveMandatorResponse;
 import de.witcom.api.command.swagger.model.LoginRequest;
 import de.witcom.api.command.swagger.model.LoginResponse;
 import de.witcom.api.command.swagger.model.ServiceStatusData;
-import de.witcom.api.config.ApplicationProperties;
+import de.witcom.api.config.properties.ApplicationProperties;
 import de.witcom.api.model.Session;
 import de.witcom.api.repo.SessionRepository;
 

@@ -13,6 +13,8 @@ import org.springframework.web.server.ServerWebExchange;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.witcom.api.config.properties.ApplicationProperties;
+
 import java.net.URL;
 import java.security.PublicKey;
 import java.util.List;
@@ -32,7 +34,7 @@ import org.keycloak.TokenVerifier;
 import org.keycloak.jose.jwk.JSONWebKeySet;
 import org.keycloak.jose.jwk.JWK;
 import org.keycloak.jose.jwk.JWKParser;
-import de.witcom.api.config.ApplicationProperties;
+
 import reactor.core.publisher.Mono;
 
 @Component
