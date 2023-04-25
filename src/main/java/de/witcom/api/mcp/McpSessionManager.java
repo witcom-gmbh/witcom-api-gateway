@@ -202,6 +202,11 @@ public class McpSessionManager {
 		
 	}
 
+	public void triggerSessionRefresh(){
+		//we could perform a logout here for forcing a session refresh
+		this.autoRefreshSession();
+	}
+
 	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
 	private void autoRefreshSession() {
 		if (!appProperties.getMcpConfig().isEnabled()){
