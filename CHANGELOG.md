@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 2.2.2 - 2023-04-25
+#### Bug Fixes
+- Add Session-Refresh Task-Locking - (fef093c) - iceman91176
+#### Refactoring
+- Relocated ConfigurationRefreshEventListener - (59cf374) - iceman91176
+
+- - -
+
 ## 2.2.1 - 2023-04-25
 #### Bug Fixes
 - No forced session refresh in SPL-filter - (df59551) - iceman91176
