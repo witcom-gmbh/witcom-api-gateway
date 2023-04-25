@@ -7,10 +7,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
 
@@ -29,6 +31,8 @@ import de.witcom.api.mcp.tron.model.LoginInfoSerializer;
 import de.witcom.api.mcp.tron.model.OAuth2TokenSerializer;
 import de.witcom.api.model.Session;
 import de.witcom.api.repo.SessionRepository;
+import de.witcom.api.service.LockManager;
+import net.javacrumbs.shedlock.core.SimpleLock;
 
 @Service
 public class McpSessionManager {
@@ -37,6 +41,8 @@ public class McpSessionManager {
 	
 	private static final String APP_ID = "MCP";
 	
+	@Autowired
+	private LockManager lockManager;
 
     @Autowired
     private ApiClient mcpAuthClient;
@@ -141,16 +147,6 @@ public class McpSessionManager {
 
     }
 
-	public void refreshSession() {
-	    logger.info("Refreshing session with MCP");
-	    Session session = loadSessionFromCache();
-	    if (session != null){
-            if (isSessionActive(session.getSessionId())) {
-			    return;
-		    }
-	    }
-		this.login();
-	}    
 
     private void login() {
         if (!this.isConfigurationValid()) {
@@ -202,26 +198,47 @@ public class McpSessionManager {
 		
 	}
 
+	@Async("gatewayTaskExecutor")
 	public void triggerSessionRefresh(){
-		//we could perform a logout here for forcing a session refresh
-		this.autoRefreshSession();
-	}
-
-	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
-	private void autoRefreshSession() {
 		if (!appProperties.getMcpConfig().isEnabled()){
 			return;
 		}
-	    logger.info("Refreshing session with MCP");
-	    Session session = loadSessionFromCache();
-	    if (session != null){
-	        if (isSessionActive(session.getSessionId())) {
-			 return;
-		    }
-	    }
-	    logger.warn("Session expired - refresh required");
-		this.login();
-	}	
+		//we could perform a logout here for forcing a session refresh
+		refreshSession();
+	}
+
+	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
+	public void scheduledSessionRefresh() {
+		if (!appProperties.getMcpConfig().isEnabled()){
+			return;
+		}
+	    refreshSession();
+	}
+	
+	public void refreshSession() {
+		//get a lock
+		Optional<SimpleLock> myLock = this.lockManager.lock("MCP_SESSION_REFRESH", Duration.ofSeconds(15L));
+		if (myLock.isEmpty()){
+            logger.info("Unable to get a lock for ServicePlanet session-refresh");
+            return;
+        } 
+
+		try {
+			logger.info("Refreshing session with MCP");
+			Session session = loadSessionFromCache();
+			if (session != null){
+				if (isSessionActive(session.getSessionId())) {
+					return;
+				}
+			}
+			logger.warn("Session expired - refresh required");
+			this.login();
+		}finally {
+			//unlock
+            lockManager.unlock(myLock);
+        }
+	}    
+	
 
 	@PreDestroy
 	private void shutdown() {

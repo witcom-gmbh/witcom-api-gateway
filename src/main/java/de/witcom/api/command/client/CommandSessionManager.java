@@ -1,5 +1,6 @@
 package de.witcom.api.command.client;
 
+import java.time.Duration;
 import java.util.Optional;
 
 import javax.annotation.PreDestroy;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,8 @@ import de.witcom.api.command.swagger.model.ServiceStatusData;
 import de.witcom.api.config.properties.ApplicationProperties;
 import de.witcom.api.model.Session;
 import de.witcom.api.repo.SessionRepository;
+import de.witcom.api.service.LockManager;
+import net.javacrumbs.shedlock.core.SimpleLock;
 
 @Service
 public class CommandSessionManager {
@@ -42,15 +46,18 @@ public class CommandSessionManager {
 
 	//@Autowired
 	private final ApplicationProperties appProperties;
+
+	private final LockManager lockManager;
 	
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	public CommandSessionManager(@Lazy RestApiClient apiClient,@Lazy LoginApiClient loginClient,SessionRepository sessionRepo,ApplicationProperties appProperties){
+	public CommandSessionManager(@Lazy RestApiClient apiClient,@Lazy LoginApiClient loginClient,SessionRepository sessionRepo,ApplicationProperties appProperties,LockManager lockManager){
 		this.apiClient = apiClient;
 		this.appProperties = appProperties;
 		this.sessionRepo = sessionRepo;
 		this.loginClient = loginClient;
+		this.lockManager = lockManager;
 	}
 
 	public String getSessionId() {
@@ -162,11 +169,16 @@ public class CommandSessionManager {
 		}
 	}
 
+	@Async("gatewayTaskExecutor")
 	public void triggerSessionRefresh(){
+		if (!appProperties.getMcpConfig().isEnabled()){
+			return;
+		}
 		//we could perform a logout here for forcing a session refresh
-		this.autoRefreshSession();
+		refreshSession();
 	}	
 
+	/*
 	public void refreshSession() {
 	    logger.info("Refreshing session with Command");
 	    Session session = loadSessionFromCache();
@@ -177,24 +189,39 @@ public class CommandSessionManager {
 	    }
 		this.login();
 	}
+	*/
 	
 	//@Scheduled(cron = "0 0/5 * * * ?")
 	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
-	private void autoRefreshSession() {
-
-		if (!appProperties.getCommandConfig().isEnabled()){
+	public void scheduledSessionRefresh() {
+		if (!appProperties.getMcpConfig().isEnabled()){
 			return;
 		}
+	    refreshSession();
+	}
 
-	    logger.info("Refreshing session with Command");
-	    Session session = loadSessionFromCache();
-	    if (session != null){
-	        if (isSessionActive(session.getSessionId())) {
-			 return;
-		    }
-	    }
-	    logger.warn("Session expired - refresh required");
-		this.login();
+	public void refreshSession() {
+		//get a lock
+		Optional<SimpleLock> myLock = this.lockManager.lock("COMMAND_SESSION_REFRESH", Duration.ofSeconds(15L));
+		if (myLock.isEmpty()){
+			logger.info("Unable to get a lock for ServicePlanet session-refresh");
+			return;
+		} 
+		try {
+			logger.info("Refreshing session with Command");
+			Session session = loadSessionFromCache();
+			if (session != null){
+				if (isSessionActive(session.getSessionId())) {
+				return;
+				}
+			}
+			logger.warn("Session expired - refresh required");
+			this.login();
+		}finally {
+			//unlock
+			lockManager.unlock(myLock);
+		}
+			
 	}	
 	
 	private void storeSession(String sessionId) {
