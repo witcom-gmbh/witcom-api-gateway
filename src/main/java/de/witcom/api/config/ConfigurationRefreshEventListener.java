@@ -1,4 +1,4 @@
-package de.witcom.api.command.client.configuration;
+package de.witcom.api.config;
 
 import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
 import org.springframework.context.annotation.Configuration;
