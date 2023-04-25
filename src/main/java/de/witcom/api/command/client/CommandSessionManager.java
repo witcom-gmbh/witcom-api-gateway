@@ -43,6 +43,7 @@ public class CommandSessionManager {
 	//@Autowired
 	private final ApplicationProperties appProperties;
 	
+	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public CommandSessionManager(@Lazy RestApiClient apiClient,@Lazy LoginApiClient loginClient,SessionRepository sessionRepo,ApplicationProperties appProperties){
@@ -160,7 +161,12 @@ public class CommandSessionManager {
 			logger.error("Error when trying to login to command: {}", e.getMessage());
 		}
 	}
-	
+
+	public void triggerSessionRefresh(){
+		//we could perform a logout here for forcing a session refresh
+		this.autoRefreshSession();
+	}	
+
 	public void refreshSession() {
 	    logger.info("Refreshing session with Command");
 	    Session session = loadSessionFromCache();

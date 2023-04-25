@@ -4,6 +4,8 @@ import java.net.HttpCookie;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.PreDestroy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +93,29 @@ public class SplSessionManager {
 	    log.warn("Unable to get Session-ID");
 		return null;
 		
+	}
+
+	private void logoutSession(ServicePlanetTenantConfiguration tenant,String sessionId) {
+
+		String url = tenant.getSplBaseUrl() + "/serviceplanet/remote/service/v1/login/logout";
+		RestTemplate restTemplate = new RestTemplate();
+
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+		requestHeaders.set("Cookie", "JSESSIONID=" + sessionId);
+		HttpEntity<Void> request = new HttpEntity<>(requestHeaders);
+
+		try {
+			ResponseEntity<BooleanHolder> response = restTemplate.exchange(url, HttpMethod.POST, request,
+					BooleanHolder.class);
+			if (!response.getStatusCode().equals(HttpStatus.OK)) {
+				log.error("Logout from ServicePlanet was not successful - got Status : {}", response.getStatusCode());
+			}
+		} catch (Exception e) {
+			log.error("Error when trying to logout session from SPL {} : {}", url, e.getMessage());
+		}
+
+
 	}
 	
 	private boolean isSessionActive(ServicePlanetTenantConfiguration tenant,String sessionId) {
@@ -220,6 +245,22 @@ public class SplSessionManager {
 
 		}
 	}
+
+	public void triggerSessionRefresh(){
+		if(!appProperties.getSplConfig().isEnabled()){
+			return;
+		}
+
+		//refresh sessions for all tenants
+		if(appProperties.getSplConfig().getTenants() != null){
+			appProperties.getSplConfig().getTenants().forEach(tenant -> {
+				refreshTenantSession(tenant,true);
+			});
+		} else {
+			//old single-tenant configuration
+			refreshTenantSession(getDefaultTenant());
+		}
+	}
 	
 	//@Scheduled(cron = "0 0/5 * * * ?")
 	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
@@ -241,16 +282,26 @@ public class SplSessionManager {
 	}
 
 	private void refreshTenantSession(ServicePlanetTenantConfiguration tenant){
+		refreshTenantSession(tenant,false);
+	}
+
+	private void refreshTenantSession(ServicePlanetTenantConfiguration tenant,boolean force){
 
 		log.debug(String.format("Checking session for tenant %s", tenant.getTenantName()));
 		Session session = loadSessionFromCache(tenant);
+		
 		if (session != null){
-			//Todo: Validierung ob noch gueltig
 			if (isSessionActive(tenant,session.getSessionId())) {
-				return;
+				if (force){
+					// danger-zone: this creates additional sessions. we must logout the old session first
+					this.logoutSession(tenant, session.getSessionId());
+					//now we can go on
+				} else {
+					return;
+				}
 			}
 		}
-		log.warn(String.format("Session for tenant %s expired - refresh required",tenant.getTenantName()));
+		log.warn(String.format("Session for tenant %s expired or refresh is forced - refresh required",tenant.getTenantName()));
 		this.login(tenant);
 
 	}
