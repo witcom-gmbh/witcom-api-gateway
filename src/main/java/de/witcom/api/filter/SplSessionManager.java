@@ -1,6 +1,7 @@
 package de.witcom.api.filter;
 
 import java.net.HttpCookie;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,9 +29,11 @@ import de.witcom.api.config.properties.ApplicationProperties;
 import de.witcom.api.config.properties.ApplicationProperties.ServicePlanetTenantConfiguration;
 import de.witcom.api.model.Session;
 import de.witcom.api.repo.SessionRepository;
+import de.witcom.api.service.LockManager;
 import de.witcom.api.spl.swagger.model.BooleanHolder;
 import de.witcom.api.spl.swagger.model.UserLoginDto;
 import lombok.extern.log4j.Log4j2;
+import net.javacrumbs.shedlock.core.SimpleLock;
 
 @Service
 @Log4j2
@@ -39,10 +43,12 @@ public class SplSessionManager {
 	
     private final SessionRepository sessionRepo;
 	private final ApplicationProperties appProperties;
+	private final LockManager lockManager;
 
-	public SplSessionManager(SessionRepository sessionRepo, ApplicationProperties appProperties){
+	public SplSessionManager(SessionRepository sessionRepo, ApplicationProperties appProperties,LockManager lockManager){
 		this.sessionRepo = sessionRepo;
 		this.appProperties = appProperties;
+		this.lockManager = lockManager;
 	}
 	
 	public String getSessionId(){
@@ -246,6 +252,7 @@ public class SplSessionManager {
 		}
 	}
 
+	@Async("gatewayTaskExecutor")
 	public void triggerSessionRefresh(){
 
 		refreshSession();
@@ -269,22 +276,38 @@ public class SplSessionManager {
 		*/
 	}
 	
-	//@Scheduled(cron = "0 0/5 * * * ?")
+	
 	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
+	public void scheduledSessionRefresh(){
+		refreshSession();
+
+	}
+
 	private void refreshSession() {
 		if(!appProperties.getSplConfig().isEnabled()){
 			return;
 		}
 
-		//refresh sessions for all tenants
-		if(appProperties.getSplConfig().getTenants() != null){
-			appProperties.getSplConfig().getTenants().forEach(tenant -> {
-				refreshTenantSession(tenant);
-			});
-		} else {
-			//old single-tenant configuration
-			refreshTenantSession(getDefaultTenant());
-		}
+		//get a lock
+		Optional<SimpleLock> myLock = this.lockManager.lock("SPL_SESSION_REFRESH", Duration.ofSeconds(15L));
+		if (myLock.isEmpty()){
+            log.info("Unable to get a lock for ServicePlanet session-refresh");
+            return;
+        } 
+		try {
+			//refresh sessions for all tenants
+			if(appProperties.getSplConfig().getTenants() != null){
+				appProperties.getSplConfig().getTenants().forEach(tenant -> {
+					refreshTenantSession(tenant);
+				});
+			} else {
+				//old single-tenant configuration
+				refreshTenantSession(getDefaultTenant());
+			}
+		}finally {
+			//unlock
+            lockManager.unlock(myLock);
+        }
 
 	}
 
