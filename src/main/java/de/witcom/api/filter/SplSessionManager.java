@@ -247,6 +247,12 @@ public class SplSessionManager {
 	}
 
 	public void triggerSessionRefresh(){
+
+		refreshSession();
+
+		//this works, but creates multiple sessions when there are multiple api-gateway instances
+		//so just perform a normal refresh, which means that for logging out session the logout has to be done in serviceplanet
+		/*
 		if(!appProperties.getSplConfig().isEnabled()){
 			return;
 		}
@@ -258,8 +264,9 @@ public class SplSessionManager {
 			});
 		} else {
 			//old single-tenant configuration
-			refreshTenantSession(getDefaultTenant());
+			refreshTenantSession(getDefaultTenant(),true);
 		}
+		*/
 	}
 	
 	//@Scheduled(cron = "0 0/5 * * * ?")
