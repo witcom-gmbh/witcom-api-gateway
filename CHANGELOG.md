@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 2.2.0 - 2023-04-25
+#### Features
+- Trigger session-refresh for filters - (8808c9b) - iceman91176
+#### Refactoring
+- Refactor actuator configuration - (b998150) - iceman91176
+
+- - -
+
 ## 2.1.0 - 2023-04-25
 #### Continuous Integration
 - fix wrong docker-org - (170b9c1) - iceman91176
