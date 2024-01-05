@@ -62,24 +62,6 @@ spring:
              tenant: TEST02
          - RewritePath=/smdb-tenant-3/(?<segment>.*), /serviceplanet/remote/service/$\{segment}
 
-#dsl recherche
-      - id: dsl-api
-        uri: https://secure.mk-netzdienste.de/kundenportal
-        predicates:
-         - Path=/dslrecherche/**
-        filters:
-          - KeyCloakFilter=requiredRole,service_read
-          - RemoveRequestHeader=Authorization    
-          - BasicAuthFilter=${MK_USER},${MK_PASS}
-          - RewritePath=/dslrecherche/(?<segment>.*), /kundenportal/$\{segment}
-#camunda
-      - id: camunda-rest-api
-        uri: http://camundaengine:8080/engine-rest
-        #uri: http://camunda.witcom-dev.services/engine-rest
-        predicates:
-         - Path=/camunda/**
-        filters:
-          - RewritePath=/camunda/(?<segment>.*), /engine-rest/$\{segment}
 #httpbin
       - id: dummy-api
         uri: http://httpbin.org:80
@@ -101,9 +83,10 @@ spring:
              role-work: super-work
              role-read: read
          - RewritePath=/mcp/(?<segment>.*), /$\{segment}
+
 #command    
       - id: command-base
-        uri: ${RMDB_BASEURL:http://localhost:8080/axis}
+        uri: ${application.command-config.base-url}
         predicates:
          - Path=/rmdb/api/rest/entity/campus/**,/rmdb/api/rest/entity/building/**,/rmdb/api/rest/entity/floor/**,/rmdb/api/rest/entity/room/**
         filters:
@@ -114,7 +97,7 @@ spring:
              role-read: read
          - RewritePath=/rmdb/(?<segment>.*), /axis/$\{segment}
       - id: command-default
-        uri: ${RMDB_BASEURL:http://localhost:8080/axis}
+        uri: ${application.command-config.base-url}
         predicates:
          - Path=/rmdb/**
         filters:
@@ -128,39 +111,34 @@ spring:
 application:
   command-config:
     enabled: false
-    base-url: ${RMDB_BASEURL:http://localhost:8080}
-    user: ${RMDB_USER}
-    password: ${RMDB_PASSWORD}
-    group: ${RMDB_GROUP}
-    mandant: ${RMDB_MANDANT}
+    base-url: http://localhost:1080/rmdb
+    user: dummyuser
+    password: dummypassword
+    group: dummygroup
+    mandant: dummymandant
   keycloak-config:
-    keycloak-realm-id: ${KEYCLOAK_REALM_ID}
-    keycloak-server-url: ${KEYCLOAK_SERVER_URL}
+    keycloak-realm-id: devrealm
+    keycloak-server-url: http://keycloak:9999
   spl-config:
-    enabled: true
-    #the followign 4 lines are deprecated. use tenants config instead
-    #spl-base-url: ${SPL_BASEURL:http://localhost:8080}
-    #spl-tenant: ${SPL_TENANT}
-    #spl-user: ${SPL_USER}
-    #spl-password: ${SPL_PASSWORD} 
+    enabled: false
     tenants:
-    - spl-base-url: ${SPL_BASEURL:http://localhost:8080}
-      spl-user: ${SPL_USER}
-      spl-password: ${SPL_PASSWORD} 
-      spl-tenant: ${SPL_TENANT}
+    - spl-base-url: http://localhost:1080/smdb
+      spl-user: dummyuser
+      spl-password: dummypassword
+      spl-tenant: tenant1
       tenant-name: TEST01
       default-tenant: true
-    - spl-base-url: ${SPL_BASEURL:http://localhost:8080}
-      spl-user: ${SPL_USER}
-      spl-password: ${SPL_PASSWORD} 
-      spl-tenant: ${SPL_TENANT}
+    - spl-base-url: http://localhost:1080/smdb
+      spl-user: dummyuser
+      spl-password: dummypassword
+      spl-tenant: tenant2
       tenant-name: TEST02
 
   mcp-config:
     enabled: false
-    base-url: ${MCP_BASEURL:http://localhost:8080} 
-    user: ${MCP_USER}
-    password: ${MCP_PASSWORD}
+    base-url: http://localhost:1080/mcp
+    user: dummyuser
+    password: dummypassword
 
 logging:
   level:

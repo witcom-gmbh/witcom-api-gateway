@@ -3,6 +3,22 @@
 ARG VARIANT=17-buster
 FROM mcr.microsoft.com/vscode/devcontainers/java:0-${VARIANT}
 
+# Brute force around certificate-inspection
+ARG SKIP_APT_PEER_VERIFY="false"
+RUN if [ "${SKIP_APT_PEER_VERIFY}" = "true" ]; then \
+    touch /etc/apt/apt.conf.d/99verify-peer.conf && echo >>/etc/apt/apt.conf.d/99verify-peer.conf "Acquire { https::Verify-Peer false }"; \
+    fi
+
+# Custom CA integration for Java
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && \
+    apt-get -y install ca-certificates-java
+    
+# Add custom CAs
+COPY ./ca-trust/*.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates && \
+    # if adding additional JDKs -> repeat
+    ln -sf /etc/ssl/certs/java/cacerts /usr/lib/jvm/msopenjdk-current/lib/security/cacerts
+
 # [Option] Install Maven
 ARG INSTALL_MAVEN="false"
 ARG MAVEN_VERSION=""
@@ -13,7 +29,7 @@ RUN if [ "${INSTALL_MAVEN}" = "true" ]; then su vscode -c "umask 0002 && . /usr/
     && if [ "${INSTALL_GRADLE}" = "true" ]; then su vscode -c "umask 0002 && . /usr/local/sdkman/bin/sdkman-init.sh && sdk install gradle \"${GRADLE_VERSION}\""; fi
 
 #Install Additional JDK runtimes
-RUN su vscode -c "umask 0002 && . /usr/local/sdkman/bin/sdkman-init.sh && sdk install java 11.0.18-ms"
+#RUN su vscode -c "umask 0002 && . /usr/local/sdkman/bin/sdkman-init.sh && sdk install java 11.0.18-ms"
 
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="none"
@@ -23,10 +39,10 @@ ARG INSTALL_NGROK="false"
 RUN if [ "${INSTALL_NGROK}" = "true" ]; then su vscode -c "umask 0002 && mkdir -p /home/vscode/.local/bin && wget -qO- https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz | tar xvz -C /home/vscode/.local/bin && chmod +x /home/vscode/.local/bin/ngrok"; fi
 
 ARG INSTALL_COCOGITTO="true"
-ARG COCOGITTO_VERSION="5.3.1"
+ARG COCOGITTO_VERSION="6.0.1"
 
 RUN if [ "${INSTALL_COCOGITTO}" = "true" ]; then \
-    su vscode -c "umask 0002 && mkdir -p /home/vscode/.local/bin && wget -qO- https://github.com/cocogitto/cocogitto/releases/download/${COCOGITTO_VERSION}/cocogitto-${COCOGITTO_VERSION}-x86_64-unknown-linux-musl.tar.gz | tar xvz -C /home/vscode/.local/bin && chmod +x /home/vscode/.local/bin/cog"; \
+    su vscode -c "umask 0002 && mkdir -p /home/vscode/.local/bin && wget -qO- https://github.com/cocogitto/cocogitto/releases/download/${COCOGITTO_VERSION}/cocogitto-${COCOGITTO_VERSION}-x86_64-unknown-linux-musl.tar.gz | tar xvz --strip-components=1 -C /home/vscode/.local/bin && chmod +x /home/vscode/.local/bin/cog"; \
     fi
 
 ARG INSTALL_YQ="false"
