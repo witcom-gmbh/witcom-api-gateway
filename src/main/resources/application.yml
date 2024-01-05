@@ -7,4 +7,9 @@ spring:
       cors-configurations:
         '[/**]':
          allowedOrigins: "*"          
-    
+
+
+logging:
+  level:
+    root: ERROR
+    de.witcom: DEBUG

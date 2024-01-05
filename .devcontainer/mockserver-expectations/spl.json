@@ -1,3 +1,67 @@
 [
-	
+	{
+		"httpRequest": {
+			"path": "/smdb/serviceplanet/remote/service/v1/login/authenticate",
+			"method": "POST"
+		},
+		"httpResponse": {
+			"body": {
+				"_type": "UserLoginDto",
+				"id": 11475427,
+				"version": 0,
+				"firstname": "dummy",
+				"middlename": null,
+				"lastname": "user",
+				"loginname": "dummy",
+				"email": null,
+				"phone": null,
+				"department": null,
+				"organization": null,
+				"location": null,
+				"timezone": null,
+				"language": "de_DE",
+				"businessLanguage": "de_DE",
+				"requiresNewPassword": false,
+				"userMayChangePassword": false,
+				"accountCreationDate": "2023-05-03T13:14:36.394+00:00",
+				"lastStatusChangeDate": "2023-05-03T13:14:36.394+00:00",
+				"lastLoginDate": "2024-01-05T17:14:40.673+00:00",
+				"tracing": false,
+				"traceUntilDate": null,
+				"requiresInitialSetup": false,
+				"licenseType": "MODIFY_PERMISSION",
+				"tenant": {
+					"_type": "TenantLoginDto",
+					"id": 11475277,
+					"name": "TENANT01",
+					"defaultLoginTenant": false
+				},
+				"attachmentFile": {
+					"_type": "AttachmentFileDto",
+					"id": 11475426,
+					"version": 0,
+					"sealed": false,
+					"attachmentCount": 0
+				},
+				"defaultPortfolioId": null,
+				"defaultLoginTenant": null,
+				"fullname": "dummy user"
+			},
+			"cookies": {
+				"JSESSIONID": "a-random-sessionid"
+			}
+		}
+	},
+	{
+		"httpRequest": {
+			"path": "/serviceplanet/remote/service/v1/cis/query",
+			"method": "POST",
+			"cookies": {
+				"JSESSIONID": "a-random-sessionid"
+			}
+		},
+		"httpResponse": {
+			"body": []
+		}
+	}		
 ]

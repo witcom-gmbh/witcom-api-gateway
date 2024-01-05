@@ -125,13 +125,13 @@ public class KeycloakMcpFilter extends AbstractGatewayFilterFactory<KeycloakMcpF
 		String readRole=this.defaultReadRole;
 		String workRole=this.defaultWorkRole;
 		String deleteRole=this.defaultDeleteRole;
-		if (!StringUtils.isEmpty(config.getRoleRead())) {
+		if (StringUtils.hasText(config.getRoleRead())) {
 			readRole=config.getRoleRead();
 		}
-		if (!StringUtils.isEmpty(config.getRoleWork())) {
+		if (StringUtils.hasText(config.getRoleWork())) {
 			workRole=config.getRoleWork();
 		}
-		if (!StringUtils.isEmpty(config.getRoleDelete())) {
+		if (StringUtils.hasText(config.getRoleDelete())) {
 			deleteRole=config.getRoleDelete();
 		}
 
@@ -139,15 +139,16 @@ public class KeycloakMcpFilter extends AbstractGatewayFilterFactory<KeycloakMcpF
 		//GET Method requires READ role
 		//DELETE requires DELETE role
 		//PATCH,POST,PUT requires WORK role
-		switch (serverHttpRequest.getMethod()){
-			case DELETE:
+		
+		switch (serverHttpRequest.getMethod().toString()){
+			case "DELETE":
 				return this.hasRole(accessToken, audience, deleteRole);
-			case GET:
-			case HEAD:
+			case "GET":
+			case "HEAD":
 				return this.hasRole(accessToken, audience, readRole);
-			case PATCH:
-			case POST:
-			case PUT:
+			case "PATCH":
+			case "POST":
+			case "PUT":
 				return this.hasRole(accessToken, audience, workRole);
 
 		}

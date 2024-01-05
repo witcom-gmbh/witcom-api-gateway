@@ -1,11 +1,11 @@
-package de.witcom.api.filter;
+package de.witcom.api.serviceplanet;
 
 import java.net.HttpCookie;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +142,7 @@ public class SplSessionManager {
 			if (!response.getStatusCode().equals(HttpStatus.OK)) {
 				log.error("Login to ServicePlanet was not successful - got Status : {}", response.getStatusCode());
 			} else {
-				return response.getBody().isValue();
+				return response.getBody().getValue();
 			}
 		} catch (Exception e) {
 			log.error("Error when trying to validate session in SPL {} : {}", url, e.getMessage());

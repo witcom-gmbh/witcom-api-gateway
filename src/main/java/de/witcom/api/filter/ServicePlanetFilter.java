@@ -10,6 +10,7 @@ import org.springframework.cloud.gateway.filter.factory.GatewayFilterFactory;
 import org.springframework.cloud.gateway.support.HasRouteId;
 import org.springframework.stereotype.Component;
 
+import de.witcom.api.serviceplanet.SplSessionManager;
 import lombok.Getter;
 import lombok.Setter;
 

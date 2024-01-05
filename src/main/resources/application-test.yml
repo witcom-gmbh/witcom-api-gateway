@@ -6,9 +6,10 @@
 #        logger-level: full
         
 spring:
-  redis:
-    host: redis
-    port: 6379
+  data:
+    redis:
+      host: redis
+      port: 6379
 
   cloud:
     consul:
@@ -111,7 +112,7 @@ spring:
 application:
   command-config:
     enabled: false
-    base-url: http://localhost:1080/rmdb
+    base-url: http://mockserver:1080/rmdb
     user: dummyuser
     password: dummypassword
     group: dummygroup
@@ -122,13 +123,13 @@ application:
   spl-config:
     enabled: false
     tenants:
-    - spl-base-url: http://localhost:1080/smdb
+    - spl-base-url: http://mockserver:1080/smdb
       spl-user: dummyuser
       spl-password: dummypassword
       spl-tenant: tenant1
       tenant-name: TEST01
       default-tenant: true
-    - spl-base-url: http://localhost:1080/smdb
+    - spl-base-url: http://mockserver:1080/smdb
       spl-user: dummyuser
       spl-password: dummypassword
       spl-tenant: tenant2
@@ -136,13 +137,14 @@ application:
 
   mcp-config:
     enabled: false
-    base-url: http://localhost:1080/mcp
+    base-url: http://mockserver:1080/mcp
     user: dummyuser
     password: dummypassword
 
 logging:
   level:
-    ROOT: INFO
+    root: ERROR
+    de.witcom: DEBUG
     org.springframework.cloud.config: DEBUG
     feign.Logger: DEBUG
 

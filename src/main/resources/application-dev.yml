@@ -6,9 +6,10 @@
 #        logger-level: full
         
 spring:
-  redis:
-    host: redis
-    port: 6379
+  data:
+    redis:
+      host: redis
+      port: 6379
 
   cloud:
     consul:
@@ -162,9 +163,11 @@ application:
     user: ${MCP_USER}
     password: ${MCP_PASSWORD}
 
+
 logging:
   level:
-    ROOT: INFO
+    root: ERROR
+    de.witcom: DEBUG
     org.springframework.cloud.config: DEBUG
     feign.Logger: DEBUG
 

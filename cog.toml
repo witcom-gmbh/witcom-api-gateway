@@ -13,6 +13,10 @@ pre_package_bump_hooks = []
 post_package_bump_hooks = []
 
 [commit_types]
+improvement = { changelog_title = "Improvements", bump_patch = true }
+chore = { changelog_title = "Chore", omit_from_changelog = true }
+ci = { changelog_title = "", omit_from_changelog = true }
+perf = { changelog_title = "", omit_from_changelog = true }
 
 [changelog]
 path = "CHANGELOG.md"
