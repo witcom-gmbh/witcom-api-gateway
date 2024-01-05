@@ -1,3 +1,28 @@
 [
-	
+	{
+		"httpRequest": {
+			"path": "/rmdb/api/rest/businessGateway/login",
+			"method": "POST"
+		},
+		"httpResponse": {
+			"body": {"status":{"errorCode":0,"message":null,"subErrorCode":null,"success":true},"sessionId":"a-random-sessionid"}
+		}
+	},
+	{
+		"httpRequest": {
+			"path": "/axis/api/rest/entity/organization/query",
+			"method": "POST"
+		},
+		"httpResponse": {
+			"body": {
+				"status": {
+					"errorCode": 0,
+					"subErrorCode": null,
+					"message": null,
+					"success": true
+				},
+				"returnData": []
+			}
+		}
+	}
 ]

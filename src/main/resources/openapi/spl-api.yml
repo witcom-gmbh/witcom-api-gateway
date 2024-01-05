@@ -1,0 +1,917 @@
+openapi: 3.0.1
+info:
+  contact:
+    email: support@fntsoftware.com
+    name: FNT GmbH
+    url: https://www.fntsoftware.com
+  description: ServicePlanet REST API (SPL 8.4.2-231204)
+  title: ServicePlanet API
+  version: 1.5.2
+servers:
+- url: http://smdb.dev.witcom.services
+tags:
+- description: "Defines a login application service. Handles all aspects of a user\
+    \ login /<br> logout. Only supports authentication within ServicePlanet as required\
+    \ by<br> authentication type {@link AuthenticationType#SERVICEPLANET AuthenticationType#SERVICEPLANET}."
+  name: Login_V1
+paths:
+  /v1/login/authenticate:
+    post:
+      deprecated: false
+      description: "Authenticate a user given by the user's login name, password and\
+        \ tenant. Upon<br> a successful authentication the user is 'logged-in' and\
+        \ the user data is<br> added to the user's session.<br> <br> <p><br> Returns\
+        \ a successfully authenticated user or throws an exception<br> </p><br> <br>\
+        \ <p><br> <b>Note:</b> It is the responsibility of the calling service to\
+        \ check the<br> 'requiresNewPassword' and the 'userMayChangePassword' property\
+        \ of the<br> returned user data<br> {@link com.fntsoftware.serviceplanet.services.app.login.dto.UserLoginDto\
+        \  UserLoginDto}.<br> <ul><br> <li>If the property 'requiresNewPassword' is\
+        \ <code>true</code> the GUI must<br> enforce the user to immediately change\
+        \ the password after a successful<br> login.</li><br> <li>If the property\
+        \ 'userMayChangePassword' is <code>true</code> the user may<br> change his\
+        \ password any time at his own will. If it is set to<br> <code>false</code>\
+        \ the user is not allowed to change his password (e.g. for<br> LDAP authentication).</li><br>\
+        \ </ul>"
+      operationId: Login::authenticate::V1
+      parameters:
+      - description: A login name
+        explode: true
+        in: query
+        name: loginname
+        required: true
+        schema:
+          format: string
+          type: string
+        style: form
+      - description: A password
+        explode: true
+        in: query
+        name: password
+        required: true
+        schema:
+          format: string
+          type: string
+        style: form
+      - description: A tenant
+        explode: true
+        in: query
+        name: tenant
+        required: false
+        schema:
+          format: string
+          type: string
+        style: form
+      - description: If set to true will close the oldest of the users sessions and<br>            opens
+          a new one otherwise will check that users session count does<br>            not
+          reached maximum
+        explode: true
+        in: query
+        name: allowDropOldestSession
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLoginDto'
+          description: OK - Returns The authenticated user with the associated tenant
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: "The request does not comply with all required data constraints.\
+            \ E.g. missing mandatory fields, violating field constraints, ..."
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authenticated. Login first
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authorized to use the resource
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Resource not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The request could not be served
+      summary: authenticate
+      tags:
+      - Login_V1
+  /v1/login/active_tenants/find_by_user:
+    get:
+      deprecated: false
+      description: Find the active tenants associated with a user.<br> <br> <p><br>
+        A tenant is active if it has the state <tt>ACTIVE</tt> and if it is<br> associated
+        with an <tt>ACTIVE</tt> user group.<br> </p>
+      operationId: Login::findActiveTenantsByUser::V1
+      parameters:
+      - description: The user's login name
+        explode: true
+        in: query
+        name: loginname
+        required: true
+        schema:
+          format: string
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TenantLoginDto'
+                type: array
+          description: OK - Returns A list of tenants (returns an empty list if the
+            user does not exist<br>         or the user has no associated tenants)
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: "The request does not comply with all required data constraints.\
+            \ E.g. missing mandatory fields, violating field constraints, ..."
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authenticated. Login first
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authorized to use the resource
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Resource not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The request could not be served
+      summary: findActiveTenantsByUser
+      tags:
+      - Login_V1
+  /v1/login/logged_in_user/find:
+    get:
+      deprecated: false
+      description: Returns the logged-in user of the current session.
+      operationId: Login::getLoggedInUser::V1
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLoginDto'
+          description: OK - Returns the logged-in user or null if a user is not logged-in
+            on the current<br>         session
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: "The request does not comply with all required data constraints.\
+            \ E.g. missing mandatory fields, violating field constraints, ..."
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authenticated. Login first
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authorized to use the resource
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Resource not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The request could not be served
+      summary: getLoggedInUser
+      tags:
+      - Login_V1
+  /v1/login/logged_in_user/active:
+    get:
+      deprecated: false
+      description: Checks if the current session has a logged-in user.
+      operationId: Login::hasLoggedInUser::V1
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BooleanHolder'
+          description: OK - Returns true if the current session has a logged-in user.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: "The request does not comply with all required data constraints.\
+            \ E.g. missing mandatory fields, violating field constraints, ..."
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authenticated. Login first
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authorized to use the resource
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Resource not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The request could not be served
+      summary: hasLoggedInUser
+      tags:
+      - Login_V1
+  /v1/login/logout:
+    post:
+      deprecated: false
+      description: Logout the current user and clean the user's session.
+      operationId: Login::logout::V1
+      responses:
+        "200":
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: "The request does not comply with all required data constraints.\
+            \ E.g. missing mandatory fields, violating field constraints, ..."
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authenticated. Login first
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authorized to use the resource
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Resource not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The request could not be served
+      summary: logout
+      tags:
+      - Login_V1
+  /v1/login/tenant/switch:
+    post:
+      deprecated: false
+      description: Switches the current user to a new tenant.
+      operationId: Login::switchTenant::V1
+      parameters:
+      - description: The new tenant to user is switched to
+        explode: true
+        in: query
+        name: tenant
+        required: true
+        schema:
+          format: string
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLoginDto'
+          description: OK - Returns The authenticated user with the associated new
+            tenant
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: "The request does not comply with all required data constraints.\
+            \ E.g. missing mandatory fields, violating field constraints, ..."
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authenticated. Login first
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authorized to use the resource
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Resource not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The request could not be served
+      summary: switchTenant
+      tags:
+      - Login_V1
+components:
+  schemas:
+    BooleanHolder:
+      example:
+        value: true
+      properties:
+        value:
+          nullable: true
+          type: boolean
+      type: object
+    ConstraintViolation:
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - $ref: '#/components/schemas/ConstraintViolation_allOf'
+      x-spl-supertype-ref: '#/components/schemas/ApiError'
+    ApiError:
+      properties:
+        _type:
+          default: ApiError
+          type: string
+        errType:
+          nullable: true
+          type: string
+        message:
+          nullable: true
+          type: string
+        localizedMessage:
+          nullable: true
+          type: string
+        uri:
+          nullable: true
+          type: string
+        details:
+          nullable: true
+          type: string
+        minorErrorCode:
+          nullable: true
+          type: string
+        auditEventURI:
+          nullable: true
+          type: string
+      required:
+      - _type
+      type: object
+    BusinessConstraintViolationDto:
+      description: Defines a business constraint violation. Defines setters & getters
+        as<br> required by the FLEX remoting to work properly.
+      properties:
+        _type:
+          default: BusinessConstraintViolationDto
+          type: string
+        message:
+          nullable: true
+          type: string
+        rootEntityName:
+          nullable: true
+          type: string
+        propertyPath:
+          nullable: true
+          type: string
+        invalidValue:
+          nullable: true
+          type: string
+        messageKey:
+          nullable: true
+          type: string
+        leafEntityName:
+          nullable: true
+          type: string
+      required:
+      - _type
+      type: object
+    InvalidSearchQuery:
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - $ref: '#/components/schemas/InvalidSearchQuery_allOf'
+      x-spl-supertype-ref: '#/components/schemas/ApiError'
+    UserLoginDto:
+      description: User Login Data
+      example:
+        firstname: firstname
+        timezone:
+          standardOffsetMillis: 2
+          displayName:
+            _type: MultiLingualStringDto
+            defaultText: defaultText
+            map:
+              key: map
+          _type: TimezoneDto
+          name: name
+          active: true
+          id: 5
+          version: 5
+        language: language
+        lastLoginDate: 2000-01-23T04:56:07.000+00:00
+        businessLanguage: businessLanguage
+        userMayChangePassword: true
+        requiresInitialSetup: true
+        attachmentFile:
+          sealed: true
+          _type: AttachmentFileDto
+          attachmentCount: 3
+          id: 7
+          version: 9
+        licenseType: NONE
+        accountCreationDate: 2000-01-23T04:56:07.000+00:00
+        id: 0
+        department: department
+        lastStatusChangeDate: 2000-01-23T04:56:07.000+00:00
+        tenant:
+          _type: TenantLoginDto
+          name: name
+          id: 1
+          defaultLoginTenant: true
+        email: email
+        tracing: true
+        loginname: loginname
+        _type: UserLoginDto
+        middlename: middlename
+        version: 6
+        lastname: lastname
+        phone: phone
+        organization: organization
+        traceUntilDate: 2000-01-23T04:56:07.000+00:00
+        location: location
+        fullname: fullname
+        defaultPortfolioId: 2
+        requiresNewPassword: true
+        defaultLoginTenant:
+          _type: TenantDto
+          name: name
+          currency: currency
+          id: 4
+          lastStatusChangeDate: 2000-01-23T04:56:07.000+00:00
+          version: 7
+          status: ACTIVE
+      properties:
+        _type:
+          default: UserLoginDto
+          type: string
+        id:
+          format: int64
+          nullable: true
+          type: integer
+        version:
+          format: int32
+          nullable: true
+          type: integer
+        organization:
+          description: The organization the user is employed at
+          nullable: true
+          type: string
+        location:
+          description: The location the user is working at
+          nullable: true
+          type: string
+        language:
+          nullable: true
+          type: string
+        tracing:
+          description: If set to TRUE all the ServicePlanet calls executed in the
+            context of<br>         the user will be traced in the backend.
+          type: boolean
+        tenant:
+          $ref: '#/components/schemas/TenantLoginDto'
+        timezone:
+          $ref: '#/components/schemas/TimezoneDto'
+        firstname:
+          nullable: true
+          type: string
+        middlename:
+          nullable: true
+          type: string
+        lastname:
+          nullable: true
+          type: string
+        email:
+          description: The email address
+          nullable: true
+          type: string
+        department:
+          description: The organization's department the user is working at
+          nullable: true
+          type: string
+        loginname:
+          nullable: true
+          type: string
+        attachmentFile:
+          $ref: '#/components/schemas/AttachmentFileDto'
+        fullname:
+          nullable: true
+          type: string
+        businessLanguage:
+          description: The user's business language
+          nullable: true
+          type: string
+        defaultPortfolioId:
+          format: int64
+          nullable: true
+          type: integer
+        lastStatusChangeDate:
+          description: The date the user's status changed most recently
+          format: date-time
+          nullable: true
+          type: string
+        phone:
+          description: The user's phone number
+          nullable: true
+          type: string
+        defaultLoginTenant:
+          $ref: '#/components/schemas/TenantDto'
+        requiresNewPassword:
+          description: Enforces the users to change his password. If set to TRUE the
+            user<br>         needs to change the password before he is able to login
+            again.
+          type: boolean
+        accountCreationDate:
+          description: The date the user account has been created
+          format: date-time
+          nullable: true
+          type: string
+        lastLoginDate:
+          description: The user's last login date
+          format: date-time
+          nullable: true
+          type: string
+        traceUntilDate:
+          description: Represents the time until which tracing is in effect for this
+            user
+          format: date-time
+          nullable: true
+          type: string
+        userMayChangePassword:
+          description: The flag is set to TRUE if the user is allowed to change his<br>         password.
+            E.g. if LDAP authentication is in use this flag is set to<br>         FALSE.
+          type: boolean
+        licenseType:
+          description: The concurrent-user license type the logged-in user consumed
+          enum:
+          - NONE
+          - VIEW_ONLY_PERMISSION
+          - MODIFY_PERMISSION
+          - VIEW_ONLY_PERMISSION_OVERDRAFT
+          - MODIFY_PERMISSION_OVERDRAFT
+          - TECHNICAL
+          nullable: true
+          type: string
+          x-spl-enum-type: ConcurrentUserLicenseType
+        requiresInitialSetup:
+          type: boolean
+      required:
+      - _type
+      - requiresInitialSetup
+      - requiresNewPassword
+      - tracing
+      - userMayChangePassword
+      type: object
+      x-spl-entity: true
+    TenantLoginDto:
+      description: Tenant Login DTO
+      example:
+        _type: TenantLoginDto
+        name: name
+        id: 1
+        defaultLoginTenant: true
+      properties:
+        _type:
+          default: TenantLoginDto
+          type: string
+        name:
+          description: The name of the tenant
+          nullable: true
+          type: string
+        id:
+          description: The tenant's primary key (ID)
+          format: int64
+          nullable: true
+          type: integer
+        defaultLoginTenant:
+          description: True if this tenant is the default login tenant of the currently<br>         logged
+            in user.
+          type: boolean
+      required:
+      - _type
+      - defaultLoginTenant
+      type: object
+    TimezoneDto:
+      description: Represents a Timezone
+      example:
+        standardOffsetMillis: 2
+        displayName:
+          _type: MultiLingualStringDto
+          defaultText: defaultText
+          map:
+            key: map
+        _type: TimezoneDto
+        name: name
+        active: true
+        id: 5
+        version: 5
+      properties:
+        _type:
+          default: TimezoneDto
+          type: string
+        id:
+          format: int64
+          nullable: true
+          type: integer
+        version:
+          format: int32
+          nullable: true
+          type: integer
+        name:
+          maxLength: 50
+          minLength: 1
+          type: string
+        active:
+          type: boolean
+        displayName:
+          $ref: '#/components/schemas/MultiLingualStringDto'
+        standardOffsetMillis:
+          format: int32
+          type: integer
+      required:
+      - _type
+      - active
+      - displayName
+      - name
+      - standardOffsetMillis
+      type: object
+      x-spl-entity: true
+    MultiLingualStringDto:
+      description: Multilingual string DTO - A multi-lingual text
+      example:
+        _type: MultiLingualStringDto
+        defaultText: defaultText
+        map:
+          key: map
+      properties:
+        _type:
+          default: MultiLingualStringDto
+          type: string
+        map:
+          additionalProperties:
+            type: string
+          type: object
+          x-spl-map-key:
+            type: string
+        defaultText:
+          nullable: true
+          type: string
+      required:
+      - _type
+      type: object
+    AttachmentFileDto:
+      description: A file holding all attachments
+      example:
+        sealed: true
+        _type: AttachmentFileDto
+        attachmentCount: 3
+        id: 7
+        version: 9
+      properties:
+        _type:
+          default: AttachmentFileDto
+          type: string
+        id:
+          format: int64
+          nullable: true
+          type: integer
+        version:
+          format: int32
+          nullable: true
+          type: integer
+        sealed:
+          type: boolean
+        attachmentCount:
+          format: int32
+          type: integer
+      required:
+      - _type
+      - attachmentCount
+      - sealed
+      type: object
+      x-spl-entity: true
+    TenantDto:
+      description: Represents a tenant
+      example:
+        _type: TenantDto
+        name: name
+        currency: currency
+        id: 4
+        lastStatusChangeDate: 2000-01-23T04:56:07.000+00:00
+        version: 7
+        status: ACTIVE
+      properties:
+        _type:
+          default: TenantDto
+          type: string
+        id:
+          format: int64
+          nullable: true
+          type: integer
+        version:
+          format: int32
+          nullable: true
+          type: integer
+        name:
+          maxLength: 100
+          minLength: 3
+          type: string
+        currency:
+          pattern: "[A-Z]{3}"
+          type: string
+        status:
+          enum:
+          - ACTIVE
+          - INACTIVE
+          type: string
+          x-spl-enum-type: TenantStatus
+        lastStatusChangeDate:
+          format: date-time
+          type: string
+      required:
+      - _type
+      - currency
+      - lastStatusChangeDate
+      - name
+      - status
+      type: object
+      x-spl-entity: true
+    ExpressionFailure:
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - $ref: '#/components/schemas/ExpressionFailure_allOf'
+      x-spl-supertype-ref: '#/components/schemas/ApiError'
+    LocalizedExpressionFailureDto:
+      description: Defines a localized expression failure.
+      properties:
+        _type:
+          default: LocalizedExpressionFailureDto
+          type: string
+        beginPosition:
+          format: int32
+          nullable: true
+          type: integer
+        endPosition:
+          format: int32
+          nullable: true
+          type: integer
+        localizedErrMsg:
+          nullable: true
+          type: string
+      required:
+      - _type
+      type: object
+    ValidationFailure:
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - $ref: '#/components/schemas/ValidationFailure_allOf'
+      x-spl-supertype-ref: '#/components/schemas/ApiError'
+    LocalizedValidationFailureDto:
+      description: Defines a business validation failures. Defines setters & getters
+        as required<br> by the FLEX remoting to work properly.
+      properties:
+        _type:
+          default: LocalizedValidationFailureDto
+          type: string
+        rootPath:
+          nullable: true
+          type: string
+        localizedErrMsg:
+          nullable: true
+          type: string
+      required:
+      - _type
+      type: object
+    ConstraintViolation_allOf:
+      properties:
+        _type:
+          default: ConstraintViolation
+          type: string
+        violations:
+          items:
+            $ref: '#/components/schemas/BusinessConstraintViolationDto'
+          nullable: true
+          type: array
+      required:
+      - _type
+      type: object
+      example: null
+    InvalidSearchQuery_allOf:
+      properties:
+        _type:
+          default: InvalidSearchQuery
+          type: string
+        query:
+          nullable: true
+          type: string
+        expectedOperators:
+          items:
+            nullable: true
+            type: string
+          nullable: true
+          type: array
+        expectedValues:
+          items:
+            nullable: true
+            type: string
+          nullable: true
+          type: array
+        errorStartPosition:
+          format: int32
+          type: integer
+      required:
+      - _type
+      - errorStartPosition
+      type: object
+      example: null
+    ExpressionFailure_allOf:
+      properties:
+        _type:
+          default: ExpressionFailure
+          type: string
+        failures:
+          items:
+            $ref: '#/components/schemas/LocalizedExpressionFailureDto'
+          nullable: true
+          type: array
+        expression:
+          nullable: true
+          type: string
+      required:
+      - _type
+      type: object
+      example: null
+    ValidationFailure_allOf:
+      properties:
+        _type:
+          default: ValidationFailure
+          type: string
+        failures:
+          items:
+            $ref: '#/components/schemas/LocalizedValidationFailureDto'
+          nullable: true
+          type: array
+      required:
+      - _type
+      type: object
+      example: null

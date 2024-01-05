@@ -1,3 +1,22 @@
 [
-	
+	{
+		"httpRequest": {
+			"path": "/mcp/tron/api/v1/oauth2/tokens",
+			"method": "POST"
+		},
+		"httpResponse": {
+			"body": {
+				"accessToken": "a-random-sessionid"
+			}
+		}
+	},
+	{
+		"httpRequest": {
+			"path": "/mcp/tron/api/v1/login-info",
+			"method": "GET"
+		},
+		"httpResponse": {
+			"body": {"tenantNumber":1}
+		}
+	}	
 ]

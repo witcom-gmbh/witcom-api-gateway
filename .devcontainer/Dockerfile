@@ -51,6 +51,13 @@ RUN if [ "${INSTALL_YQ}" = "true" ]; then \
     su vscode -c "umask 0002 && mkdir -p /home/vscode/.local/bin && wget -qO/home/vscode/.local/bin/yq https://github.com/mikefarah/yq/releases/${YQ_VERSION}/download/yq_linux_amd64  && chmod a+x /home/vscode/.local/bin/yq"; \
     fi
 
+ARG INSTALL_OPENAPI_CLI="false"
+ARG OPENAPI_CLI_VERSION="6.6.0"
+RUN if [ "${INSTALL_OPENAPI_CLI}" = "true" ]; then \
+    su vscode -c "umask 0002 && mkdir -p /home/vscode/.local/bin && wget https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/${OPENAPI_CLI_VERSION}/openapi-generator-cli-${OPENAPI_CLI_VERSION}.jar -O/home/vscode/.local/bin/openapi-generator-cli.jar"; \
+    fi
+
+
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 #     && apt-get -y install --no-install-recommends <your-package-list-here>

@@ -55,6 +55,11 @@ steps:
     - curl -4 -fsS -m 10 --retry 10 --retry-connrefused -o /dev/null -XPUT http://mockserver:1080/mockserver/status
     - curl -4 -fsS -m 10 --retry 10 --retry-connrefused -o /dev/null http://keycloak:9999
 
+  - name: Wait until redis service is ready
+    image: appropriate/nc
+    commands:
+    - nc -vz -w 30 redis 6379
+
   - name: Fix permissions on build-cache directory
     image: alpine
     volumes:  
@@ -216,6 +221,10 @@ services:
       <<: *default_environment    
       MOCKSERVER_INITIALIZATION_JSON_PATH: /drone/src/.devcontainer/mockserver-expectations/[A-z0-9_]*.json
       MOCKSERVER_WATCH_INITIALIZATION_JSON: true
+
+# redis
+  - name: redis
+    image: redis:6.0
 
 volumes:
 - name: shared

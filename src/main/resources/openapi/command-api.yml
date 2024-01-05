@@ -1,0 +1,467 @@
+openapi: 3.0.1
+info:
+  description: Swagger API for FNT Command Business Gateway
+  title: Swagger for Command BGE
+  version: 12.10.3
+servers:
+- url: https://rmdb.workspace.witcom.de/axis
+paths:
+  /api/rest/entity/login/getMandatorsAndUserGroups:
+    post:
+      description: Queries all possible mandators and their users / groups
+      operationId: LoginGetMandatorsAndUserGroups
+      parameters:
+      - description: Session-ID
+        in: query
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginGetMandatorsAndUserGroupsRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginGetMandatorsAndUserGroupsResponse'
+          description: returns LoginGetMandatorsAndUserGroupsResponse
+      summary: "Mandators, users and groups"
+      tags:
+      - login
+      x-codegen-request-body-name: body
+  /api/rest/entity/login/getActiveMandator:
+    post:
+      description: Queries the active mandator and the user / group
+      operationId: LoginGetActiveMandator
+      parameters:
+      - description: Session-ID
+        in: query
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginGetActiveMandatorRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginGetActiveMandatorResponse'
+          description: returns LoginGetActiveMandatorResponse
+      summary: Active mandator and user / group
+      tags:
+      - login
+      x-codegen-request-body-name: body
+  /api/rest/entity/login/foreignLogin:
+    post:
+      description: Allows you to create a session for an arbitrary user using a technical
+        user.
+      operationId: ForeignLoginLogin
+      parameters:
+      - description: Session-ID
+        in: query
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForeignLoginLoginRequestData'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForeignLoginLoginResponse'
+          description: returns ForeignLoginLoginResponse
+      summary: Foreign login
+      tags:
+      - login
+      x-codegen-request-body-name: body
+  /api/rest/entity/login/changeMandator:
+    post:
+      description: Modifies the active mandator
+      operationId: ChangeMandatorLogin
+      parameters:
+      - description: Session-ID
+        in: query
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeMandatorLoginRequestData'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeMandatorLoginResponse'
+          description: returns ChangeMandatorLoginResponse
+      summary: Change mandator / group
+      tags:
+      - login
+      x-codegen-request-body-name: body
+  /api/rest/businessGateway/login:
+    post:
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: returns LoginResponse
+      tags:
+      - REST
+      x-codegen-request-body-name: body
+  /api/rest/businessGateway/logout:
+    post:
+      operationId: logout
+      parameters:
+      - description: Session-ID
+        in: query
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceStatusData'
+          description: returns LogoutResponse
+      tags:
+      - REST
+components:
+  schemas:
+    ChangeMandatorLoginResponse:
+      example:
+        status:
+          success: true
+          errorCode: 6
+          subErrorCode: subErrorCode
+          message: message
+      properties:
+        status:
+          $ref: '#/components/schemas/ServiceStatusData'
+      type: object
+    LoginGetActiveMandatorResponseData:
+      example:
+        groupName: groupName
+        userGroupElid: userGroupElid
+        manId: 0.8008281904610115
+        description: description
+        userElid: userElid
+        userName: userName
+      properties:
+        groupName:
+          type: string
+        userGroupElid:
+          type: string
+        manId:
+          format: BigDecimal
+          type: number
+        description:
+          type: string
+        userElid:
+          type: string
+        userName:
+          type: string
+      title: LoginGetActiveMandatorResponseData
+      type: object
+    LoginRequest:
+      example:
+        password: password
+        userGroupName: userGroupName
+        manId: manId
+        user: user
+      properties:
+        password:
+          type: string
+        userGroupName:
+          type: string
+        manId:
+          type: string
+        user:
+          type: string
+      title: LoginRequest
+      type: object
+    LoginGetMandatorsAndUserGroupsReturnAttribute:
+      items:
+        type: string
+      type: array
+    LoginGetActiveMandatorResponse:
+      example:
+        returnData:
+        - groupName: groupName
+          userGroupElid: userGroupElid
+          manId: 0.8008281904610115
+          description: description
+          userElid: userElid
+          userName: userName
+        - groupName: groupName
+          userGroupElid: userGroupElid
+          manId: 0.8008281904610115
+          description: description
+          userElid: userElid
+          userName: userName
+        status:
+          success: true
+          errorCode: 6
+          subErrorCode: subErrorCode
+          message: message
+      properties:
+        returnData:
+          items:
+            $ref: '#/components/schemas/LoginGetActiveMandatorResponseData'
+          type: array
+        status:
+          $ref: '#/components/schemas/ServiceStatusData'
+      type: object
+    LoginGetMandatorsAndUserGroupsRestriction:
+      title: LoginGetMandatorsAndUserGroupsRestriction
+      type: object
+    LoginGetMandatorsAndUserGroupsResponse:
+      example:
+        returnData:
+        - manId: 0.8008281904610115
+          description: description
+          groups:
+          - groupName: groupName
+            userGroupElid: userGroupElid
+          - groupName: groupName
+            userGroupElid: userGroupElid
+          users:
+          - userElid: userElid
+            userName: userName
+          - userElid: userElid
+            userName: userName
+        - manId: 0.8008281904610115
+          description: description
+          groups:
+          - groupName: groupName
+            userGroupElid: userGroupElid
+          - groupName: groupName
+            userGroupElid: userGroupElid
+          users:
+          - userElid: userElid
+            userName: userName
+          - userElid: userElid
+            userName: userName
+        status:
+          success: true
+          errorCode: 6
+          subErrorCode: subErrorCode
+          message: message
+      properties:
+        returnData:
+          items:
+            $ref: '#/components/schemas/LoginGetMandatorsAndUserGroupsResponseData'
+          type: array
+        status:
+          $ref: '#/components/schemas/ServiceStatusData'
+      type: object
+    loginmandatorGroup:
+      example:
+        groupName: groupName
+        userGroupElid: userGroupElid
+      properties:
+        groupName:
+          type: string
+        userGroupElid:
+          type: string
+      title: loginmandatorGroup
+      type: object
+    LoginGetActiveMandatorReturnAttribute:
+      items:
+        type: string
+      type: array
+    ChangeMandatorLoginRequestData:
+      example:
+        userGroupName: userGroupName
+        manId: 0.8008281904610115
+      properties:
+        userGroupName:
+          type: string
+        manId:
+          format: BigDecimal
+          type: number
+      title: ChangeMandatorLoginRequestData
+      type: object
+    LoginResponse:
+      example:
+        sessionId: sessionId
+        status:
+          success: true
+          errorCode: 6
+          subErrorCode: subErrorCode
+          message: message
+      properties:
+        sessionId:
+          type: string
+        status:
+          $ref: '#/components/schemas/ServiceStatusData'
+      title: LoginResponse
+      type: object
+    LoginGetMandatorsAndUserGroupsRequest:
+      example:
+        returnAttributes:
+        - returnAttributes
+        - returnAttributes
+        restrictions: "{}"
+      properties:
+        returnAttributes:
+          items:
+            type: string
+          type: array
+        restrictions:
+          title: LoginGetMandatorsAndUserGroupsRestriction
+          type: object
+      type: object
+    ForeignLoginLoginResponse:
+      example:
+        returnData:
+          sessionId: sessionId
+        status:
+          success: true
+          errorCode: 6
+          subErrorCode: subErrorCode
+          message: message
+      properties:
+        returnData:
+          $ref: '#/components/schemas/ForeignLoginLoginResponseData'
+        status:
+          $ref: '#/components/schemas/ServiceStatusData'
+      type: object
+    loginmandatorUser:
+      example:
+        userElid: userElid
+        userName: userName
+      properties:
+        userElid:
+          type: string
+        userName:
+          type: string
+      title: loginmandatorUser
+      type: object
+    ForeignLoginLoginRequestData:
+      example:
+        internalUserPassword: internalUserPassword
+        internalUserName: internalUserName
+        userGroupName: userGroupName
+        manId: 0.8008281904610115
+        userName: userName
+      properties:
+        internalUserPassword:
+          type: string
+        internalUserName:
+          type: string
+        userGroupName:
+          type: string
+        manId:
+          format: BigDecimal
+          type: number
+        userName:
+          type: string
+      title: ForeignLoginLoginRequestData
+      type: object
+    ForeignLoginLoginResponseData:
+      example:
+        sessionId: sessionId
+      properties:
+        sessionId:
+          type: string
+      title: ForeignLoginLoginResponseData
+      type: object
+    LoginGetActiveMandatorRestriction:
+      title: LoginGetActiveMandatorRestriction
+      type: object
+    LoginGetMandatorsAndUserGroupsResponseData:
+      example:
+        manId: 0.8008281904610115
+        description: description
+        groups:
+        - groupName: groupName
+          userGroupElid: userGroupElid
+        - groupName: groupName
+          userGroupElid: userGroupElid
+        users:
+        - userElid: userElid
+          userName: userName
+        - userElid: userElid
+          userName: userName
+      properties:
+        manId:
+          format: BigDecimal
+          type: number
+        description:
+          type: string
+        groups:
+          items:
+            $ref: '#/components/schemas/loginmandatorGroup'
+          type: array
+        users:
+          items:
+            $ref: '#/components/schemas/loginmandatorUser'
+          type: array
+      title: LoginGetMandatorsAndUserGroupsResponseData
+      type: object
+    LoginGetActiveMandatorRequest:
+      example:
+        returnAttributes:
+        - returnAttributes
+        - returnAttributes
+        restrictions: "{}"
+      properties:
+        returnAttributes:
+          items:
+            type: string
+          type: array
+        restrictions:
+          title: LoginGetActiveMandatorRestriction
+          type: object
+      type: object
+    ServiceStatusData:
+      example:
+        success: true
+        errorCode: 6
+        subErrorCode: subErrorCode
+        message: message
+      properties:
+        success:
+          type: boolean
+        errorCode:
+          format: int32
+          type: integer
+        subErrorCode:
+          type: string
+        message:
+          type: string
+      title: ServiceStatusData
+      type: object
+x-original-swagger-version: "2.0"

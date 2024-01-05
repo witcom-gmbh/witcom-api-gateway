@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 
 import de.witcom.api.command.client.CommandSessionManager;
-import de.witcom.api.filter.SplSessionManager;
 import de.witcom.api.mcp.McpSessionManager;
+import de.witcom.api.serviceplanet.SplSessionManager;
 import lombok.extern.log4j.Log4j2;
 
 @Configuration

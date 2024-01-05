@@ -16,7 +16,7 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 

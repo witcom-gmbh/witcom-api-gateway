@@ -3,10 +3,14 @@ package de.witcom.api;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import de.witcom.api.config.properties.ApplicationProperties;
+import de.witcom.api.mcp.McpSessionManager;
 import de.witcom.api.mcp.client.Oauth2Api;
 import de.witcom.api.mcp.tron.ApiClient;
 
 import de.witcom.api.mcp.tron.model.OAuth2TokenSerializer;
+import de.witcom.api.repo.SessionRepository;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -17,20 +21,32 @@ import org.joda.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-//@SpringBootTest
+@SpringBootTest
 public class McpTests {
 
-    //@Autowired
+    @Autowired
     ApiClient mcpAuthClient;
 
-	//@Autowired
-	ApplicationProperties appProperties;    
+	@Autowired
+	ApplicationProperties appProperties;
+    
+    @Autowired
+    McpSessionManager sessionManager;
 
-    //@Test
-    void simpleTest(){
+    @Autowired
+    SessionRepository sessionRepo;
 
-        Oauth2Api tokensApi = mcpAuthClient.buildClient(Oauth2Api.class);
-        OAuth2TokenSerializer res = tokensApi.oauth2TokensCreate(appProperties.getMcpConfig().getUser(), appProperties.getMcpConfig().getPassword(), "password", null, null, null, null, null, null, null);
+    @Test
+    void getSession(){
+
+        sessionRepo.deleteAll();
+
+		assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
+		assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
+
+
+        //Oauth2Api tokensApi = mcpAuthClient.buildClient(Oauth2Api.class);
+        //OAuth2TokenSerializer res = tokensApi.oauth2TokensCreate(appProperties.getMcpConfig().getUser(), appProperties.getMcpConfig().getPassword(), "password", null, null, null, null, null, null, null);
 
 
     }

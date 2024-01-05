@@ -3,8 +3,8 @@ package de.witcom.api.command.client;
 import java.time.Duration;
 import java.util.Optional;
 
-import javax.annotation.PreDestroy;
-import javax.validation.Valid;
+import jakarta.annotation.PreDestroy;
+import jakarta.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -107,7 +107,7 @@ public class CommandSessionManager {
 		try {
 			LoginGetActiveMandatorResponse loginResponse = this.loginClient.loginGetActiveMandator(sessionId, body );
 			
-				if (!loginResponse.getStatus().isSuccess()){
+				if (!loginResponse.getStatus().getSuccess()){
 					logger.error("Sessioncheck in command  was not successful - got Status : {}",loginResponse.getStatus().getMessage());
 					return false;
 				}
@@ -158,7 +158,7 @@ public class CommandSessionManager {
 		
 		try {
 			LoginResponse loginResponse = apiClient.login(login);
-			if (!loginResponse.getStatus().isSuccess()){
+			if (!loginResponse.getStatus().getSuccess()){
 				logger.error("Login to Command  was not successful - got Status : {}",loginResponse.getStatus().getMessage());
 				return;
 			}
