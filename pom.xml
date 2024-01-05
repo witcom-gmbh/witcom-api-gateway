@@ -16,7 +16,8 @@
 	<description>API-Gateway</description>
 
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
+		<openapi.skip>false</openapi.skip>
 		<spring-cloud.version>2021.0.6</spring-cloud.version>
 		<keycloak.version>17.0.1</keycloak.version>
 		<version.swagger.codegen>2.4.0</version.swagger.codegen>
@@ -293,13 +294,14 @@
 			<plugin>
 				<groupId>org.openapitools</groupId>
 				<artifactId>openapi-generator-maven-plugin</artifactId>
-				<version>5.2.1</version>
+				<version>6.3.0</version>
 				<executions>
 					<execution>
 						<goals>
 							<goal>generate</goal>
 						</goals>
 						<configuration>
+							<skip>${openapi.skip}</skip>
 							<inputSpec>${project.basedir}/src/main/resources/mcp-tron.yml</inputSpec>
 							<generatorName>java</generatorName>
 							<modelPackage>${project.groupId}.api.mcp.tron.model</modelPackage>
@@ -362,9 +364,34 @@
 	</build>
 	<profiles>
 		<profile>
+			<id>test</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<!-- log configuration -->
+				<logback.loglevel>DEBUG</logback.loglevel>
+				<!-- default Spring profiles -->
+				<spring.profiles.active>test</spring.profiles.active>
+			</properties>
+		</profile>
+		<profile>
+			<id>test-fast</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<openapi.skip>true</openapi.skip>
+				<!-- log configuration -->
+				<logback.loglevel>DEBUG</logback.loglevel>
+				<!-- default Spring profiles -->
+				<spring.profiles.active>test</spring.profiles.active>
+			</properties>
+		</profile>
+		<profile>
 			<id>dev</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<properties>
 				<!-- log configuration -->
@@ -376,7 +403,7 @@
 		<profile>
 			<id>prod</id>
 			<activation>
-				<activeByDefault>false</activeByDefault>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
 				<!-- log configuration -->

@@ -16,13 +16,9 @@
 				"maven.executable.path": "/usr/local/sdkman/candidates/maven/current/bin/mvn",
 				"java.configuration.runtimes": [
 					{
-					"name": "JavaSE-11",
-					"path": "/usr/local/sdkman/candidates/java/11.0.18-ms",
-					"default": true
-					},
-					{
 					"name": "JavaSE-17",
-					"path": "/usr/lib/jvm/msopenjdk-current"
+					"path": "/usr/lib/jvm/msopenjdk-current",
+					"default": true
 					}
 				]
 			},
@@ -37,7 +33,23 @@
 	//"runArgs": ["--network=confluent-platform_default"],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [8080],
+	"forwardPorts": [
+		8080,
+		"keycloak:9999",
+		"mockserver:1080"
+
+	],
+	"portsAttributes": {
+			"8080": {
+					"label": "Application"
+			},
+			"keycloak:9999": {
+					"label": "Keycloak"
+			},
+			"mockserver:1080": {
+					"label": "Mockserver"
+			}
+	},
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postStartCommand": "./.devcontainer/update-maven-settings.sh && git config core.hooksPath '.git-hooks'",
