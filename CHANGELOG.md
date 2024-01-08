@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.2.5 - 2024-01-08
+
+- - -
+
 ## v2.2.4 - 2024-01-08
 #### Bug Fixes
 - **(helm)** make redis-host a required variable - (b49bf7c) - *iceman91176*
