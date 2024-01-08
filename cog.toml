@@ -7,7 +7,11 @@ pre_bump_hooks = [
 ]
 post_bump_hooks = [
     "git push",
-    "git push origin {{version}}"
+    "git push origin {{version}}",
+    "mvn versions:set -DnewVersion={{version+minor-SNAPSHOT}}",
+    "git add pom.xml",
+    "cog commit chore \"bump snapshot to {{version+1minor-SNAPSHOT}}\"",
+    "git push",
 ]
 pre_package_bump_hooks = []
 post_package_bump_hooks = []
