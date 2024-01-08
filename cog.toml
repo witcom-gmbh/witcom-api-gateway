@@ -3,7 +3,7 @@ ignore_merge_commits = true
 branch_whitelist = ["main"]
 pre_bump_hooks = [
     "mvn versions:set -DnewVersion={{version}}",
-    "yq -i '.version=\"{{version}}\" | .appVersion=\"{{version}}\"' deployment/helm/Chart.yaml"
+    "yq -i '.version=\"{{version}}\" | .appVersion=\"{{version}}\"' deployment/witcom-api-gateway/Chart.yaml"
 ]
 post_bump_hooks = [
     "git push",
