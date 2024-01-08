@@ -63,5 +63,19 @@
 		"httpResponse": {
 			"body": []
 		}
+	},
+	{
+		"httpRequest": {
+			"path": "/smdb/serviceplanet/remote/service/v1/login/logged_in_user/active",
+			"method": "GET",
+			"cookies": {
+				"JSESSIONID": "a-random-sessionid"
+			}
+		},
+		"httpResponse": {
+			"body": {
+				"value": true
+			}
+		}
 	}		
 ]

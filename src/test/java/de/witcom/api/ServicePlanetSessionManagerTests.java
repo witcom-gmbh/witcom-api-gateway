@@ -26,4 +26,10 @@ public class ServicePlanetSessionManagerTests {
 		assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
 	}
 
+	@Test
+	void checkIfSessionIsActive() {
+		sessionRepo.deleteAll();
+		this.sessionManager.isSessionActive("http://mockserver:1080/smdb", "a-random-sessionid");
+	}	
+
 }

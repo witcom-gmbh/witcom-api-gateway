@@ -83,25 +83,29 @@ public class KeyCloakTokenService {
 		try {
 	        ObjectMapper om = new ObjectMapper();
 	        
+			logger.trace(getRealmCertsUrl());
 	        JSONWebKeySet certInfos = om.readValue(new URL(getRealmCertsUrl()).openStream(),JSONWebKeySet.class);
+			// logger.debug(String.format("Got %s public keys",certInfos.getKeys().length));
 	        
 	        JWK keyInfo = null;
 			for ( JWK key:certInfos.getKeys()){
     	        String kid=key.getKeyId();
+				logger.trace(String.format("Check if PUBKEY-KID %s equals Token-KID %s",kid,jwsHeader.getKeyId()));
     	        if (jwsHeader.getKeyId().equals(kid)) {
     			  keyInfo  = key;
     			  break;
     			}
 			}
 			if (keyInfo == null) {
-				logger.error("Unable to get public key from certendpoint "+getRealmCertsUrl());
+				logger.error(String.format("No public key matching KID found on certendpoint %s",getRealmCertsUrl()));
 				return null;
 			}
 			
 			return JWKParser.create(keyInfo).toPublicKey();
 	        
 		} catch (Exception e) {
-			logger.error("Unable to get public key from certendpoint "+getRealmCertsUrl()+ ":" + e.getMessage());
+			logger.error(String.format("Got exception %s when trying to retrieve public-key",e.getClass().getName()));
+			// logger.error("Unable to get public key from certendpoint "+getRealmCertsUrl()+ ":" + e.getMessage());
 		}
 		return null;
 	}

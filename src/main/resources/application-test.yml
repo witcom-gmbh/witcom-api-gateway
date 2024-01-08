@@ -37,7 +37,7 @@ spring:
         predicates:
          - Path=/smdb/**
         filters:
-#         - KeyCloakFilter=requiredRole,service_read
+         # - KeyCloakFilter=requiredRole,smdb-resource-server:full-access
          - ServicePlanetFilter
          - RewritePath=/smdb/(?<segment>.*), /serviceplanet/remote/service/$\{segment}
 #service-planet default-tenant    
@@ -120,8 +120,22 @@ application:
   keycloak-config:
     keycloak-realm-id: devrealm
     keycloak-server-url: http://keycloak:9999
+    # keycloak-realm-id: ${KEYCLOAK_REALM_ID}
+    # keycloak-server-url: ${KEYCLOAK_SERVER_URL}
   spl-config:
     enabled: false
+    # tenants:
+    # - spl-base-url: ${SPL_BASEURL}
+    #   spl-user: ${SPL_USER}
+    #   spl-password: ${SPL_PASSWORD}
+    #   spl-tenant: WITCOM-B-SMDB01
+    #   tenant-name: TEST01
+    #   default-tenant: true
+    # - spl-base-url: ${SPL_BASEURL}
+    #   spl-user: ${SPL_USER}
+    #   spl-password: ${SPL_PASSWORD}
+    #   spl-tenant: WITCOM-B-SMDB01
+    #   tenant-name: TEST02
     tenants:
     - spl-base-url: http://mockserver:1080/smdb
       spl-user: dummyuser

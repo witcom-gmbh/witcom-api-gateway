@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.http.HttpEntity;
@@ -19,11 +20,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang3.StringUtils;
+import org.openapitools.jackson.nullable.JsonNullableModule;
 
 import de.witcom.api.config.properties.ApplicationProperties;
 import de.witcom.api.config.properties.ApplicationProperties.ServicePlanetTenantConfiguration;
@@ -90,6 +98,7 @@ public class SplSessionManager {
 	    }
 	    
 	    //Keine Session-ID da -> Login
+		log.debug("No cached session found - get a new one");
 	    this.login(tenant);
 	    session = loadSessionFromCache(tenant);
 	    if (session != null){
@@ -104,7 +113,7 @@ public class SplSessionManager {
 	private void logoutSession(ServicePlanetTenantConfiguration tenant,String sessionId) {
 
 		String url = tenant.getSplBaseUrl() + "/serviceplanet/remote/service/v1/login/logout";
-		RestTemplate restTemplate = new RestTemplate();
+		RestTemplate restTemplate = getServicePlanetRestTemplate();//new RestTemplate();
 
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -124,12 +133,15 @@ public class SplSessionManager {
 
 	}
 	
-	private boolean isSessionActive(ServicePlanetTenantConfiguration tenant,String sessionId) {
-		// log.debug("Check if Session {} is active",this.sessionId);
+	public boolean isSessionActive(ServicePlanetTenantConfiguration tenant,String sessionId) {
+		String url = tenant.getSplBaseUrl();
+		return isSessionActive(url,sessionId);
+	}
+
+	public boolean isSessionActive(String splBaseUrl,String sessionId) {
 		
-		
-		String url = tenant.getSplBaseUrl() + "/serviceplanet/remote/service/v1/login/logged_in_user/active";
-		RestTemplate restTemplate = new RestTemplate();
+		String url = splBaseUrl + "/serviceplanet/remote/service/v1/login/logged_in_user/active";
+		RestTemplate restTemplate = getServicePlanetRestTemplate();
 
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -149,7 +161,21 @@ public class SplSessionManager {
 		}
 
 		return false;
+	}	
+
+	private RestTemplate getServicePlanetRestTemplate(){
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.getMessageConverters().add(0, splMappingJackson2HttpMessageConverter());
+		return restTemplate;
 	}
+
+	private MappingJackson2HttpMessageConverter splMappingJackson2HttpMessageConverter() {
+
+		final ObjectMapper m = new ObjectMapper();
+        m.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        m.registerModule(new JsonNullableModule());
+		return new MappingJackson2HttpMessageConverter(m);
+	}	
 	
 	private Session loadSessionFromCache(ServicePlanetTenantConfiguration tenant){
 
@@ -207,7 +233,7 @@ public class SplSessionManager {
 
 		String url = tenant.getSplBaseUrl() + "/serviceplanet/remote/service/v1/login/authenticate";
 
-		RestTemplate restTemplate = new RestTemplate();
+		RestTemplate restTemplate = getServicePlanetRestTemplate();//new RestTemplate();
 
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
