@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>de.witcom</groupId>
 	<artifactId>witcom-api-gateway</artifactId>
-	<version>2.3.0-SNAPSHOT</version>
+	<version>2.2.4</version>
 	<name>witcom-api-gateway</name>
 	<description>API-Gateway</description>
 

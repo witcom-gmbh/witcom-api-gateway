@@ -2,6 +2,32 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.2.4 - 2024-01-08
+#### Bug Fixes
+- **(helm)** make redis-host a required variable - (b49bf7c) - *iceman91176*
+- **(helm)** correct outdated image-repository - (c300847) - *iceman91176*
+- Fix issues with ServicePlanet-API-Client - (c21b49c) - iceman91176
+- Add Session-Refresh Task-Locking - (fef093c) - iceman91176
+- No forced session refresh in SPL-filter - (df59551) - iceman91176
+- in-place update of chart.yml - (15ca030) - iceman91176
+#### Documentation
+- Updated docs for multi-tenancy - (47523a8) - iceman91176
+- update docs for 2.0.0 - (b793ad6) - iceman91176
+#### Features
+- **(helm)** make kv-consul-path configurable - (af09f3c) - *iceman91176*
+- Trigger session-refresh for filters - (8808c9b) - iceman91176
+- Add SPL multi-tenancy - (fa000e7) - iceman91176
+#### Improvements
+- Update to spring-boot 3.1.7 - (dcebf08) - iceman91176
+#### Refactoring
+- Relocated ConfigurationRefreshEventListener - (59cf374) - iceman91176
+- Refactor actuator configuration - (b998150) - iceman91176
+- Refactor application properties - (54da69f) - iceman91176
+- bump to spring boot 2.7.10 - (8e9ae00) - iceman91176
+- removed obsolete trust-ca - (7cc762c) - iceman91176
+
+- - -
+
 ## 2.2.3 - 2024-01-08
 #### Bug Fixes
 - Fix issues with ServicePlanet-API-Client - (c21b49c) - iceman91176
