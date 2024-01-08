@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## 2.2.3 - 2024-01-08
+#### Bug Fixes
+- Fix issues with ServicePlanet-API-Client - (c21b49c) - iceman91176
+#### Improvements
+- Update to spring-boot 3.1.7 - (dcebf08) - iceman91176
+
+- - -
+
 ## 2.2.2 - 2023-04-25
 #### Bug Fixes
 - Add Session-Refresh Task-Locking - (fef093c) - iceman91176
