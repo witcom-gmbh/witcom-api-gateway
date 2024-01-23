@@ -19,7 +19,7 @@
 		<java.version>17</java.version>
 		<openapi.skip>false</openapi.skip>
 		<spring-cloud.version>2022.0.3</spring-cloud.version>
-		<keycloak.version>17.0.1</keycloak.version>
+		<keycloak.version>23.0.4</keycloak.version>
 		<version.swagger.codegen>2.4.0</version.swagger.codegen>
 		<jodatime-version>2.7</jodatime-version>
 		<jackson-version>2.11.4</jackson-version>
