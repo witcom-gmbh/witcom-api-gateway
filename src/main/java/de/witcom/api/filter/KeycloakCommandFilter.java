@@ -1,5 +1,6 @@
 package de.witcom.api.filter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.springframework.util.StringUtils;
+// import org.springframework.util.StringUtils;
 
 import de.witcom.api.command.client.CommandSessionManager;
 import de.witcom.api.config.properties.ApplicationProperties;
@@ -61,7 +62,7 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
 				logger.error("No keycloak-resource-id configured. Authorization not possible");
                 return this.onError(exchange, "No keycloak-resource-id configured. Authorization not possible");
 			}
-			if (StringUtils.isEmpty(config.getResourceId())) {
+			if (StringUtils.isBlank(config.getResourceId())) {
 				logger.error("No keycloak-resource-id configured. Authorization not possible");
                 return this.onError(exchange, "No keycloak-resource-id configured. Authorization not possible");
 			}
@@ -88,7 +89,7 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
 				StringBuilder query = new StringBuilder();
 				String originalQuery = uri.getRawQuery();
 
-				if (StringUtils.hasText(originalQuery)) {
+				if (StringUtils.isNotBlank(originalQuery)) {
 					query.append(originalQuery);
 					if (originalQuery.charAt(originalQuery.length() - 1) != '&') {
 						query.append('&');
@@ -124,10 +125,10 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
 		String audience=config.getResourceId();
 		String readRole=this.defaultReadRole;
 		String workRole=this.defaultWorkRole;
-		if (!StringUtils.isEmpty(config.getRoleRead())) {
+		if (!StringUtils.isBlank(config.getRoleRead())) {
 			readRole=config.getRoleRead();
 		}
-		if (!StringUtils.isEmpty(config.getRoleWork())) {
+		if (!StringUtils.isBlank(config.getRoleWork())) {
 			workRole=config.getRoleWork();
 		}
 		

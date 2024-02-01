@@ -1,5 +1,6 @@
 package de.witcom.api.filter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.springframework.util.StringUtils;
+//import org.springframework.util.StringUtils;
 
 import de.witcom.api.command.client.CommandSessionManager;
 import de.witcom.api.config.properties.ApplicationProperties;
@@ -125,13 +126,13 @@ public class KeycloakMcpFilter extends AbstractGatewayFilterFactory<KeycloakMcpF
 		String readRole=this.defaultReadRole;
 		String workRole=this.defaultWorkRole;
 		String deleteRole=this.defaultDeleteRole;
-		if (StringUtils.hasText(config.getRoleRead())) {
+		if (StringUtils.isNotBlank(config.getRoleRead())) {
 			readRole=config.getRoleRead();
 		}
-		if (StringUtils.hasText(config.getRoleWork())) {
+		if (StringUtils.isNotBlank(config.getRoleWork())) {
 			workRole=config.getRoleWork();
 		}
-		if (StringUtils.hasText(config.getRoleDelete())) {
+		if (StringUtils.isNotBlank(config.getRoleDelete())) {
 			deleteRole=config.getRoleDelete();
 		}
 
