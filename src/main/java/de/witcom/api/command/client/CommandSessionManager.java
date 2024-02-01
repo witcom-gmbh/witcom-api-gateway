@@ -191,10 +191,9 @@ public class CommandSessionManager {
 	}
 	*/
 	
-	//@Scheduled(cron = "0 0/5 * * * ?")
 	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
 	public void scheduledSessionRefresh() {
-		if (!appProperties.getMcpConfig().isEnabled()){
+		if (!appProperties.getCommandConfig().isEnabled()){
 			return;
 		}
 	    refreshSession();
@@ -204,7 +203,7 @@ public class CommandSessionManager {
 		//get a lock
 		Optional<SimpleLock> myLock = this.lockManager.lock("COMMAND_SESSION_REFRESH", Duration.ofSeconds(15L));
 		if (myLock.isEmpty()){
-			logger.info("Unable to get a lock for ServicePlanet session-refresh");
+			logger.info("Unable to get a lock for Command session-refresh");
 			return;
 		} 
 		try {
