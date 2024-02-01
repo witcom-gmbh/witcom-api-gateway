@@ -71,8 +71,8 @@ public class KeyCloakTokenService {
             throw new KeyCloakFilterException("Malformed Authorization content");
         }
 
-        if (!components[0].equals("Bearer")) {
-            throw new KeyCloakFilterException("Bearer is needed");
+        if (!components[0].toUpperCase().equals("BEARER")) {
+            throw new KeyCloakFilterException("Bearer Attribute is needed in Authorization header");
         }
 
         return components[1].trim();

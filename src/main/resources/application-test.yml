@@ -70,6 +70,15 @@ spring:
          - Path=/get/**
         filters:
           - KeyCloakFilter=requiredRole,rmdb-resource-server:base-work
+
+      - id: dummy-api-2
+        uri: http://httpbin.org:80
+        predicates:
+         - Path=/get-fail/**
+        filters:
+          - KeyCloakFilter=requiredRole,rmdb-resource-server:i-do-not-exist
+
+
           #- AddRequestHeader=X-Some-Header, custom-header
           #- CommandFilter
 #mcp
