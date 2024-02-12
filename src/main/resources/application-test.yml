@@ -78,6 +78,26 @@ spring:
         filters:
           - KeyCloakFilter=requiredRole,rmdb-resource-server:i-do-not-exist
 
+      - id: command-session-header
+        uri: http://mockserver:1080/
+        predicates:
+         - Path=/soapproxy/**
+        filters:
+         - name: CommandSessionIdToHeaderFilter
+           args:
+             sessionHeader: X-COMMAND-SESSION-ID
+
+      - id: command-session-header-with-auth
+        uri: http://mockserver:1080/
+        predicates:
+          - Path=/soapproxy-auth/**
+        filters:
+          - KeyCloakFilter=requiredRole,rmdb-resource-server:base-work
+          - RemoveRequestHeader=Authorization
+          - name: CommandSessionIdToHeaderFilter
+            args:
+              sessionHeader: X-COMMAND-SESSION-ID
+          - RewritePath=/soapproxy-auth/(?<segment>.*), /soapproxy/$\{segment}    
 
           #- AddRequestHeader=X-Some-Header, custom-header
           #- CommandFilter

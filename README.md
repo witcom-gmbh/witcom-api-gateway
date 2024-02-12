@@ -257,9 +257,42 @@ spring:
          - RewritePath=/rmdb/(?<segment>.*), /axis/$\{segment}
 ```
 
+# Custom Filter - Command-Session-ID-to-Header
+Ein Filter der die aktuell gespeicherte Command-Session-ID (siehe KeycloakCommandFilter) in einen konfigurierbaren Header schreibt
+
+## Beispiel
+
+Hier wird der Filter mit einem Keycloak-filter kombiniert um eine Authentifizierung zu erreichen. 
+
+```yaml
+spring:
+  cloud:
+   gateway:
+    globalcors:
+      cors-configurations:
+        '[/**]':
+         allowedOrigins: "*"          
+    routes:
+      - id: command-soap-proxy
+        uri: ${WS_BASEURL:http://localhost:8080/soap-proxy/axis}
+        predicates:
+         - Path=/cmd-ws/**
+        filters:
+         # Checks OAuth-Token for required role
+         - KeyCloakFilter=requiredRole,rmdb-resource-server:worker
+         # Removes existing Authorization-Header
+         - RemoveRequestHeader=Authorization
+         # Adds Command-Session-Id from Session-Manager to header X-COMMAND-SESSION-ID
+         - name: CommandSessionIdToHeaderFilter
+           args:
+             sessionHeader: X-COMMAND-SESSION-ID        
+         # Some rewriting
+         - RewritePath=/cmd-ws/(?<segment>.*), /$\{segment}
+```
+
 # Custom Filter - Ciena MCP mit Keycloak-Authorisierung
 Ein Filter der jeden Zugriff auf die Ciena MCP mit einem gueltigen MCP eigenen OAuth2 Access-Token versieht.
-Der Filter fuehrt einen Login bei FNT Command durch um eine OAuth2-Token zu erhalten. Dieses Token
+Der Filter fuehrt einen Login bei Ciena MCP durch um eine OAuth2-Token zu erhalten. Dieses Token
 wird in einem REDIS Key-Value-Store abgespeichert, um mehrere Instanzen des API-Gateways laufen lassen zu können.
 
 ## Globale Einstellungen

@@ -24,5 +24,17 @@
 				"returnData": []
 			}
 		}
+	},
+	{
+		"httpRequest": {
+			"path": "/soapproxy/somews",
+			"method": "POST",
+			"headers": {
+				"X-COMMAND-SESSION-ID": "a-random-sessionid"
+			}
+		},
+		"httpResponse": {
+			"body": {"status":"OK"}
+		}
 	}
 ]
