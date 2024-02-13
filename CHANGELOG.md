@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.3.0 - 2024-02-13
+#### Features
+- **(filter)** Adds CommandSessionToHeaderFilter  - (616401e) - *iceman91176*
+
+- - -
+
 ## v2.2.6 - 2024-02-01
 #### Bug Fixes
 - Fixes command-session-refresh  - (571c9d2) - iceman91176
