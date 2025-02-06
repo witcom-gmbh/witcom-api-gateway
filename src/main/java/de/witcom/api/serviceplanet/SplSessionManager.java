@@ -245,23 +245,14 @@ public class SplSessionManager {
 		try {
 			ResponseEntity<UserLoginDto> res = api.loginAuthenticate2V1WithHttpInfo(tenant.getSplUser(), tenant.getSplPassword(), true);
 
+			log.trace(res.getHeaders().toString());
+
 			//ApiResponse<UserLoginDto> res = this.getLoginV1Api(tenant).loginAuthenticate2V1WithHttpInfo(request);
 			if (!res.getStatusCode().equals(HttpStatus.OK)) {
 				log.error("Login to ServicePlanet at {} was not successful - got Status : {}",tenant.getSplBaseUrl(), res.getStatusCode());
 				return;
 			}
-			if (res.getHeaders().get("Set-Cookie").isEmpty()) {
-				log.error("Unable to extract sessionid - got no cookies");
-				return;
-			}
-
-			String cookieValue = null;
-			for (String cookie : res.getHeaders().get("set-cookie")) {
-				List<HttpCookie> cookies = HttpCookie.parse(cookie);
-				if (cookies.get(0).getName().equals("JSESSIONID")) {
-					cookieValue = cookies.get(0).getValue();
-				}
-			}
+			String cookieValue = extractSessionCookieFromResponse(res.getHeaders());
 			if (cookieValue == null) {
 				log.error("Unable to login - no session cookie");
 				return;
@@ -270,7 +261,21 @@ public class SplSessionManager {
 			// switch the tenant
 			if (StringUtils.isNotBlank(tenant.getSplTenant())){
 				try {
-					api.loginSwitchTenantV1(tenant.getSplTenant(),cookieValue);
+					// api.loginSwitchTenantV1(tenant.getSplTenant(),cookieValue);
+					ResponseEntity<UserLoginDto> switchTenantResponse = api.loginSwitchTenantV1WithHttpInfo(tenant.getSplTenant(),cookieValue);
+					if (!switchTenantResponse.getStatusCode().equals(HttpStatus.OK)) {
+						log.error("Switching the tenant to {} in ServicePlanet at {} was not successful - got Status : {}",tenant.getSplTenant(),tenant.getSplBaseUrl(), res.getStatusCode());
+						api.loginLogoutV1(cookieValue);
+						return;
+					}
+					String newCookie = extractSessionCookieFromResponse(switchTenantResponse.getHeaders());
+					if (StringUtils.isBlank(newCookie)){
+						log.error("Unable to switch tenant - no session cookie");
+						api.loginLogoutV1(cookieValue);
+						return;
+					}
+					log.debug("Switching the tenant resulted in session-cookie {}, old session-cookie was {}",newCookie,cookieValue);
+					cookieValue = newCookie;
 				} catch (Exception e) {
 					log.error("Error when trying to switch the tenant at {} for tenant {} : {}",tenant.getSplBaseUrl(),tenant.getSplTenant(), e.getMessage());
 					// if switching the tenant fails we logout
@@ -283,6 +288,32 @@ public class SplSessionManager {
 		} catch (Exception e) {
 			log.error("Error when trying to login to SPL at {} for tenant {} : {}",tenant.getSplBaseUrl(),tenant.getSplTenant(), e.getMessage());
 		}
+
+	}
+
+	private String extractSessionCookieFromResponse(HttpHeaders headers){
+
+
+		if (headers.get("Set-Cookie").isEmpty()) {
+			log.error("Unable to extract sessionid - got no cookies");
+			return null;
+		}
+
+		String cookieValue = null;
+		for (String cookie : headers.get("set-cookie")) {
+			List<HttpCookie> cookies = HttpCookie.parse(cookie);
+			if (cookies.get(0).getName().equals("JSESSIONID")) {
+				cookieValue = cookies.get(0).getValue();
+			}
+		}
+		if (cookieValue == null) {
+			log.error("Unable to login - no session cookie");
+			return null;
+		}
+
+		return cookieValue;
+
+
 
 	}
 
