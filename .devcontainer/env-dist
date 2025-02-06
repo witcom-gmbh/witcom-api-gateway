@@ -1,0 +1,17 @@
+KEYCLOAK_ADMIN=admin
+KEYCLOAK_ADMIN_PASSWORD=change_me
+KEYCLOAK_SERVER_URL=http://keycloak:9999
+KEYCLOAK_REALM_ID=devrealm
+API_GW_OAUTH_TESTCLIENT_CLIENTSECRET=****
+API_GW_OAUTH_TESTCLIENT_CLIENTID=api-gw-test-client
+RMDB_BASEURL=http://mockserver:1080/rmdb
+RMDB_USER=dummyuser
+RMDB_PASSWORD=dummypassword
+RMDB_GROUP=dummygroup
+RMDB_MANDANT=dummymandant
+SPL_BASEURL=http://mockserver:1080/spl
+SPL_USER=dummyuser
+SPL_PASSWORD=dummypassword
+MCP_BASEURL=http://mockserver:1080/mcp
+MCP_USER=dummyuser
+MCP_PASSWORD=dummypassword

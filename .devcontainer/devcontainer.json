@@ -11,7 +11,7 @@
 		// Configure properties specific to VS Code.
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
-			"settings": { 
+			"settings": {
 				"java.jdt.ls.java.home": "/usr/lib/jvm/msopenjdk-current",
 				"maven.executable.path": "/usr/local/sdkman/candidates/maven/current/bin/mvn",
 				"java.configuration.runtimes": [
@@ -24,8 +24,8 @@
 			},
 			"extensions": [
 				"vscjava.vscode-java-pack",
-				"gabrielbb.vscode-lombok",
-				"Pivotal.vscode-boot-dev-pack"
+				"vmware.vscode-boot-dev-pack",
+				"redhat.java@1.35.1"
 			]
 		}
 	},
@@ -51,15 +51,31 @@
 			}
 	},
 
+	"initializeCommand": [".devcontainer/init"],
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postStartCommand": "./.devcontainer/update-maven-settings.sh && git config core.hooksPath '.git-hooks'",
-
+	"postStartCommand": ".devcontainer/postStartCommand",
 	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 
 	"remoteEnv": {
-		"NEXUS_USER": "${localEnv:NEXUS_USER}",
-		"NEXUS_PASSWORD": "${localEnv:NEXUS_PASSWORD}",
-		"NEXUS_URL": "${localEnv:NEXUS_URL}"
+		"CHEZMOI_REPO": "${localEnv:CHEZMOI_REPO}"
+	},
+	"features": {
+		"ghcr.io/eitsupi/devcontainer-features/jq-likes:2": {
+			"jqVersion": "latest",
+			"yqVersion": "latest",
+			"gojqVersion": "none",
+			"xqVersion": "none",
+			"jaqVersion": "none"
+		},
+		"ghcr.io/devcontainers-contrib/features/age:1": {"version": "v1.1.1"},
+		"ghcr.io/devcontainers-contrib/features/age-keygen:1": {"version": "v1.1.1"},
+		"ghcr.io/rio/features/chezmoi:1": {},
+		"ghcr.io/witcom-gmbh/devcontainer-features/cocogitto:latest": {},
+		"ghcr.io/devcontainers/features/java:1": {
+			"version": "none",
+			"installGradle": "false",
+			"installMaven": "true"
+		}
 	}
 }

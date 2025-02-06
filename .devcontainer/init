@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# create .env file if none exists
+
+if [ ! -f .devcontainer/.env ]
+then
+	echo ".env file not found - create example"
+    cp -f .devcontainer/env.dist .devcontainer/.env
+fi

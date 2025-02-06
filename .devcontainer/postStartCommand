@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+./bin/git/init-hooks
+
+# pip config set global.trusted-host  "pypi.org files.pythonhosted.org pypi.python.org" --trusted-host=pypi.python.org --trusted-host=pypi.org --trusted-host=files.pythonhosted.org
+
+cp -f ./.devcontainer/bash_aliases.sh ~/.bash_aliases
+
+echo "Run chezmoi-init for the final touch...."
