@@ -17,16 +17,17 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<openapi.skip>false</openapi.skip>
+		<openapi.skip>true</openapi.skip>
 		<spring-cloud.version>2022.0.3</spring-cloud.version>
 		<keycloak.version>26.0.6</keycloak.version>
 		<version.swagger.codegen>2.4.0</version.swagger.codegen>
 		<jodatime-version>2.7</jodatime-version>
 		<jackson-version>2.11.4</jackson-version>
+		<org.mapstruct.version>1.5.2.Final</org.mapstruct.version>
 		<org.projectlombok.version>1.18.22</org.projectlombok.version>
 		<yaml.file>${project.basedir}/src/main/resources/splapi.yaml</yaml.file>
 		<command-yaml.file>${project.basedir}/src/main/resources/fntcommand-login-api.yml</command-yaml.file>
-		<generated-sources-path>${project.build.directory}/generated-sources</generated-sources-path>
+		<generated-sources-path>${project.build.directory}/openapi</generated-sources-path>
 		<generated-sources-java-path>main/java</generated-sources-java-path>
 	</properties>
 
@@ -241,60 +242,9 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>io.swagger</groupId>
-				<artifactId>swagger-codegen-maven-plugin</artifactId>
-				<version>${version.swagger.codegen}</version>
-				<executions>
-					<!-- <execution>
-						<id>generate-spl-api</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<configuration>
-											<inputSpec>${yaml.file}</inputSpec>
-					<configOptions>
-						<sourceFolder>${generated-sources-java-path}</sourceFolder>
-					</configOptions>
-					<output>${generated-sources-path}</output>
-						
-							<library>spring-cloud</library>
-							<language>spring</language>
-							<generateApis>false</generateApis>
-							<generateSupportingFiles>false</generateSupportingFiles>
-							<modelPackage>${project.groupId}.api.spl.swagger.model</modelPackage>
-							<apiPackage>${project.groupId}.api.spl.swagger.api</apiPackage>
-							<invokerPackage>${project.groupId}.api.spl.swagger.invoker</invokerPackage>
-						</configuration>
-					</execution> -->
-
-					<!-- <execution>
-						<id>generate-command-api</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<configuration>
-											<inputSpec>${command-yaml.file}</inputSpec>
-					<configOptions>
-						<sourceFolder>${generated-sources-java-path}</sourceFolder>
-					</configOptions>
-					<output>${generated-sources-path}</output>
-							<library>spring-cloud</library>
-							<language>spring</language>
-							<generateApis>false</generateApis>
-							<generateSupportingFiles>false</generateSupportingFiles>
-							<modelPackage>${project.groupId}.api.command.swagger.model</modelPackage>
-							<apiPackage>${project.groupId}.api.command.swagger.api</apiPackage>
-							<invokerPackage>${project.groupId}.api.command.swagger.invoker</invokerPackage>
-						</configuration>
-					</execution> -->
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.openapitools</groupId>
 				<artifactId>openapi-generator-maven-plugin</artifactId>
-				<version>6.3.0</version>
+				<version>7.8.0</version>
 				<executions>
 					<execution>
 						<id>generate-command-api</id>
@@ -314,7 +264,7 @@
 								<dateLibrary>joda</dateLibrary>
 								<useJakartaEe>true</useJakartaEe>
 							</configOptions>
-							<output>${generated-sources-path}</output>
+							<output>${generated-sources-path}/command-api</output>
 							<environmentVariables>
 								<models />
 								<apis>false</apis>
@@ -344,7 +294,7 @@
 								<dateLibrary>joda</dateLibrary>
 								<useJakartaEe>true</useJakartaEe>
 							</configOptions>
-							<output>${generated-sources-path}</output>
+							<output>${generated-sources-path}/serviceplanet-api</output>
 							<environmentVariables>
 								<models />
 								<apis>false</apis>
@@ -375,7 +325,7 @@
 								<dateLibrary>joda</dateLibrary>
 								<useJakartaEe>true</useJakartaEe>
 							</configOptions>
-							<output>${generated-sources-path}</output>
+							<output>${generated-sources-path}/mcp-api</output>
 							<environmentVariables>
 								<models />
 								<apis>false</apis>
@@ -395,13 +345,17 @@
 				<executions>
 					<execution>
 						<id>add-generated-source</id>
-						<phase>initialize</phase>
+						<phase>generate-sources</phase>
 						<goals>
 							<goal>add-source</goal>
 						</goals>
 						<configuration>
 							<sources>
-								<source>${generated-sources-path}/${generated-sources-java-path}</source>
+								<source>${generated-sources-openapi-path}/serviceplanet-api/${generated-sources-java-path}</source>
+								<source>${generated-sources-openapi-path}/command-api/${generated-sources-java-path}</source>
+								<source>${generated-sources-openapi-path}/mcp-api/${generated-sources-java-path}</source>
+								<!-- mapstruct -->
+								<source>${project.build.directory}/generated-sources/annotations/</source>
 							</sources>
 						</configuration>
 					</execution>
@@ -420,6 +374,16 @@
                                 <artifactId>lombok</artifactId>
                                 <version>${org.projectlombok.version}</version>
                             </path>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok-mapstruct-binding</artifactId>
+                                <version>0.2.0</version>
+                            </path>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${org.mapstruct.version}</version>
+                            </path>							
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>				
@@ -432,19 +396,6 @@
 				<activeByDefault>false</activeByDefault>
 			</activation>
 			<properties>
-				<!-- log configuration -->
-				<logback.loglevel>DEBUG</logback.loglevel>
-				<!-- default Spring profiles -->
-				<spring.profiles.active>test</spring.profiles.active>
-			</properties>
-		</profile>
-		<profile>
-			<id>test-fast</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<properties>
-				<openapi.skip>true</openapi.skip>
 				<!-- log configuration -->
 				<logback.loglevel>DEBUG</logback.loglevel>
 				<!-- default Spring profiles -->
@@ -483,6 +434,20 @@
 			</dependencies>
 			-->
 		</profile>
+		<!-- this is the only profile where openapi-code is generated...  -->
+		<profile>
+			<id>openapi-codegen</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<openapi.skip>false</openapi.skip>
+				<!-- log configuration -->
+				<logback.loglevel>DEBUG</logback.loglevel>
+				<!-- default Spring profiles -->
+				<spring.profiles.active>test</spring.profiles.active>
+			</properties>
+		</profile>			
 	</profiles>
 
 	<repositories>

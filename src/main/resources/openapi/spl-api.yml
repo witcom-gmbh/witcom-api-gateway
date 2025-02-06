@@ -4,20 +4,88 @@ info:
     email: support@fntsoftware.com
     name: FNT GmbH
     url: https://www.fntsoftware.com
-  description: ServicePlanet REST API (SPL 8.4.2-231204)
+  description: ServicePlanet REST API (SPL 9.6.0-250127)
   title: ServicePlanet API
   version: 1.5.2
 servers:
-- url: http://smdb.dev.witcom.services
+- url: http://10.19.1.88:8888
 tags:
 - description: "Defines a login application service. Handles all aspects of a user\
     \ login /<br> logout. Only supports authentication within ServicePlanet as required\
     \ by<br> authentication type {@link AuthenticationType#SERVICEPLANET AuthenticationType#SERVICEPLANET}."
   name: Login_V1
 paths:
-  /v1/login/authenticate:
+  /v1/login/authenticate2:
     post:
       deprecated: false
+      operationId: Login::authenticate2::V1
+      parameters:
+      - explode: true
+        in: query
+        name: loginname
+        required: true
+        schema:
+          format: string
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: password
+        required: true
+        schema:
+          format: string
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: allowDropOldestSession
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLoginDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: "The request does not comply with all required data constraints.\
+            \ E.g. missing mandatory fields, violating field constraints, ..."
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authenticated. Login first
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The caller is not authorized to use the resource
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Resource not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The request could not be served
+      tags:
+      - Login_V1
+  /v1/login/authenticate:
+    post:
+      deprecated: true
       description: "Authenticate a user given by the user's login name, password and\
         \ tenant. Upon<br> a successful authentication the user is 'logged-in' and\
         \ the user data is<br> added to the user's session.<br> <br> <p><br> Returns\
@@ -367,23 +435,71 @@ paths:
       - Login_V1
 components:
   schemas:
-    BooleanHolder:
+    TenantLoginDto:
+      description: Tenant Login DTO
       example:
-        value: true
+        _type: TenantLoginDto
+        name: name
+        id: 2
+        defaultLoginTenant: true
       properties:
-        value:
-          nullable: true
+        _type:
+          default: TenantLoginDto
+          type: string
+        defaultLoginTenant:
+          description: True if this tenant is the default login tenant of the currently
           type: boolean
+        name:
+          description: The name of the tenant
+          nullable: true
+          type: string
+        id:
+          description: The tenant's primary key (ID)
+          format: int64
+          nullable: true
+          type: integer
+      required:
+      - _type
+      - defaultLoginTenant
       type: object
-    ConstraintViolation:
+    ExpressionFailure:
       allOf:
       - $ref: '#/components/schemas/ApiError'
-      - $ref: '#/components/schemas/ConstraintViolation_allOf'
+      - properties:
+          _type:
+            default: ExpressionFailure
+            type: string
+          failures:
+            items:
+              $ref: '#/components/schemas/LocalizedExpressionFailureDto'
+            nullable: true
+            type: array
+          expression:
+            nullable: true
+            type: string
+        required:
+        - _type
+        type: object
       x-spl-supertype-ref: '#/components/schemas/ApiError'
     ApiError:
+      example:
+        errType: errType
+        localizedMessage: localizedMessage
+        auditEventURI: auditEventURI
+        _type: ApiError
+        details: details
+        message: message
+        uri: uri
+        minorErrorCode: minorErrorCode
       properties:
         _type:
           default: ApiError
+          type: string
+        minorErrorCode:
+          nullable: true
+          type: string
+        auditEventURI:
+          nullable: true
           type: string
         errType:
           nullable: true
@@ -400,54 +516,35 @@ components:
         details:
           nullable: true
           type: string
-        minorErrorCode:
-          nullable: true
-          type: string
-        auditEventURI:
-          nullable: true
-          type: string
       required:
       - _type
       type: object
-    BusinessConstraintViolationDto:
-      description: Defines a business constraint violation. Defines setters & getters
-        as<br> required by the FLEX remoting to work properly.
+    LocalizedExpressionFailureDto:
+      description: Defines a localized expression failure.
       properties:
         _type:
-          default: BusinessConstraintViolationDto
+          default: LocalizedExpressionFailureDto
           type: string
-        message:
+        localizedErrMsg:
           nullable: true
           type: string
-        rootEntityName:
+        beginPosition:
+          format: int32
           nullable: true
-          type: string
-        propertyPath:
+          type: integer
+        endPosition:
+          format: int32
           nullable: true
-          type: string
-        invalidValue:
-          nullable: true
-          type: string
-        messageKey:
-          nullable: true
-          type: string
-        leafEntityName:
-          nullable: true
-          type: string
+          type: integer
       required:
       - _type
       type: object
-    InvalidSearchQuery:
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - $ref: '#/components/schemas/InvalidSearchQuery_allOf'
-      x-spl-supertype-ref: '#/components/schemas/ApiError'
     UserLoginDto:
       description: User Login Data
       example:
         firstname: firstname
         timezone:
-          standardOffsetMillis: 2
+          standardOffsetMillis: 3
           displayName:
             _type: MultiLingualStringDto
             defaultText: defaultText
@@ -456,19 +553,19 @@ components:
           _type: TimezoneDto
           name: name
           active: true
-          id: 5
-          version: 5
+          id: 7
+          version: 9
         language: language
         lastLoginDate: 2000-01-23T04:56:07.000+00:00
-        businessLanguage: businessLanguage
         userMayChangePassword: true
         requiresInitialSetup: true
+        businessLanguage: businessLanguage
         attachmentFile:
           sealed: true
           _type: AttachmentFileDto
-          attachmentCount: 3
-          id: 7
-          version: 9
+          attachmentCount: 5
+          id: 1
+          version: 5
         licenseType: NONE
         accountCreationDate: 2000-01-23T04:56:07.000+00:00
         id: 0
@@ -477,7 +574,7 @@ components:
         tenant:
           _type: TenantLoginDto
           name: name
-          id: 1
+          id: 2
           defaultLoginTenant: true
         email: email
         tracing: true
@@ -513,6 +610,23 @@ components:
           format: int32
           nullable: true
           type: integer
+        userMayChangePassword:
+          description: The flag is set to TRUE if the user is allowed to change his
+          type: boolean
+        licenseType:
+          description: The concurrent-user license type the logged-in user consumed
+          enum:
+          - NONE
+          - VIEW_ONLY_PERMISSION
+          - MODIFY_PERMISSION
+          - VIEW_ONLY_PERMISSION_OVERDRAFT
+          - MODIFY_PERMISSION_OVERDRAFT
+          - TECHNICAL
+          nullable: true
+          type: string
+          x-spl-enum-type: ConcurrentUserLicenseType
+        requiresInitialSetup:
+          type: boolean
         organization:
           description: The organization the user is employed at
           nullable: true
@@ -526,8 +640,16 @@ components:
           type: string
         tracing:
           description: If set to TRUE all the ServicePlanet calls executed in the
-            context of<br>         the user will be traced in the backend.
+            context of
           type: boolean
+        loginname:
+          nullable: true
+          type: string
+        attachmentFile:
+          $ref: '#/components/schemas/AttachmentFileDto'
+        fullname:
+          nullable: true
+          type: string
         tenant:
           $ref: '#/components/schemas/TenantLoginDto'
         timezone:
@@ -547,14 +669,6 @@ components:
           type: string
         department:
           description: The organization's department the user is working at
-          nullable: true
-          type: string
-        loginname:
-          nullable: true
-          type: string
-        attachmentFile:
-          $ref: '#/components/schemas/AttachmentFileDto'
-        fullname:
           nullable: true
           type: string
         businessLanguage:
@@ -578,8 +692,7 @@ components:
           $ref: '#/components/schemas/TenantDto'
         requiresNewPassword:
           description: Enforces the users to change his password. If set to TRUE the
-            user<br>         needs to change the password before he is able to login
-            again.
+            user
           type: boolean
         accountCreationDate:
           description: The date the user account has been created
@@ -597,24 +710,6 @@ components:
           format: date-time
           nullable: true
           type: string
-        userMayChangePassword:
-          description: The flag is set to TRUE if the user is allowed to change his<br>         password.
-            E.g. if LDAP authentication is in use this flag is set to<br>         FALSE.
-          type: boolean
-        licenseType:
-          description: The concurrent-user license type the logged-in user consumed
-          enum:
-          - NONE
-          - VIEW_ONLY_PERMISSION
-          - MODIFY_PERMISSION
-          - VIEW_ONLY_PERMISSION_OVERDRAFT
-          - MODIFY_PERMISSION_OVERDRAFT
-          - TECHNICAL
-          nullable: true
-          type: string
-          x-spl-enum-type: ConcurrentUserLicenseType
-        requiresInitialSetup:
-          type: boolean
       required:
       - _type
       - requiresInitialSetup
@@ -623,38 +718,41 @@ components:
       - userMayChangePassword
       type: object
       x-spl-entity: true
-    TenantLoginDto:
-      description: Tenant Login DTO
+    AttachmentFileDto:
+      description: A file holding all attachments
       example:
-        _type: TenantLoginDto
-        name: name
+        sealed: true
+        _type: AttachmentFileDto
+        attachmentCount: 5
         id: 1
-        defaultLoginTenant: true
+        version: 5
       properties:
         _type:
-          default: TenantLoginDto
-          type: string
-        name:
-          description: The name of the tenant
-          nullable: true
+          default: AttachmentFileDto
           type: string
         id:
-          description: The tenant's primary key (ID)
           format: int64
           nullable: true
           type: integer
-        defaultLoginTenant:
-          description: True if this tenant is the default login tenant of the currently<br>         logged
-            in user.
+        version:
+          format: int32
+          nullable: true
+          type: integer
+        sealed:
           type: boolean
+        attachmentCount:
+          format: int32
+          type: integer
       required:
       - _type
-      - defaultLoginTenant
+      - attachmentCount
+      - sealed
       type: object
+      x-spl-entity: true
     TimezoneDto:
       description: Represents a Timezone
       example:
-        standardOffsetMillis: 2
+        standardOffsetMillis: 3
         displayName:
           _type: MultiLingualStringDto
           defaultText: defaultText
@@ -663,8 +761,8 @@ components:
         _type: TimezoneDto
         name: name
         active: true
-        id: 5
-        version: 5
+        id: 7
+        version: 9
       properties:
         _type:
           default: TimezoneDto
@@ -719,37 +817,6 @@ components:
       required:
       - _type
       type: object
-    AttachmentFileDto:
-      description: A file holding all attachments
-      example:
-        sealed: true
-        _type: AttachmentFileDto
-        attachmentCount: 3
-        id: 7
-        version: 9
-      properties:
-        _type:
-          default: AttachmentFileDto
-          type: string
-        id:
-          format: int64
-          nullable: true
-          type: integer
-        version:
-          format: int32
-          nullable: true
-          type: integer
-        sealed:
-          type: boolean
-        attachmentCount:
-          format: int32
-          type: integer
-      required:
-      - _type
-      - attachmentCount
-      - sealed
-      type: object
-      x-spl-entity: true
     TenantDto:
       description: Represents a tenant
       example:
@@ -796,39 +863,25 @@ components:
       - status
       type: object
       x-spl-entity: true
-    ExpressionFailure:
-      allOf:
-      - $ref: '#/components/schemas/ApiError'
-      - $ref: '#/components/schemas/ExpressionFailure_allOf'
-      x-spl-supertype-ref: '#/components/schemas/ApiError'
-    LocalizedExpressionFailureDto:
-      description: Defines a localized expression failure.
-      properties:
-        _type:
-          default: LocalizedExpressionFailureDto
-          type: string
-        beginPosition:
-          format: int32
-          nullable: true
-          type: integer
-        endPosition:
-          format: int32
-          nullable: true
-          type: integer
-        localizedErrMsg:
-          nullable: true
-          type: string
-      required:
-      - _type
-      type: object
     ValidationFailure:
       allOf:
       - $ref: '#/components/schemas/ApiError'
-      - $ref: '#/components/schemas/ValidationFailure_allOf'
+      - properties:
+          _type:
+            default: ValidationFailure
+            type: string
+          failures:
+            items:
+              $ref: '#/components/schemas/LocalizedValidationFailureDto'
+            nullable: true
+            type: array
+        required:
+        - _type
+        type: object
       x-spl-supertype-ref: '#/components/schemas/ApiError'
     LocalizedValidationFailureDto:
       description: Defines a business validation failures. Defines setters & getters
-        as required<br> by the FLEX remoting to work properly.
+        as required
       properties:
         _type:
           default: LocalizedValidationFailureDto
@@ -842,76 +895,85 @@ components:
       required:
       - _type
       type: object
-    ConstraintViolation_allOf:
+    BooleanHolder:
+      example:
+        value: true
+      properties:
+        value:
+          nullable: true
+          type: boolean
+      type: object
+    ConstraintViolation:
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - properties:
+          _type:
+            default: ConstraintViolation
+            type: string
+          violations:
+            items:
+              $ref: '#/components/schemas/BusinessConstraintViolationDto'
+            nullable: true
+            type: array
+        required:
+        - _type
+        type: object
+      x-spl-supertype-ref: '#/components/schemas/ApiError'
+    BusinessConstraintViolationDto:
+      description: Defines a business constraint violation. Defines setters & getters
+        as
       properties:
         _type:
-          default: ConstraintViolation
+          default: BusinessConstraintViolationDto
           type: string
-        violations:
-          items:
-            $ref: '#/components/schemas/BusinessConstraintViolationDto'
+        messageKey:
           nullable: true
-          type: array
+          type: string
+        leafEntityName:
+          nullable: true
+          type: string
+        message:
+          nullable: true
+          type: string
+        rootEntityName:
+          nullable: true
+          type: string
+        propertyPath:
+          nullable: true
+          type: string
+        invalidValue:
+          nullable: true
+          type: string
       required:
       - _type
       type: object
-      example: null
-    InvalidSearchQuery_allOf:
-      properties:
-        _type:
-          default: InvalidSearchQuery
-          type: string
-        query:
-          nullable: true
-          type: string
-        expectedOperators:
-          items:
+    InvalidSearchQuery:
+      allOf:
+      - $ref: '#/components/schemas/ApiError'
+      - properties:
+          _type:
+            default: InvalidSearchQuery
+            type: string
+          expectedOperators:
+            items:
+              nullable: true
+              type: string
+            nullable: true
+            type: array
+          expectedValues:
+            items:
+              nullable: true
+              type: string
+            nullable: true
+            type: array
+          errorStartPosition:
+            format: int32
+            type: integer
+          query:
             nullable: true
             type: string
-          nullable: true
-          type: array
-        expectedValues:
-          items:
-            nullable: true
-            type: string
-          nullable: true
-          type: array
-        errorStartPosition:
-          format: int32
-          type: integer
-      required:
-      - _type
-      - errorStartPosition
-      type: object
-      example: null
-    ExpressionFailure_allOf:
-      properties:
-        _type:
-          default: ExpressionFailure
-          type: string
-        failures:
-          items:
-            $ref: '#/components/schemas/LocalizedExpressionFailureDto'
-          nullable: true
-          type: array
-        expression:
-          nullable: true
-          type: string
-      required:
-      - _type
-      type: object
-      example: null
-    ValidationFailure_allOf:
-      properties:
-        _type:
-          default: ValidationFailure
-          type: string
-        failures:
-          items:
-            $ref: '#/components/schemas/LocalizedValidationFailureDto'
-          nullable: true
-          type: array
-      required:
-      - _type
-      type: object
-      example: null
+        required:
+        - _type
+        - errorStartPosition
+        type: object
+      x-spl-supertype-ref: '#/components/schemas/ApiError'

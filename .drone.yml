@@ -76,7 +76,8 @@ steps:
     - echo "Linting helm chart"
     - cd ./deployment/witcom-api-gateway && helm lint
 
-  - name: Full test
+
+  - name: Resolve dependencies
     image: maven:3-eclipse-temurin-17
     environment:
       <<: *default_environment
@@ -84,10 +85,11 @@ steps:
     - name: cache
       path: /drone/cache
     commands:
-    - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -Dmaven.repo.local=/drone/cache
-    - mvn -Ptest-fast test -B -Dmaven.repo.local=/drone/cache
+    - mvn dependency:resolve -B -V -Dmaven.repo.local=/drone/cache
+    # see https://stackoverflow.com/questions/16866978/maven-cant-find-my-local-artifacts
+    - find /drone/cache -name _remote.repositories -exec rm -v {} \;
 
-  - name: rebuild-cache
+  - name: rebuild dependency cache
     image: meltwater/drone-cache
     volumes:
     - name: cache
@@ -107,6 +109,17 @@ steps:
       path_style: true
       mount:
         - '/drone/cache'
+
+  - name: Full tests
+    image: maven:3-eclipse-temurin-17
+    environment:
+      <<: *default_environment
+    volumes:
+    - name: cache
+      path: /drone/cache
+    commands:
+    - mvn -Popenapi-codegen generate-sources -DskipTests=true -Dmaven.javadoc.skip=true -B -V -Dmaven.repo.local=/drone/cache
+    - sleep 10 && mvn -Ptest test -B -Dmaven.repo.local=/drone/cache
 
   - name: Maven build
     image: maven:3-eclipse-temurin-17

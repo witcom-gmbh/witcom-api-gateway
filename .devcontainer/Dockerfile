@@ -25,7 +25,7 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/wit-ca-crt-19f321a4661f
 # ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 
 ARG INSTALL_OPENAPI_CLI="false"
-ARG OPENAPI_CLI_VERSION="6.6.0"
+ARG OPENAPI_CLI_VERSION="7.8.0"
 RUN if [ "${INSTALL_OPENAPI_CLI}" = "true" ]; then \
     su vscode -c "umask 0002 && mkdir -p /home/vscode/.local/bin && wget https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/${OPENAPI_CLI_VERSION}/openapi-generator-cli-${OPENAPI_CLI_VERSION}.jar -O/home/vscode/.local/bin/openapi-generator-cli.jar"; \
     fi
