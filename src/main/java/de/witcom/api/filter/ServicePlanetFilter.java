@@ -13,9 +13,12 @@ import org.springframework.stereotype.Component;
 import de.witcom.api.serviceplanet.SplSessionManager;
 import lombok.Getter;
 import lombok.Setter;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 
 @Component
@@ -48,7 +51,15 @@ public class ServicePlanetFilter extends AbstractGatewayFilterFactory<ServicePla
 	            ServerHttpRequest request = exchange.getRequest().mutate()
 						.header("Cookie", "JSESSIONID=" + sessionId)
 						.build();
-	            return chain.filter(exchange.mutate().request(request).build());
+	            return chain.filter(exchange.mutate().request(request).build())
+				.then(Mono.fromRunnable(() -> {
+						ServerHttpResponse response = exchange.getResponse();
+						//If unauthorized -> refresh session so that the next call will be ok
+						if (response.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+							sessionManager.triggerSessionRefresh();
+						}
+					}))
+				;
             } 
             logger.warn("Got no SPL-Session-ID - API-Call will fail");
             return chain.filter(exchange);

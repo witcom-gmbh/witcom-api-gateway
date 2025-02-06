@@ -285,10 +285,10 @@
 							<skip>${openapi.skip}</skip>
 							<inputSpec>${project.basedir}/src/main/resources/openapi/spl-api.yml</inputSpec>
 							<generatorName>java</generatorName>
-							<modelPackage>${project.groupId}.api.spl.swagger.model</modelPackage>
-							<apiPackage>${project.groupId}.api.spl.swagger.api</apiPackage>
-							<invokerPackage>${project.groupId}.api.spl.swagger.invoker</invokerPackage>
-							<basePackage>${project.groupId}.api.spl.swagger</basePackage>
+							<modelPackage>${project.groupId}.api.serviceplanet.model</modelPackage>
+							<apiPackage>${project.groupId}.api.serviceplanet.api</apiPackage>
+							<invokerPackage>${project.groupId}.api.serviceplanet</invokerPackage>
+							<basePackage>${project.groupId}.api.serviceplanet</basePackage>
 							<configOptions>
 								<sourceFolder>${generated-sources-java-path}</sourceFolder>
 								<dateLibrary>joda</dateLibrary>
@@ -297,7 +297,7 @@
 							<output>${generated-sources-path}/serviceplanet-api</output>
 							<environmentVariables>
 								<models />
-								<apis>false</apis>
+								<apis/>
 								<supportingFiles></supportingFiles>
 								<apiTests>false</apiTests>
 								<modelTests>false</modelTests>
