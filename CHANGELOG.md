@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.3.1 - 2025-02-06
+#### Improvements
+- **(filter)** Implements Serviceplanet-API changes for login-requests - (5934d71) - *iceman91176*
+
+- - -
+
 ## v2.3.0 - 2024-02-13
 #### Features
 - **(filter)** Adds CommandSessionToHeaderFilter  - (616401e) - *iceman91176*
