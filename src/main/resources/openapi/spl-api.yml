@@ -197,6 +197,13 @@ paths:
           format: string
           type: string
         style: form
+      - explode: true
+        in: cookie
+        name: JSESSIONID
+        required: true
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -246,6 +253,14 @@ paths:
       deprecated: false
       description: Returns the logged-in user of the current session.
       operationId: Login::getLoggedInUser::V1
+      parameters:
+      - explode: true
+        in: cookie
+        name: JSESSIONID
+        required: true
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -293,6 +308,14 @@ paths:
       deprecated: false
       description: Checks if the current session has a logged-in user.
       operationId: Login::hasLoggedInUser::V1
+      parameters:
+      - explode: true
+        in: cookie
+        name: JSESSIONID
+        required: true
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -339,6 +362,14 @@ paths:
       deprecated: false
       description: Logout the current user and clean the user's session.
       operationId: Login::logout::V1
+      parameters:
+      - explode: true
+        in: cookie
+        name: JSESSIONID
+        required: true
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           description: OK
@@ -389,6 +420,13 @@ paths:
         required: true
         schema:
           format: string
+          type: string
+        style: form
+      - explode: true
+        in: cookie
+        name: JSESSIONID
+        required: true
+        schema:
           type: string
         style: form
       responses:

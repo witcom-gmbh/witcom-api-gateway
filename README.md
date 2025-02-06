@@ -68,8 +68,10 @@ Der Filter fuehrt einen Login bei Service-Planet durch um eine Session zu erhalt
 wird in einem REDIS Key-Value-Store abgespeichert, um mehrere Instanzen des API-Gateways laufen zu lassen.
 Der Filter ist Mehr-Mandatenfähig, d.h. in einer API-Gateway-Instanz können mehrere Mandanten angesprochen werden.
 
+Erfordert mindestens Serviceplanet Version 9.6
+
 ## Globale Einstellungen
-Globale Filtereinstellungen über die application-properties konfiguriert. Diese Properties können natürlich auch aus Consul geladen werden. Es ist auch nöglich dort Umgebungsvariablen zu referenzieren
+Globale Filtereinstellungen über die application-properties konfiguriert. Diese Properties können natürlich auch aus Consul geladen werden. Es ist auch möglich dort Umgebungsvariablen zu referenzieren
 
 ```yaml
 application:

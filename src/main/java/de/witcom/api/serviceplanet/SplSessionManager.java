@@ -29,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openapitools.jackson.nullable.JsonNullableModule;
@@ -38,8 +39,9 @@ import de.witcom.api.config.properties.ApplicationProperties.ServicePlanetTenant
 import de.witcom.api.model.Session;
 import de.witcom.api.repo.SessionRepository;
 import de.witcom.api.service.LockManager;
-import de.witcom.api.spl.swagger.model.BooleanHolder;
-import de.witcom.api.spl.swagger.model.UserLoginDto;
+import de.witcom.api.serviceplanet.api.LoginV1Api;
+import de.witcom.api.serviceplanet.model.BooleanHolder;
+import de.witcom.api.serviceplanet.model.UserLoginDto;
 import lombok.extern.log4j.Log4j2;
 import net.javacrumbs.shedlock.core.SimpleLock;
 
@@ -112,22 +114,23 @@ public class SplSessionManager {
 
 	private void logoutSession(ServicePlanetTenantConfiguration tenant,String sessionId) {
 
-		String url = tenant.getSplBaseUrl() + "/serviceplanet/remote/service/v1/login/logout";
-		RestTemplate restTemplate = getServicePlanetRestTemplate();//new RestTemplate();
+		LoginV1Api api = this.getLoginV1Api(tenant);
 
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-		requestHeaders.set("Cookie", "JSESSIONID=" + sessionId);
-		HttpEntity<Void> request = new HttpEntity<>(requestHeaders);
+		// String url = tenant.getSplBaseUrl() + "/serviceplanet/remote/service/v1/login/logout";
+		// RestTemplate restTemplate = getServicePlanetRestTemplate();//new RestTemplate();
+		// HttpHeaders requestHeaders = new HttpHeaders();
+		// requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+		// requestHeaders.set("Cookie", "JSESSIONID=" + sessionId);
+		// HttpEntity<Void> request = new HttpEntity<>(requestHeaders);
 
 		try {
-			ResponseEntity<BooleanHolder> response = restTemplate.exchange(url, HttpMethod.POST, request,
-					BooleanHolder.class);
+			
+			ResponseEntity<Void> response = api.loginLogoutV1WithHttpInfo(sessionId);
 			if (!response.getStatusCode().equals(HttpStatus.OK)) {
 				log.error("Logout from ServicePlanet was not successful - got Status : {}", response.getStatusCode());
 			}
 		} catch (Exception e) {
-			log.error("Error when trying to logout session from SPL {} : {}", url, e.getMessage());
+			log.error("Error when trying to logout session from SPL {} : {}", tenant.getSplBaseUrl(), e.getMessage());
 		}
 
 
@@ -139,25 +142,25 @@ public class SplSessionManager {
 	}
 
 	public boolean isSessionActive(String splBaseUrl,String sessionId) {
-		
-		String url = splBaseUrl + "/serviceplanet/remote/service/v1/login/logged_in_user/active";
-		RestTemplate restTemplate = getServicePlanetRestTemplate();
 
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-		requestHeaders.set("Cookie", "JSESSIONID=" + sessionId);
-		HttpEntity<Void> request = new HttpEntity<>(requestHeaders);
+		LoginV1Api api = this.getLoginV1Api(splBaseUrl);
+		
+		// String url = splBaseUrl + "/serviceplanet/remote/service/v1/login/logged_in_user/active";
+		// RestTemplate restTemplate = getServicePlanetRestTemplate();
+		// HttpHeaders requestHeaders = new HttpHeaders();
+		// requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+		// requestHeaders.set("Cookie", "JSESSIONID=" + sessionId);
+		// HttpEntity<Void> request = new HttpEntity<>(requestHeaders);
 
 		try {
-			ResponseEntity<BooleanHolder> response = restTemplate.exchange(url, HttpMethod.GET, request,
-					BooleanHolder.class);
+			ResponseEntity<BooleanHolder> response = api.loginHasLoggedInUserV1WithHttpInfo(sessionId);
 			if (!response.getStatusCode().equals(HttpStatus.OK)) {
 				log.error("Login to ServicePlanet was not successful - got Status : {}", response.getStatusCode());
 			} else {
 				return response.getBody().getValue();
 			}
 		} catch (Exception e) {
-			log.error("Error when trying to validate session in SPL {} : {}", url, e.getMessage());
+			log.error("Error when trying to validate session in SPL {} : {}", splBaseUrl, e.getMessage());
 		}
 
 		return false;
@@ -174,6 +177,7 @@ public class SplSessionManager {
 		final ObjectMapper m = new ObjectMapper();
         m.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         m.registerModule(new JsonNullableModule());
+		m.registerModule(new JodaModule());
 		return new MappingJackson2HttpMessageConverter(m);
 	}	
 	
@@ -231,51 +235,55 @@ public class SplSessionManager {
 	        return;
         }        
 
-		String url = tenant.getSplBaseUrl() + "/serviceplanet/remote/service/v1/login/authenticate";
-
-		RestTemplate restTemplate = getServicePlanetRestTemplate();//new RestTemplate();
-
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-		map.add("loginname", tenant.getSplUser());
-		map.add("password", tenant.getSplPassword());
-		map.add("allowDropOldestSession","true");
-		if (!StringUtils.isEmpty(tenant.getSplTenant())){
-			map.add("tenant", tenant.getSplTenant());
-		}
+		// LoginAuthenticate2V1QueryParams request = new LoginAuthenticate2V1QueryParams()
+		// 	.loginname(tenant.getSplUser())
+		// 	.password(tenant.getSplPassword())
+		// 	.allowDropOldestSession(true);
 		
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map,
-				requestHeaders);
+		LoginV1Api api = this.getLoginV1Api(tenant);
+		
 		try {
-			ResponseEntity<Object> response = restTemplate.postForEntity(url, request, Object.class);
-			if (!response.getStatusCode().equals(HttpStatus.OK)) {
-				log.error("Login to ServicePlanet at {} was not successful - got Status : {}",url, response.getStatusCode());
-			} else {
-				if (response.getHeaders().get("Set-Cookie").isEmpty()) {
-					log.error("Unable to extract sessionid - got no cookies");
-				} else {
+			ResponseEntity<UserLoginDto> res = api.loginAuthenticate2V1WithHttpInfo(tenant.getSplUser(), tenant.getSplPassword(), true);
 
-					String cookieValue = null;
-					for (String cookie : response.getHeaders().get("set-cookie")) {
-						List<HttpCookie> cookies = HttpCookie.parse(cookie);
-						if (cookies.get(0).getName().equals("JSESSIONID")) {
-							cookieValue = cookies.get(0).getValue();
-						}
-					}
-					if (cookieValue == null) {
-						log.error("Unable to login - no session cookie");
-					} else {
-						this.storeSession(tenant,cookieValue);
-					}
-				}
+			//ApiResponse<UserLoginDto> res = this.getLoginV1Api(tenant).loginAuthenticate2V1WithHttpInfo(request);
+			if (!res.getStatusCode().equals(HttpStatus.OK)) {
+				log.error("Login to ServicePlanet at {} was not successful - got Status : {}",tenant.getSplBaseUrl(), res.getStatusCode());
+				return;
+			}
+			if (res.getHeaders().get("Set-Cookie").isEmpty()) {
+				log.error("Unable to extract sessionid - got no cookies");
+				return;
 			}
 
-		} catch (Exception e) {
-			log.error("Error when trying to login to SPL at {} : {}",url, e.getMessage());
+			String cookieValue = null;
+			for (String cookie : res.getHeaders().get("set-cookie")) {
+				List<HttpCookie> cookies = HttpCookie.parse(cookie);
+				if (cookies.get(0).getName().equals("JSESSIONID")) {
+					cookieValue = cookies.get(0).getValue();
+				}
+			}
+			if (cookieValue == null) {
+				log.error("Unable to login - no session cookie");
+				return;
+			}
 
+			// switch the tenant
+			if (StringUtils.isNotBlank(tenant.getSplTenant())){
+				try {
+					api.loginSwitchTenantV1(tenant.getSplTenant(),cookieValue);
+				} catch (Exception e) {
+					log.error("Error when trying to switch the tenant at {} for tenant {} : {}",tenant.getSplBaseUrl(),tenant.getSplTenant(), e.getMessage());
+					// if switching the tenant fails we logout
+					api.loginLogoutV1(cookieValue);
+					return;
+				}
+			}
+			this.storeSession(tenant,cookieValue);
+						
+		} catch (Exception e) {
+			log.error("Error when trying to login to SPL at {} for tenant {} : {}",tenant.getSplBaseUrl(),tenant.getSplTenant(), e.getMessage());
 		}
+
 	}
 
 	@Async("gatewayTaskExecutor")
@@ -369,6 +377,16 @@ public class SplSessionManager {
 		Session session = new Session(sessionKey,sessionId);
 		//Todo - add expiration date
 	    sessionRepo.save(session);
+	}
+
+	private LoginV1Api getLoginV1Api(String baseUrl){
+		ApiClient client = new ApiClient(getServicePlanetRestTemplate());
+		client.setBasePath(baseUrl + "/serviceplanet/remote/service");
+		return new LoginV1Api(client);		
+	}
+
+	private LoginV1Api getLoginV1Api(ServicePlanetTenantConfiguration tenant){
+		return getLoginV1Api(tenant.getSplBaseUrl());
 	}
 
 }
