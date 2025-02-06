@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.3.2 - 2025-02-06
+#### Bug Fixes
+- **(filter)** Update session-cookie for tenant-switch - (5b746a6) - *iceman91176*
+
+- - -
+
 ## v2.3.1 - 2025-02-06
 #### Improvements
 - **(filter)** Implements Serviceplanet-API changes for login-requests - (5934d71) - *iceman91176*
