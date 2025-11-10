@@ -14,18 +14,39 @@
 			"settings": {
 				"java.jdt.ls.java.home": "/usr/lib/jvm/msopenjdk-current",
 				"maven.executable.path": "/usr/local/sdkman/candidates/maven/current/bin/mvn",
+				"spring-boot.ls.java.home": "/usr/lib/jvm/msopenjdk-current",
 				"java.configuration.runtimes": [
 					{
-					"name": "JavaSE-17",
+					"name": "JavaSE-21",
 					"path": "/usr/lib/jvm/msopenjdk-current",
 					"default": true
 					}
-				]
+				],
+				// check-style-related configuration
+				"java.checkstyle.configuration": "${workspaceFolder}/witcom-checks.xml",
+				"java.checkstyle.version": "10.24.0",
+				"java.format.settings.url": "${workspaceFolder}/eclipse-java-witcom-style.xml",
+				// match with check-style configuration
+				"java.completion.importOrder": [
+					"#",
+					"java",
+					"javax",
+					"org",
+					""
+				],
+				"[java]": {
+					"editor.useTabStops": false,
+					"editor.tabSize": 4,
+					"editor.insertSpaces": true
+				}
 			},
 			"extensions": [
 				"vscjava.vscode-java-pack",
 				"vmware.vscode-boot-dev-pack",
-				"redhat.java@1.35.1"
+				"redhat.java",
+				"vmware.vscode-boot-dev-pack",
+				"sonarsource.sonarlint-vscode",
+				"shengchen.vscode-checkstyle"
 			]
 		}
 	},
@@ -68,10 +89,16 @@
 			"xqVersion": "none",
 			"jaqVersion": "none"
 		},
-		"ghcr.io/devcontainers-contrib/features/age:1": {"version": "v1.1.1"},
-		"ghcr.io/devcontainers-contrib/features/age-keygen:1": {"version": "v1.1.1"},
+		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+			"version": "latest",
+			"helm": "latest",
+			"minikube": "none"
+		},
+		"ghcr.io/devcontainers-extra/features/age:1": {"version": "v1.1.1"},
+		// "ghcr.io/devcontainers-contrib/features/age-keygen:1": {"version": "v1.1.1"},
 		"ghcr.io/rio/features/chezmoi:1": {},
 		"ghcr.io/witcom-gmbh/devcontainer-features/cocogitto:latest": {},
+		"ghcr.io/witcom-gmbh/devcontainer-features/helmdocs:latest": {},
 		"ghcr.io/devcontainers/features/java:1": {
 			"version": "none",
 			"installGradle": "false",

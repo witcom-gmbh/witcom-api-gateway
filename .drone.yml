@@ -56,7 +56,7 @@ steps:
     - curl -4 -fsS -m 10 --retry 10 --retry-connrefused -o /dev/null http://keycloak:9999
 
   - name: Wait until redis service is ready
-    image: appropriate/nc
+    image: subfuzion/netcat
     commands:
     - nc -vz -w 30 redis 6379
 
@@ -78,7 +78,7 @@ steps:
 
 
   - name: Resolve dependencies
-    image: maven:3-eclipse-temurin-17
+    image: maven:3-eclipse-temurin-21
     environment:
       <<: *default_environment
     volumes:
@@ -111,7 +111,7 @@ steps:
         - '/drone/cache'
 
   - name: Full tests
-    image: maven:3-eclipse-temurin-17
+    image: maven:3-eclipse-temurin-21
     environment:
       <<: *default_environment
     volumes:
@@ -122,7 +122,7 @@ steps:
     - sleep 10 && mvn -Ptest test -B -Dmaven.repo.local=/drone/cache
 
   - name: Maven build
-    image: maven:3-eclipse-temurin-17
+    image: maven:3-eclipse-temurin-21
     environment:
       <<: *default_environment
     volumes:

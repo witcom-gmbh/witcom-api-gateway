@@ -8,7 +8,6 @@ services:
       dockerfile: Dockerfile
       # [Optional] You can use build args to set options. e.g. 'VARIANT' below affects the image in the Dockerfile
       args: 
-        VARIANT: 17-bookworm
         SKIP_APT_PEER_VERIFY: "true"
     env_file: .env
     volumes:

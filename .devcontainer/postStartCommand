@@ -6,4 +6,7 @@
 
 cp -f ./.devcontainer/bash_aliases.sh ~/.bash_aliases
 
+# Install the helm-unittest plugin
+helm plugin install https://github.com/helm-unittest/helm-unittest.git
+
 echo "Run chezmoi-init for the final touch...."
