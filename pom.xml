@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.12</version>
+		<version>3.5.6</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>de.witcom</groupId>
@@ -18,7 +18,7 @@
 	<properties>
 		<java.version>21</java.version>
 		<openapi.skip>true</openapi.skip>
-		<spring-cloud.version>2022.0.3</spring-cloud.version>
+		<spring-cloud.version>2025.0.0</spring-cloud.version>
 		<keycloak.version>26.0.6</keycloak.version>
 		<version.swagger.codegen>2.4.0</version.swagger.codegen>
 		<jodatime-version>2.7</jodatime-version>
@@ -53,6 +53,12 @@
 		<dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-consul-config</artifactId>
+        	<exclusions>
+        		<exclusion>
+        			<artifactId>httpclient</artifactId>
+        			<groupId>org.apache.httpcomponents</groupId>
+        		</exclusion>
+        	</exclusions>
         </dependency>		
 		<dependency>
             <groupId>org.springframework.boot</groupId>
@@ -147,17 +153,27 @@
 			<artifactId>jackson-datatype-joda</artifactId>
 			<version>${jackson-version}</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>${jodatime-version}</version>
-		</dependency>		
+		</dependency>		 -->
         
 		<!-- https://mvnrepository.com/artifact/org.openapitools/openapi-generator -->
 		<dependency>
 			<groupId>org.openapitools</groupId>
 			<artifactId>openapi-generator</artifactId>
 			<version>5.2.1</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-simple</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
