@@ -13,23 +13,23 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ConfigurationRefreshEventListener {
 
-	private final McpSessionManager mcpSessionmanager;
-	private final SplSessionManager splSessionManager;
-	private final CommandSessionManager commandSessionManager;
+    private final McpSessionManager mcpSessionmanager;
+    private final SplSessionManager splSessionManager;
+    private final CommandSessionManager commandSessionManager;
 
-	public ConfigurationRefreshEventListener(McpSessionManager mcpSessionmanager,SplSessionManager splSessionManager,CommandSessionManager commandSessionManager){
-		this.mcpSessionmanager = mcpSessionmanager;
-		this.splSessionManager = splSessionManager;
-		this.commandSessionManager = commandSessionManager;
+    public ConfigurationRefreshEventListener(McpSessionManager mcpSessionmanager,SplSessionManager splSessionManager,CommandSessionManager commandSessionManager){
+        this.mcpSessionmanager = mcpSessionmanager;
+        this.splSessionManager = splSessionManager;
+        this.commandSessionManager = commandSessionManager;
 
-	}
+    }
 
-	@EventListener(RefreshScopeRefreshedEvent.class)
+    @EventListener(RefreshScopeRefreshedEvent.class)
     public void onRefresh(RefreshScopeRefreshedEvent event) {
             log.info("Triggering session-refresh for filters");
-			this.mcpSessionmanager.triggerSessionRefresh();
-			this.splSessionManager.triggerSessionRefresh();
-			this.commandSessionManager.triggerSessionRefresh();       
+            this.mcpSessionmanager.triggerSessionRefresh();
+            this.splSessionManager.triggerSessionRefresh();
+            this.commandSessionManager.triggerSessionRefresh();       
     }
-	
+    
 }

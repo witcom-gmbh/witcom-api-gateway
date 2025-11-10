@@ -23,69 +23,69 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 
 @Component
 public class ServicePlanetFilter extends AbstractGatewayFilterFactory<ServicePlanetFilter.Config>{
-	
-	@Autowired
-	SplSessionManager sessionManager;
-	
-	Logger logger = LoggerFactory.getLogger(ServicePlanetFilter.class);
+    
+    @Autowired
+    SplSessionManager sessionManager;
+    
+    Logger logger = LoggerFactory.getLogger(ServicePlanetFilter.class);
 
-	public ServicePlanetFilter() {
-		super(Config.class);
-	}  
+    public ServicePlanetFilter() {
+        super(Config.class);
+    }  
 
-	@Override
-	public GatewayFilter apply(Config config) {
-		
-		return (exchange, chain) -> {
+    @Override
+    public GatewayFilter apply(Config config) {
+        
+        return (exchange, chain) -> {
             //ServerHttpRequest request = exchange.getRequest();
             //Hier koennte man eienn mechanismus einbauen, der auf basis eines headers einen refresh forciert
-			
-			String sessionId = null;
-			if (config.getTenant()!=null){
-				sessionId = sessionManager.getSessionId(config.getTenant());
-			} else {
-				//default tenant
-				sessionId = sessionManager.getSessionId();
-			}
+            
+            String sessionId = null;
+            if (config.getTenant()!=null){
+                sessionId = sessionManager.getSessionId(config.getTenant());
+            } else {
+                //default tenant
+                sessionId = sessionManager.getSessionId();
+            }
             if (sessionId!=null) {
-	            ServerHttpRequest request = exchange.getRequest().mutate()
-						.header("Cookie", "JSESSIONID=" + sessionId)
-						.build();
-	            return chain.filter(exchange.mutate().request(request).build())
-				.then(Mono.fromRunnable(() -> {
-						ServerHttpResponse response = exchange.getResponse();
-						//If unauthorized -> refresh session so that the next call will be ok
-						if (response.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-							sessionManager.triggerSessionRefresh();
-						}
-					}))
-				;
+                ServerHttpRequest request = exchange.getRequest().mutate()
+                        .header("Cookie", "JSESSIONID=" + sessionId)
+                        .build();
+                return chain.filter(exchange.mutate().request(request).build())
+                .then(Mono.fromRunnable(() -> {
+                        ServerHttpResponse response = exchange.getResponse();
+                        //If unauthorized -> refresh session so that the next call will be ok
+                        if (response.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+                            sessionManager.triggerSessionRefresh();
+                        }
+                    }))
+                ;
             } 
             logger.warn("Got no SPL-Session-ID - API-Call will fail");
             return chain.filter(exchange);
         };
-		
-	
-	}
+        
+    
+    }
 
     public static class Config implements HasRouteId {
-		
-		@Getter
-		@Setter
-		private String tenant;
-		private String routeId;
-		
-		@Override
-		public void setRouteId(String routeId) {
-			this.routeId = routeId;
-			
-		}
-		@Override
-		public String getRouteId() {
-			return routeId;
-		}
-		
-	}
+        
+        @Getter
+        @Setter
+        private String tenant;
+        private String routeId;
+        
+        @Override
+        public void setRouteId(String routeId) {
+            this.routeId = routeId;
+            
+        }
+        @Override
+        public String getRouteId() {
+            return routeId;
+        }
+        
+    }
 
 
 }

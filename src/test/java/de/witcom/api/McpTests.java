@@ -27,8 +27,8 @@ public class McpTests {
     @Autowired
     ApiClient mcpAuthClient;
 
-	@Autowired
-	ApplicationProperties appProperties;
+    @Autowired
+    ApplicationProperties appProperties;
     
     @Autowired
     McpSessionManager sessionManager;
@@ -41,8 +41,8 @@ public class McpTests {
 
         sessionRepo.deleteAll();
 
-		assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
-		assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
+        assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
+        assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
 
 
         //Oauth2Api tokensApi = mcpAuthClient.buildClient(Oauth2Api.class);

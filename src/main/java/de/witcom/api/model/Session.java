@@ -9,9 +9,9 @@ import org.springframework.data.annotation.Id;
 @RedisHash("Session")
 public class Session implements Serializable {
     
-	private static final long serialVersionUID = -6100707433571389630L;
+    private static final long serialVersionUID = -6100707433571389630L;
     private String sessionId;
-   	@Id    
+    @Id    
     private String applicationId;
     private Date expires;
     

@@ -12,24 +12,24 @@ import de.witcom.api.serviceplanet.SplSessionManager;
 @SpringBootTest
 public class ServicePlanetSessionManagerTests {
 
-	@Autowired
-	SplSessionManager sessionManager;
+    @Autowired
+    SplSessionManager sessionManager;
 
-	@Autowired
+    @Autowired
     SessionRepository sessionRepo;
 
 
-	@Test
-	void getSessionIdForDefaultTenant() {
-		sessionRepo.deleteAll();
-		assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
-		assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
-	}
+    @Test
+    void getSessionIdForDefaultTenant() {
+        sessionRepo.deleteAll();
+        assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
+        assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
+    }
 
-	@Test
-	void checkIfSessionIsActive() {
-		sessionRepo.deleteAll();
-		this.sessionManager.isSessionActive("http://mockserver:1080/smdb", "a-random-sessionid");
-	}	
+    @Test
+    void checkIfSessionIsActive() {
+        sessionRepo.deleteAll();
+        this.sessionManager.isSessionActive("http://mockserver:1080/smdb", "a-random-sessionid");
+    }	
 
 }

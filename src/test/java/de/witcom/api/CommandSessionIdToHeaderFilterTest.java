@@ -21,63 +21,63 @@ import de.witcom.api.config.properties.ApplicationProperties;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CommandSessionIdToHeaderFilterTest {
 
-	@LocalServerPort
-	private int port;
+    @LocalServerPort
+    private int port;
 
-	@Autowired
-	private ApplicationProperties appProperties;
+    @Autowired
+    private ApplicationProperties appProperties;
 
-	WebTestClient testclient;
+    WebTestClient testclient;
 
-	@Value("${API_GW_OAUTH_TESTCLIENT_CLIENTSECRET}")
-	String testClientClientSecret;
-	@Value("${API_GW_OAUTH_TESTCLIENT_CLIENTID}")
-	String testClientClientId;
+    @Value("${API_GW_OAUTH_TESTCLIENT_CLIENTSECRET}")
+    String testClientClientSecret;
+    @Value("${API_GW_OAUTH_TESTCLIENT_CLIENTID}")
+    String testClientClientId;
 
-	@BeforeEach
-	void setupWebClient(){
-		testclient = WebTestClient.bindToServer().baseUrl("http://localhost:"+port).build();
-	}
+    @BeforeEach
+    void setupWebClient(){
+        testclient = WebTestClient.bindToServer().baseUrl("http://localhost:"+port).build();
+    }
 
-	private TokenResponse getAccessToken(){
+    private TokenResponse getAccessToken(){
 
-		assertNotNull(testClientClientId);
-		assertNotNull(testClientClientSecret);
+        assertNotNull(testClientClientId);
+        assertNotNull(testClientClientSecret);
 
-		// get an access token
-		String kcBaseUrl = String.format("%s/realms/%s", appProperties.getKeycloakConfig().getKeycloakServerUrl(),appProperties.getKeycloakConfig().getKeycloakRealmId());
-		WebClient kcClient = WebClient.builder()
-			.baseUrl(kcBaseUrl)
-			.defaultHeaders(header -> header.setBasicAuth(testClientClientId, testClientClientSecret))
-			.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-			.build();
-		TokenResponse token = kcClient.post()
-			.uri("/protocol/openid-connect/token")
-			.body(BodyInserters.fromFormData("grant_type", "client_credentials"))
-			.retrieve()
-			.bodyToMono(TokenResponse.class)
-			.block()
-			;
-		return token;			
+        // get an access token
+        String kcBaseUrl = String.format("%s/realms/%s", appProperties.getKeycloakConfig().getKeycloakServerUrl(),appProperties.getKeycloakConfig().getKeycloakRealmId());
+        WebClient kcClient = WebClient.builder()
+            .baseUrl(kcBaseUrl)
+            .defaultHeaders(header -> header.setBasicAuth(testClientClientId, testClientClientSecret))
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            .build();
+        TokenResponse token = kcClient.post()
+            .uri("/protocol/openid-connect/token")
+            .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
+            .retrieve()
+            .bodyToMono(TokenResponse.class)
+            .block()
+            ;
+        return token;			
 
-	}	
+    }	
 
-	@Test
-	void testCommandSession2Header(){
-		testclient.post().uri("/soapproxy/somews").exchange().expectStatus().isOk();
-	}
+    @Test
+    void testCommandSession2Header(){
+        testclient.post().uri("/soapproxy/somews").exchange().expectStatus().isOk();
+    }
 
-	
-	@Test
-	void testCommandSession2HeaderWithAuth(){
-		TokenResponse token = getAccessToken();
-		testclient.post()
-			.uri("/soapproxy-auth/somews")
-			.headers(header -> header.setBearerAuth(token.getAccessToken()))
-			.exchange()
-			.expectStatus()
-			.isOk();
-	}
+    
+    @Test
+    void testCommandSession2HeaderWithAuth(){
+        TokenResponse token = getAccessToken();
+        testclient.post()
+            .uri("/soapproxy-auth/somews")
+            .headers(header -> header.setBearerAuth(token.getAccessToken()))
+            .exchange()
+            .expectStatus()
+            .isOk();
+    }
 
 
 }

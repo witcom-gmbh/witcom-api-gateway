@@ -22,7 +22,7 @@ public class McpApiConfiguration {
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-	ApplicationProperties appProperties;
+    ApplicationProperties appProperties;
 
 
     @Bean

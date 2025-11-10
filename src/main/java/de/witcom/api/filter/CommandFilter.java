@@ -26,62 +26,62 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class CommandFilter extends AbstractGatewayFilterFactory{
-	
-	//@Autowired
-	private final CommandSessionManager sessionManager;
+    
+    //@Autowired
+    private final CommandSessionManager sessionManager;
 
-	Logger logger = LoggerFactory.getLogger(CommandFilter.class);
+    Logger logger = LoggerFactory.getLogger(CommandFilter.class);
 
-	public CommandFilter(CommandSessionManager sessionManager){
-		//super(Config.c)
-		this.sessionManager = sessionManager;
-	}
+    public CommandFilter(CommandSessionManager sessionManager){
+        //super(Config.c)
+        this.sessionManager = sessionManager;
+    }
 
-	@Override
-	public GatewayFilter apply(Object config) {
-		
-		return (exchange, chain) -> {
-			
-			String sessionId = sessionManager.getSessionId();
+    @Override
+    public GatewayFilter apply(Object config) {
+        
+        return (exchange, chain) -> {
+            
+            String sessionId = sessionManager.getSessionId();
             if (sessionId!=null) {
-            	
-            	URI uri = exchange.getRequest().getURI();
-				StringBuilder query = new StringBuilder();
-				String originalQuery = uri.getRawQuery();
+                
+                URI uri = exchange.getRequest().getURI();
+                StringBuilder query = new StringBuilder();
+                String originalQuery = uri.getRawQuery();
 
-				if (StringUtils.hasText(originalQuery)) {
-					query.append(originalQuery);
-					if (originalQuery.charAt(originalQuery.length() - 1) != '&') {
-						query.append('&');
-					}
-				}
-				query.append("sessionId");
-				query.append("=");
-				query.append(sessionId);
+                if (StringUtils.hasText(originalQuery)) {
+                    query.append(originalQuery);
+                    if (originalQuery.charAt(originalQuery.length() - 1) != '&') {
+                        query.append('&');
+                    }
+                }
+                query.append("sessionId");
+                query.append("=");
+                query.append(sessionId);
 
-				try {
-					URI newUri = UriComponentsBuilder.fromUri(uri).replaceQuery(query.toString()).build(true).toUri();
-					//logger.debug("URI is now " + newUri.toString());
-					ServerHttpRequest request = exchange.getRequest().mutate().uri(newUri).build();
-					return chain.filter(exchange.mutate().request(request).build()).then(Mono.fromRunnable(() -> {
-						ServerHttpResponse response = exchange.getResponse();
-						//If unauthorized -> refresh session so that the next call will be ok
-						if (response.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-							sessionManager.refreshSession();
-						}
-					}));
-				}
-				catch (RuntimeException ex) {
-					throw new IllegalStateException("Invalid URI query: \"" + query.toString() + "\"");
-				}
+                try {
+                    URI newUri = UriComponentsBuilder.fromUri(uri).replaceQuery(query.toString()).build(true).toUri();
+                    //logger.debug("URI is now " + newUri.toString());
+                    ServerHttpRequest request = exchange.getRequest().mutate().uri(newUri).build();
+                    return chain.filter(exchange.mutate().request(request).build()).then(Mono.fromRunnable(() -> {
+                        ServerHttpResponse response = exchange.getResponse();
+                        //If unauthorized -> refresh session so that the next call will be ok
+                        if (response.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+                            sessionManager.refreshSession();
+                        }
+                    }));
+                }
+                catch (RuntimeException ex) {
+                    throw new IllegalStateException("Invalid URI query: \"" + query.toString() + "\"");
+                }
             } 
             logger.warn("Got no Command-Session-ID - API-Call will fail");
             return chain.filter(exchange);
         };
-		
-	
-	}
+        
+    
+    }
 
-	
+    
 
 }

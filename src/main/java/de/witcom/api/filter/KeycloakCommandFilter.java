@@ -33,148 +33,148 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<KeycloakCommandFilter.Config>{
-	
-	@Autowired
-	private CommandSessionManager sessionManager;
-	
-	private String defaultReadRole="read";
-	private String defaultWorkRole="work";
-	
-	private static final String WWW_AUTH_HEADER = "WWW-Authenticate";
-	
-	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
-	@Autowired
-	ApplicationProperties appProperties;
-	
-	@Autowired
-	KeyCloakTokenService tokenService;
-	
-	public KeycloakCommandFilter() {
-		super(Config.class);
-	}
+    
+    @Autowired
+    private CommandSessionManager sessionManager;
+    
+    private String defaultReadRole="read";
+    private String defaultWorkRole="work";
+    
+    private static final String WWW_AUTH_HEADER = "WWW-Authenticate";
+    
+    Logger logger = LoggerFactory.getLogger(this.getClass());
+    
+    @Autowired
+    ApplicationProperties appProperties;
+    
+    @Autowired
+    KeyCloakTokenService tokenService;
+    
+    public KeycloakCommandFilter() {
+        super(Config.class);
+    }
 
-	@Override
-	public GatewayFilter apply(Config config) {
-		
-		return (exchange, chain) -> {
-			if (config==null) {
-				logger.error("No keycloak-resource-id configured. Authorization not possible");
+    @Override
+    public GatewayFilter apply(Config config) {
+        
+        return (exchange, chain) -> {
+            if (config==null) {
+                logger.error("No keycloak-resource-id configured. Authorization not possible");
                 return this.onError(exchange, "No keycloak-resource-id configured. Authorization not possible");
-			}
-			if (StringUtils.isBlank(config.getResourceId())) {
-				logger.error("No keycloak-resource-id configured. Authorization not possible");
+            }
+            if (StringUtils.isBlank(config.getResourceId())) {
+                logger.error("No keycloak-resource-id configured. Authorization not possible");
                 return this.onError(exchange, "No keycloak-resource-id configured. Authorization not possible");
-			}
-			
-			//check access
-			try {
-				String token = this.tokenService.extractJWTToken(exchange.getRequest());
-				AccessToken accessToken = this.tokenService.extractAccessToken(token);
-				
-				if (!this.hasAccess(exchange.getRequest().getURI(),accessToken,config)) {
-            		logger.warn("No {} access to resource {}",exchange.getRequest().getMethod().name(),exchange.getRequest().getPath());
-                	return this.onError(exchange,"No access to the requested resource");
+            }
+            
+            //check access
+            try {
+                String token = this.tokenService.extractJWTToken(exchange.getRequest());
+                AccessToken accessToken = this.tokenService.extractAccessToken(token);
+                
+                if (!this.hasAccess(exchange.getRequest().getURI(),accessToken,config)) {
+                    logger.warn("No {} access to resource {}",exchange.getRequest().getMethod().name(),exchange.getRequest().getPath());
+                    return this.onError(exchange,"No access to the requested resource");
                 }
-			} catch (KeyCloakFilterException ex) {
+            } catch (KeyCloakFilterException ex) {
 
                 logger.error(ex.toString());
                 return this.onError(exchange, ex.getMessage());
             }
-			
-			String sessionId = sessionManager.getSessionId();
+            
+            String sessionId = sessionManager.getSessionId();
             if (sessionId!=null) {
-            	
-            	URI uri = exchange.getRequest().getURI();
-				StringBuilder query = new StringBuilder();
-				String originalQuery = uri.getRawQuery();
+                
+                URI uri = exchange.getRequest().getURI();
+                StringBuilder query = new StringBuilder();
+                String originalQuery = uri.getRawQuery();
 
-				if (StringUtils.isNotBlank(originalQuery)) {
-					query.append(originalQuery);
-					if (originalQuery.charAt(originalQuery.length() - 1) != '&') {
-						query.append('&');
-					}
-				}
-				query.append("sessionId");
-				query.append("=");
-				query.append(sessionId);
+                if (StringUtils.isNotBlank(originalQuery)) {
+                    query.append(originalQuery);
+                    if (originalQuery.charAt(originalQuery.length() - 1) != '&') {
+                        query.append('&');
+                    }
+                }
+                query.append("sessionId");
+                query.append("=");
+                query.append(sessionId);
 
-				try {
-					URI newUri = UriComponentsBuilder.fromUri(uri).replaceQuery(query.toString()).build(true).toUri();
-					//logger.debug("URI is now " + newUri.toString());
-					ServerHttpRequest request = exchange.getRequest().mutate().uri(newUri).build();
-					return chain.filter(exchange.mutate().request(request).build()).then(Mono.fromRunnable(() -> {
-						ServerHttpResponse response = exchange.getResponse();
-						//If unauthorized -> refresh session so that the next call will be ok
-						if (response.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-							sessionManager.refreshSession();
-						}
-					}));
-				}
-				catch (RuntimeException ex) {
-					throw new IllegalStateException("Invalid URI query: \"" + query.toString() + "\"");
-				}
+                try {
+                    URI newUri = UriComponentsBuilder.fromUri(uri).replaceQuery(query.toString()).build(true).toUri();
+                    //logger.debug("URI is now " + newUri.toString());
+                    ServerHttpRequest request = exchange.getRequest().mutate().uri(newUri).build();
+                    return chain.filter(exchange.mutate().request(request).build()).then(Mono.fromRunnable(() -> {
+                        ServerHttpResponse response = exchange.getResponse();
+                        //If unauthorized -> refresh session so that the next call will be ok
+                        if (response.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+                            sessionManager.refreshSession();
+                        }
+                    }));
+                }
+                catch (RuntimeException ex) {
+                    throw new IllegalStateException("Invalid URI query: \"" + query.toString() + "\"");
+                }
             } 
             logger.warn("Got no Command-Session-ID - API-Call will fail");
             return chain.filter(exchange);
         };
-	}
-	
-	private boolean hasAccess(URI uri,AccessToken accessToken,Config config) {
-		
-		String audience=config.getResourceId();
-		String readRole=this.defaultReadRole;
-		String workRole=this.defaultWorkRole;
-		if (!StringUtils.isBlank(config.getRoleRead())) {
-			readRole=config.getRoleRead();
-		}
-		if (!StringUtils.isBlank(config.getRoleWork())) {
-			workRole=config.getRoleWork();
-		}
-		
-		String originalPath = uri.getRawPath();
-		//logger.debug(originalPath);
-		String pattern = "";
-		//very basic pattern matching
-		//basic query operations for all entities
-		pattern = "/\\w*/api/rest/(entity|entity/custom)/(\\w*)/(query.*)";
-		boolean queryBasic = Pattern.matches(pattern, originalPath);
-		//logger.debug("queryBasic {}",queryBasic);
-		//relations - starting with uppercase-letter 
-		pattern = "/\\w*/api/rest/(entity|entity/custom)/(\\w*)/(\\w*)/([A-Z]\\w*)";
-		boolean queryRelation = Pattern.matches(pattern, originalPath);
-		//logger.debug("queryRelation {}",queryRelation);
-		
-		if (queryBasic || queryRelation) {
-			//logger.debug("Check read-access for {}",originalPath);
-			return this.hasRole(accessToken, audience, readRole);
-		}
-		//all other request require work role.... 
-		//logger.debug("Check work-access for {}",originalPath);
-		return this.hasRole(accessToken, audience, workRole);
+    }
+    
+    private boolean hasAccess(URI uri,AccessToken accessToken,Config config) {
+        
+        String audience=config.getResourceId();
+        String readRole=this.defaultReadRole;
+        String workRole=this.defaultWorkRole;
+        if (!StringUtils.isBlank(config.getRoleRead())) {
+            readRole=config.getRoleRead();
+        }
+        if (!StringUtils.isBlank(config.getRoleWork())) {
+            workRole=config.getRoleWork();
+        }
+        
+        String originalPath = uri.getRawPath();
+        //logger.debug(originalPath);
+        String pattern = "";
+        //very basic pattern matching
+        //basic query operations for all entities
+        pattern = "/\\w*/api/rest/(entity|entity/custom)/(\\w*)/(query.*)";
+        boolean queryBasic = Pattern.matches(pattern, originalPath);
+        //logger.debug("queryBasic {}",queryBasic);
+        //relations - starting with uppercase-letter 
+        pattern = "/\\w*/api/rest/(entity|entity/custom)/(\\w*)/(\\w*)/([A-Z]\\w*)";
+        boolean queryRelation = Pattern.matches(pattern, originalPath);
+        //logger.debug("queryRelation {}",queryRelation);
+        
+        if (queryBasic || queryRelation) {
+            //logger.debug("Check read-access for {}",originalPath);
+            return this.hasRole(accessToken, audience, readRole);
+        }
+        //all other request require work role.... 
+        //logger.debug("Check work-access for {}",originalPath);
+        return this.hasRole(accessToken, audience, workRole);
 
-	}
-	
-	private boolean hasRole(AccessToken accessToken,String resource,String role) {
-		
-		//logger.debug ("Looking for role {} in resource {}",role,resource);
-		Map<String,AccessToken.Access> resAccess = accessToken.getResourceAccess();
-		if (resAccess.containsKey(resource)){
-			Set<String> roles = resAccess.get(resource).getRoles();
-			//logger.debug("Found resource-roles in token {}",roles.toString());
-			if (roles.contains(role)) {
-				return true;
-			}
-			logger.warn("Required role {} not found in token",role);
-			return false;
-		} 
-		logger.warn("No Resource-Access defined for resource {}",resource);
-		
-		return false;
-		
-	}
-	
-	private Mono<Void> onError(ServerWebExchange exchange, String err)
+    }
+    
+    private boolean hasRole(AccessToken accessToken,String resource,String role) {
+        
+        //logger.debug ("Looking for role {} in resource {}",role,resource);
+        Map<String,AccessToken.Access> resAccess = accessToken.getResourceAccess();
+        if (resAccess.containsKey(resource)){
+            Set<String> roles = resAccess.get(resource).getRoles();
+            //logger.debug("Found resource-roles in token {}",roles.toString());
+            if (roles.contains(role)) {
+                return true;
+            }
+            logger.warn("Required role {} not found in token",role);
+            return false;
+        } 
+        logger.warn("No Resource-Access defined for resource {}",resource);
+        
+        return false;
+        
+    }
+    
+    private Mono<Void> onError(ServerWebExchange exchange, String err)
     {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -182,64 +182,64 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
 
         return response.setComplete();
     }
-	
-	private String formatErrorMsg(String msg)
+    
+    private String formatErrorMsg(String msg)
     {
         return String.format("Bearer realm=\""+appProperties.getKeycloakConfig().getKeycloakRealmId().trim()+"\", " +
                 "error=\"https://tools.ietf.org/html/rfc7519\", " +
                 "error_description=\"%s\" ",  msg);
     }		
-	
-	public static class Config implements HasRouteId {
-		
-		private String resourceId;
-		private String roleRead;
-		private String roleWork;
-		private String roleDelete;
-		private String routeId;
-		
-		public String getRoleRead() {
-			return roleRead;
-		}
-		public Config setRoleRead(String roleRead) {
-			this.roleRead = roleRead;
-			return this;
-		}
-		public String getRoleWork() {
-			return roleWork;
-		}
-		public Config setRoleWork(String roleWork) {
-			this.roleWork = roleWork;
-			return this;
-		}
-		public String getRoleDelete() {
-			return roleDelete;
-		}
-		public Config setRoleDelete(String roleDelete) {
-			this.roleDelete = roleDelete;
-			return this;
-		}
-		@Override
-		public void setRouteId(String routeId) {
-			this.routeId = routeId;
-			
-		}
-		@Override
-		public String getRouteId() {
-			return routeId;
-		}
-		public String getResourceId() {
-			return resourceId;
-		}
-		public Config setResourceId(String resourceId) {
-			this.resourceId = resourceId;
-			return this;
-		}
-		
-		
-		
-	}
+    
+    public static class Config implements HasRouteId {
+        
+        private String resourceId;
+        private String roleRead;
+        private String roleWork;
+        private String roleDelete;
+        private String routeId;
+        
+        public String getRoleRead() {
+            return roleRead;
+        }
+        public Config setRoleRead(String roleRead) {
+            this.roleRead = roleRead;
+            return this;
+        }
+        public String getRoleWork() {
+            return roleWork;
+        }
+        public Config setRoleWork(String roleWork) {
+            this.roleWork = roleWork;
+            return this;
+        }
+        public String getRoleDelete() {
+            return roleDelete;
+        }
+        public Config setRoleDelete(String roleDelete) {
+            this.roleDelete = roleDelete;
+            return this;
+        }
+        @Override
+        public void setRouteId(String routeId) {
+            this.routeId = routeId;
+            
+        }
+        @Override
+        public String getRouteId() {
+            return routeId;
+        }
+        public String getResourceId() {
+            return resourceId;
+        }
+        public Config setResourceId(String resourceId) {
+            this.resourceId = resourceId;
+            return this;
+        }
+        
+        
+        
+    }
 
-	
+    
 
 }

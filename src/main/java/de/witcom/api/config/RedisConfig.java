@@ -14,16 +14,16 @@ import net.javacrumbs.shedlock.provider.redis.spring.RedisLockProvider;
 @Log4j2
 public class RedisConfig {
 
-	@Bean
-	public LockProvider lockProvider(RedisConnectionFactory connectionFactory) {
-		return new RedisLockProvider(connectionFactory, "API-GATEWAY");
-	}
+    @Bean
+    public LockProvider lockProvider(RedisConnectionFactory connectionFactory) {
+        return new RedisLockProvider(connectionFactory, "API-GATEWAY");
+    }
     
     @Bean
-	StringRedisTemplate template(RedisConnectionFactory connectionFactory) {
-	    log.debug("Configuring REDIS");
-		return new StringRedisTemplate(connectionFactory);
-	}
+    StringRedisTemplate template(RedisConnectionFactory connectionFactory) {
+        log.debug("Configuring REDIS");
+        return new StringRedisTemplate(connectionFactory);
+    }
     
 }
 

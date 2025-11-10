@@ -20,24 +20,24 @@ import net.javacrumbs.shedlock.core.SimpleLock;
 @RequiredArgsConstructor
 public class LockManager {
 
-	private final LockProvider lockProvider;
+    private final LockProvider lockProvider;
 
-	public Optional<SimpleLock> lock(String lockName,Duration minimumLockDuration){
+    public Optional<SimpleLock> lock(String lockName,Duration minimumLockDuration){
 
-		LockConfiguration lockConfiguration = new LockConfiguration(Instant.now(),
-			lockName,
-			minimumLockDuration,
-			minimumLockDuration
-		);
-		log.debug(String.format("Trying to lock %s", lockConfiguration.toString()));
+        LockConfiguration lockConfiguration = new LockConfiguration(Instant.now(),
+            lockName,
+            minimumLockDuration,
+            minimumLockDuration
+        );
+        log.debug(String.format("Trying to lock %s", lockConfiguration.toString()));
 
-		//trying to lock
-		return lockProvider.lock(lockConfiguration); 
+        //trying to lock
+        return lockProvider.lock(lockConfiguration); 
 
-	}
+    }
 
-	public void unlock(Optional<SimpleLock> lock){
-		lock.ifPresent(mylock -> mylock.unlock());
-	}
-	
+    public void unlock(Optional<SimpleLock> lock){
+        lock.ifPresent(mylock -> mylock.unlock());
+    }
+    
 }

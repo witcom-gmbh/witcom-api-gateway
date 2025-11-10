@@ -14,24 +14,24 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class CommandSessionManagerTest {
 
-	@Autowired
-	private CommandSessionManager sessionManager;
+    @Autowired
+    private CommandSessionManager sessionManager;
 
-	@Autowired
+    @Autowired
     SessionRepository sessionRepo;
 
-	
-	@Test
-	void getSessionId() {
+    
+    @Test
+    void getSessionId() {
 
-		
-		sessionRepo.deleteAll();
-		
-		assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
-		assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
-		
-		
-	}
-	
+        
+        sessionRepo.deleteAll();
+        
+        assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
+        assertEquals("a-random-sessionid",this.sessionManager.getSessionId());
+        
+        
+    }
+    
 
 }

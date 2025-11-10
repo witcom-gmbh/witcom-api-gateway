@@ -13,8 +13,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAutoConfiguration
 public class WitcomApiGatewayApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(WitcomApiGatewayApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(WitcomApiGatewayApplication.class, args);
+    }
 
 }

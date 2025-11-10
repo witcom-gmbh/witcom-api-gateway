@@ -30,225 +30,225 @@ import net.javacrumbs.shedlock.core.SimpleLock;
 
 @Service
 public class CommandSessionManager {
-	
-	//@Autowired
-	private final RestApiClient apiClient;
-	
-	//@Autowired
-	private final LoginApiClient loginClient;
-	
-	private String lastSession;
-	
-	private static final String APP_ID = "COMMAND";
-	
+    
+    //@Autowired
+    private final RestApiClient apiClient;
+    
+    //@Autowired
+    private final LoginApiClient loginClient;
+    
+    private String lastSession;
+    
+    private static final String APP_ID = "COMMAND";
+    
     //@Autowired
     private final SessionRepository sessionRepo;
 
-	//@Autowired
-	private final ApplicationProperties appProperties;
+    //@Autowired
+    private final ApplicationProperties appProperties;
 
-	private final LockManager lockManager;
-	
-	
-	Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final LockManager lockManager;
+    
+    
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	public CommandSessionManager(@Lazy RestApiClient apiClient,@Lazy LoginApiClient loginClient,SessionRepository sessionRepo,ApplicationProperties appProperties,LockManager lockManager){
-		this.apiClient = apiClient;
-		this.appProperties = appProperties;
-		this.sessionRepo = sessionRepo;
-		this.loginClient = loginClient;
-		this.lockManager = lockManager;
-	}
+    public CommandSessionManager(@Lazy RestApiClient apiClient,@Lazy LoginApiClient loginClient,SessionRepository sessionRepo,ApplicationProperties appProperties,LockManager lockManager){
+        this.apiClient = apiClient;
+        this.appProperties = appProperties;
+        this.sessionRepo = sessionRepo;
+        this.loginClient = loginClient;
+        this.lockManager = lockManager;
+    }
 
-	public String getSessionId() {
-	    
-	    Session session = loadSessionFromCache();
-	    if (session != null){
-	        //Todo: Validierung ob noch gueltig
-	    	
-	    	//if (this.isSessionActive(session.getSessionId())) {
-	    		return session.getSessionId();
-	    	//}
-	    	//logger.debug("Session is NOT active");
-	    }
-	    
-	    //Keine Session-ID da -> Login
-	    logger.debug("Perform login");
-	    this.login();
-	    
-	    session = this.loadSessionFromCache();
-	    if (session != null){
-	        return session.getSessionId();    
-	    }
-	    //hier ging was in die hose
-	    logger.warn("Unable to get Session-ID");
-		return null;
-		
-	}
-	
-	private Session loadSessionFromCache(){
-		   Optional<Session> session = this.sessionRepo.findById(APP_ID);
-		   if (session.isPresent()) {
-			   this.lastSession=session.get().getSessionId();
-		       return session.get(); 
-	       }
-	       return null;
-		}	
-	
-	private boolean isSessionActive(String sessionId) {
-		logger.debug("Check for session {}",sessionId);
-		
-		if (!this.isConfigurationValid()) {
-			return false;
-		}
-		@Valid
-		LoginGetActiveMandatorRequest body = new LoginGetActiveMandatorRequest();
-		
-		try {
-			LoginGetActiveMandatorResponse loginResponse = this.loginClient.loginGetActiveMandator(sessionId, body );
-			
-				if (!loginResponse.getStatus().getSuccess()){
-					logger.error("Sessioncheck in command  was not successful - got Status : {}",loginResponse.getStatus().getMessage());
-					return false;
-				}
-				//ok so far
-				logger.debug("session {} is active",sessionId);
-				return true;
-		} catch (Exception e) {
-			logger.error("Error when trying to check session in command: {}", e.getMessage());
-		}
-		
-		return false;
-	}
-	
-	private boolean isConfigurationValid() {
-		
-		if (StringUtils.isEmpty(appProperties.getCommandConfig().getGroup())){
-	        logger.error("Command group  is empty - unable to login");
-	        return false;
+    public String getSessionId() {
+        
+        Session session = loadSessionFromCache();
+        if (session != null){
+            //Todo: Validierung ob noch gueltig
+            
+            //if (this.isSessionActive(session.getSessionId())) {
+                return session.getSessionId();
+            //}
+            //logger.debug("Session is NOT active");
         }
-   	    if (StringUtils.isEmpty(appProperties.getCommandConfig().getUser())){
-	        logger.error("Command User is empty - unable to login");
-	        return false;
+        
+        //Keine Session-ID da -> Login
+        logger.debug("Perform login");
+        this.login();
+        
+        session = this.loadSessionFromCache();
+        if (session != null){
+            return session.getSessionId();    
         }
-   	    if (StringUtils.isEmpty(appProperties.getCommandConfig().getPassword())){
-	        logger.error("Command Password is empty - unable to login");
-	        return false;
-        }        
-   	    if (StringUtils.isEmpty(appProperties.getCommandConfig().getMandant())){
-	        logger.error("Command Mandant is empty - unable to login");
-	        return false;
+        //hier ging was in die hose
+        logger.warn("Unable to get Session-ID");
+        return null;
+        
+    }
+    
+    private Session loadSessionFromCache(){
+           Optional<Session> session = this.sessionRepo.findById(APP_ID);
+           if (session.isPresent()) {
+               this.lastSession=session.get().getSessionId();
+               return session.get(); 
+           }
+           return null;
         }	
-   	    
-   	    return true;
-		
-	}
-	
-	private void login() {
-		
-		if (!this.isConfigurationValid()) {
-			return;
-		}
-		@Valid
-		LoginRequest login = new LoginRequest();
-		login.setManId(appProperties.getCommandConfig().getMandant());
-		login.setUserGroupName(appProperties.getCommandConfig().getGroup());
-		login.setUser(appProperties.getCommandConfig().getUser());
-		login.setPassword(appProperties.getCommandConfig().getPassword());
-		
-		try {
-			LoginResponse loginResponse = apiClient.login(login);
-			if (!loginResponse.getStatus().getSuccess()){
-				logger.error("Login to Command  was not successful - got Status : {}",loginResponse.getStatus().getMessage());
-				return;
-			}
-			//ok so far
-			this.storeSession(loginResponse.getSessionId());
-		} catch (Exception e) {
-			logger.error("Error when trying to login to command: {}", e.getMessage());
-		}
-	}
+    
+    private boolean isSessionActive(String sessionId) {
+        logger.debug("Check for session {}",sessionId);
+        
+        if (!this.isConfigurationValid()) {
+            return false;
+        }
+        @Valid
+        LoginGetActiveMandatorRequest body = new LoginGetActiveMandatorRequest();
+        
+        try {
+            LoginGetActiveMandatorResponse loginResponse = this.loginClient.loginGetActiveMandator(sessionId, body );
+            
+                if (!loginResponse.getStatus().getSuccess()){
+                    logger.error("Sessioncheck in command  was not successful - got Status : {}",loginResponse.getStatus().getMessage());
+                    return false;
+                }
+                //ok so far
+                logger.debug("session {} is active",sessionId);
+                return true;
+        } catch (Exception e) {
+            logger.error("Error when trying to check session in command: {}", e.getMessage());
+        }
+        
+        return false;
+    }
+    
+    private boolean isConfigurationValid() {
+        
+        if (StringUtils.isEmpty(appProperties.getCommandConfig().getGroup())){
+            logger.error("Command group  is empty - unable to login");
+            return false;
+        }
+        if (StringUtils.isEmpty(appProperties.getCommandConfig().getUser())){
+            logger.error("Command User is empty - unable to login");
+            return false;
+        }
+        if (StringUtils.isEmpty(appProperties.getCommandConfig().getPassword())){
+            logger.error("Command Password is empty - unable to login");
+            return false;
+        }        
+        if (StringUtils.isEmpty(appProperties.getCommandConfig().getMandant())){
+            logger.error("Command Mandant is empty - unable to login");
+            return false;
+        }	
+        
+        return true;
+        
+    }
+    
+    private void login() {
+        
+        if (!this.isConfigurationValid()) {
+            return;
+        }
+        @Valid
+        LoginRequest login = new LoginRequest();
+        login.setManId(appProperties.getCommandConfig().getMandant());
+        login.setUserGroupName(appProperties.getCommandConfig().getGroup());
+        login.setUser(appProperties.getCommandConfig().getUser());
+        login.setPassword(appProperties.getCommandConfig().getPassword());
+        
+        try {
+            LoginResponse loginResponse = apiClient.login(login);
+            if (!loginResponse.getStatus().getSuccess()){
+                logger.error("Login to Command  was not successful - got Status : {}",loginResponse.getStatus().getMessage());
+                return;
+            }
+            //ok so far
+            this.storeSession(loginResponse.getSessionId());
+        } catch (Exception e) {
+            logger.error("Error when trying to login to command: {}", e.getMessage());
+        }
+    }
 
-	@Async("gatewayTaskExecutor")
-	public void triggerSessionRefresh(){
-		if (!appProperties.getMcpConfig().isEnabled()){
-			return;
-		}
-		//we could perform a logout here for forcing a session refresh
-		refreshSession();
-	}	
+    @Async("gatewayTaskExecutor")
+    public void triggerSessionRefresh(){
+        if (!appProperties.getMcpConfig().isEnabled()){
+            return;
+        }
+        //we could perform a logout here for forcing a session refresh
+        refreshSession();
+    }	
 
-	/*
-	public void refreshSession() {
-	    logger.info("Refreshing session with Command");
-	    Session session = loadSessionFromCache();
-	    if (session != null){
-	        if (isSessionActive(session.getSessionId())) {
-			 return;
-		    }
-	    }
-		this.login();
-	}
-	*/
-	
-	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
-	public void scheduledSessionRefresh() {
-		if (!appProperties.getCommandConfig().isEnabled()){
-			return;
-		}
-	    refreshSession();
-	}
+    /*
+    public void refreshSession() {
+        logger.info("Refreshing session with Command");
+        Session session = loadSessionFromCache();
+        if (session != null){
+            if (isSessionActive(session.getSessionId())) {
+             return;
+            }
+        }
+        this.login();
+    }
+    */
+    
+    @Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
+    public void scheduledSessionRefresh() {
+        if (!appProperties.getCommandConfig().isEnabled()){
+            return;
+        }
+        refreshSession();
+    }
 
-	public void refreshSession() {
-		//get a lock
-		Optional<SimpleLock> myLock = this.lockManager.lock("COMMAND_SESSION_REFRESH", Duration.ofSeconds(15L));
-		if (myLock.isEmpty()){
-			logger.info("Unable to get a lock for Command session-refresh");
-			return;
-		} 
-		try {
-			logger.info("Refreshing session with Command");
-			Session session = loadSessionFromCache();
-			if (session != null){
-				if (isSessionActive(session.getSessionId())) {
-				return;
-				}
-			}
-			logger.warn("Session expired - refresh required");
-			this.login();
-		}finally {
-			//unlock
-			lockManager.unlock(myLock);
-		}
-			
-	}	
-	
-	private void storeSession(String sessionId) {
-	    logger.debug("Storing Session-ID {}",sessionId);
-		Session session = new Session(APP_ID,sessionId);
-		this.lastSession=sessionId;
-		//Todo - add expiration date
-	    sessionRepo.save(session);
-	}	
-	
-	@PreDestroy
-	private void shutdown() {
+    public void refreshSession() {
+        //get a lock
+        Optional<SimpleLock> myLock = this.lockManager.lock("COMMAND_SESSION_REFRESH", Duration.ofSeconds(15L));
+        if (myLock.isEmpty()){
+            logger.info("Unable to get a lock for Command session-refresh");
+            return;
+        } 
+        try {
+            logger.info("Refreshing session with Command");
+            Session session = loadSessionFromCache();
+            if (session != null){
+                if (isSessionActive(session.getSessionId())) {
+                return;
+                }
+            }
+            logger.warn("Session expired - refresh required");
+            this.login();
+        }finally {
+            //unlock
+            lockManager.unlock(myLock);
+        }
+            
+    }	
+    
+    private void storeSession(String sessionId) {
+        logger.debug("Storing Session-ID {}",sessionId);
+        Session session = new Session(APP_ID,sessionId);
+        this.lastSession=sessionId;
+        //Todo - add expiration date
+        sessionRepo.save(session);
+    }	
+    
+    @PreDestroy
+    private void shutdown() {
 
-		if (!appProperties.getCommandConfig().isEnabled()){
-			return;
-		}
+        if (!appProperties.getCommandConfig().isEnabled()){
+            return;
+        }
 
-		logger.debug("Perform logout from command");
-		
-		String sessionId=this.lastSession;
-		if(sessionId != null) {
-			try {
-				this.apiClient.logout(sessionId);
-			} catch (Exception e) {
-				logger.error("Error when trying to logout from command: {}", e.getMessage());
-			}
-		}
-	}
-	
+        logger.debug("Perform logout from command");
+        
+        String sessionId=this.lastSession;
+        if(sessionId != null) {
+            try {
+                this.apiClient.logout(sessionId);
+            } catch (Exception e) {
+                logger.error("Error when trying to logout from command: {}", e.getMessage());
+            }
+        }
+    }
+    
 
 }

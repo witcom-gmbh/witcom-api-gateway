@@ -38,11 +38,11 @@ import net.javacrumbs.shedlock.core.SimpleLock;
 public class McpSessionManager {
 
     private String lastSession;
-	
-	private static final String APP_ID = "MCP";
-	
-	@Autowired
-	private LockManager lockManager;
+    
+    private static final String APP_ID = "MCP";
+    
+    @Autowired
+    private LockManager lockManager;
 
     @Autowired
     private ApiClient mcpAuthClient;
@@ -52,10 +52,10 @@ public class McpSessionManager {
     @Autowired
     SessionRepository sessionRepo;
 
-	@Autowired
-	ApplicationProperties appProperties;
-	
-	Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Autowired
+    ApplicationProperties appProperties;
+    
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public McpSessionManager(ApiClient mcpAuthClient){
 
@@ -63,95 +63,95 @@ public class McpSessionManager {
 
     }
 
-	public String getSessionId() {
-	    
-	    Session session = loadSessionFromCache();
-	    if (session != null){
-	        //Todo: Validierung ob noch gueltig
-			if (this.isSessionActive(session.getSessionId())) {
-	    		return session.getSessionId();
-	    	}
-	    	logger.debug("Session is NOT active");
-	    }
-	    
-	    //Keine Session-ID da -> Login
-	    logger.debug("Perform login to MCP");
-	    this.login();
-	    
-	    session = this.loadSessionFromCache();
-	    if (session != null){
-	        return session.getSessionId();    
-	    }
-	    //hier ging was in die hose
-	    logger.warn("Unable to get MCP Token");
-		return null;
-		
-	}
+    public String getSessionId() {
+        
+        Session session = loadSessionFromCache();
+        if (session != null){
+            //Todo: Validierung ob noch gueltig
+            if (this.isSessionActive(session.getSessionId())) {
+                return session.getSessionId();
+            }
+            logger.debug("Session is NOT active");
+        }
+        
+        //Keine Session-ID da -> Login
+        logger.debug("Perform login to MCP");
+        this.login();
+        
+        session = this.loadSessionFromCache();
+        if (session != null){
+            return session.getSessionId();    
+        }
+        //hier ging was in die hose
+        logger.warn("Unable to get MCP Token");
+        return null;
+        
+    }
 
-	private void logoutSession(String sessionId){
+    private void logoutSession(String sessionId){
 
-		String url = appProperties.getMcpConfig().getBaseUrl() + "/tron/api/v1/tokens/" + sessionId;
-		RestTemplate restTemplate = new RestTemplate();
+        String url = appProperties.getMcpConfig().getBaseUrl() + "/tron/api/v1/tokens/" + sessionId;
+        RestTemplate restTemplate = new RestTemplate();
 
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-		requestHeaders.set("Authorization", "Bearer " + sessionId);
-		HttpEntity<Void> request = new HttpEntity<>(requestHeaders);
-
-
-		try {
-			
-			ResponseEntity<LoginInfoSerializer> response = restTemplate.exchange(url, HttpMethod.DELETE, request,
-					LoginInfoSerializer.class);
-			
-			if (!response.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
-				logger.error("Deleting session in MCP was not successful - got Status : {}", response.getStatusCode());
-			}
-		} catch (Exception e) {
-			logger.error("Error when trying to delete session in MCP {} : {}", url, e.getMessage());
-		}
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+        requestHeaders.set("Authorization", "Bearer " + sessionId);
+        HttpEntity<Void> request = new HttpEntity<>(requestHeaders);
 
 
-	}
+        try {
+            
+            ResponseEntity<LoginInfoSerializer> response = restTemplate.exchange(url, HttpMethod.DELETE, request,
+                    LoginInfoSerializer.class);
+            
+            if (!response.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
+                logger.error("Deleting session in MCP was not successful - got Status : {}", response.getStatusCode());
+            }
+        } catch (Exception e) {
+            logger.error("Error when trying to delete session in MCP {} : {}", url, e.getMessage());
+        }
+
+
+    }
     
     private boolean isSessionActive(String sessionId) {
-		logger.debug("Check for MCP session {}",sessionId);
-		
-		if (!this.isConfigurationValid()) {
-			return false;
-		}
+        logger.debug("Check for MCP session {}",sessionId);
+        
+        if (!this.isConfigurationValid()) {
+            return false;
+        }
 
-		String url = appProperties.getMcpConfig().getBaseUrl() + "/tron/api/v1/login-info";
-		RestTemplate restTemplate = new RestTemplate();
+        String url = appProperties.getMcpConfig().getBaseUrl() + "/tron/api/v1/login-info";
+        RestTemplate restTemplate = new RestTemplate();
 
-		HttpHeaders requestHeaders = new HttpHeaders();
-		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-		requestHeaders.set("Authorization", "Bearer " + sessionId);
-		HttpEntity<Void> request = new HttpEntity<>(requestHeaders);
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+        requestHeaders.set("Authorization", "Bearer " + sessionId);
+        HttpEntity<Void> request = new HttpEntity<>(requestHeaders);
 
-		try {
-			
-			ResponseEntity<LoginInfoSerializer> response = restTemplate.exchange(url, HttpMethod.GET, request,
-					LoginInfoSerializer.class);
-			
-			if (!response.getStatusCode().equals(HttpStatus.OK)) {
-				logger.error("Session validation in MCP was not successful - got Status : {}", response.getStatusCode());
-			} else {
-				return true;
-			}
-		} catch (Exception e) {
-			logger.error("Error when trying to validate session in MCP {} : {}", url, e.getMessage());
-		}
+        try {
+            
+            ResponseEntity<LoginInfoSerializer> response = restTemplate.exchange(url, HttpMethod.GET, request,
+                    LoginInfoSerializer.class);
+            
+            if (!response.getStatusCode().equals(HttpStatus.OK)) {
+                logger.error("Session validation in MCP was not successful - got Status : {}", response.getStatusCode());
+            } else {
+                return true;
+            }
+        } catch (Exception e) {
+            logger.error("Error when trying to validate session in MCP {} : {}", url, e.getMessage());
+        }
 
-		return false;
+        return false;
 
     }
 
 
     private void login() {
         if (!this.isConfigurationValid()) {
-			return;
-		}
+            return;
+        }
 
         try {
             OAuth2TokenSerializer res = this.tokensApi.oauth2TokensCreate(appProperties.getMcpConfig().getUser(), appProperties.getMcpConfig().getPassword(), "password", null, null, null, null, null, null, null);
@@ -162,12 +162,12 @@ public class McpSessionManager {
 
     }
 
-	private void storeSession(String sessionId) {
-	    logger.debug("Storing Session-ID {}",sessionId);
-		Session session = new Session(APP_ID,sessionId);
-		this.lastSession=sessionId;
-	    sessionRepo.save(session);
-	}    
+    private void storeSession(String sessionId) {
+        logger.debug("Storing Session-ID {}",sessionId);
+        Session session = new Session(APP_ID,sessionId);
+        this.lastSession=sessionId;
+        sessionRepo.save(session);
+    }    
 
     private Session loadSessionFromCache(){
         Optional<Session> session = this.sessionRepo.findById(APP_ID);
@@ -179,82 +179,82 @@ public class McpSessionManager {
      }	
 
     private boolean isConfigurationValid() {
-		
-		if (StringUtils.isEmpty(appProperties.getMcpConfig().getBaseUrl())){
-	        logger.error("MCP baseurl is empty - unable to login");
-	        return false;
+        
+        if (StringUtils.isEmpty(appProperties.getMcpConfig().getBaseUrl())){
+            logger.error("MCP baseurl is empty - unable to login");
+            return false;
         }
-   	    if (StringUtils.isEmpty(appProperties.getMcpConfig().getUser())){
-	        logger.error("MCP User is empty - unable to login");
-	        return false;
+        if (StringUtils.isEmpty(appProperties.getMcpConfig().getUser())){
+            logger.error("MCP User is empty - unable to login");
+            return false;
         }
-   	    if (StringUtils.isEmpty(appProperties.getMcpConfig().getPassword())){
-	        logger.error("MCP Password is empty - unable to login");
-	        return false;
+        if (StringUtils.isEmpty(appProperties.getMcpConfig().getPassword())){
+            logger.error("MCP Password is empty - unable to login");
+            return false;
         }        
-   	   	
-   	    
-   	    return true;
-		
-	}
+        
+        
+        return true;
+        
+    }
 
-	@Async("gatewayTaskExecutor")
-	public void triggerSessionRefresh(){
-		if (!appProperties.getMcpConfig().isEnabled()){
-			return;
-		}
-		//we could perform a logout here for forcing a session refresh
-		refreshSession();
-	}
+    @Async("gatewayTaskExecutor")
+    public void triggerSessionRefresh(){
+        if (!appProperties.getMcpConfig().isEnabled()){
+            return;
+        }
+        //we could perform a logout here for forcing a session refresh
+        refreshSession();
+    }
 
-	@Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
-	public void scheduledSessionRefresh() {
-		if (!appProperties.getMcpConfig().isEnabled()){
-			return;
-		}
-	    refreshSession();
-	}
-	
-	public void refreshSession() {
-		//get a lock
-		Optional<SimpleLock> myLock = this.lockManager.lock("MCP_SESSION_REFRESH", Duration.ofSeconds(15L));
-		if (myLock.isEmpty()){
+    @Scheduled(fixedDelayString = "300000", initialDelayString = "${random.int(60000)}")
+    public void scheduledSessionRefresh() {
+        if (!appProperties.getMcpConfig().isEnabled()){
+            return;
+        }
+        refreshSession();
+    }
+    
+    public void refreshSession() {
+        //get a lock
+        Optional<SimpleLock> myLock = this.lockManager.lock("MCP_SESSION_REFRESH", Duration.ofSeconds(15L));
+        if (myLock.isEmpty()){
             logger.info("Unable to get a lock for ServicePlanet session-refresh");
             return;
         } 
 
-		try {
-			logger.info("Refreshing session with MCP");
-			Session session = loadSessionFromCache();
-			if (session != null){
-				if (isSessionActive(session.getSessionId())) {
-					return;
-				}
-			}
-			logger.warn("Session expired - refresh required");
-			this.login();
-		}finally {
-			//unlock
+        try {
+            logger.info("Refreshing session with MCP");
+            Session session = loadSessionFromCache();
+            if (session != null){
+                if (isSessionActive(session.getSessionId())) {
+                    return;
+                }
+            }
+            logger.warn("Session expired - refresh required");
+            this.login();
+        }finally {
+            //unlock
             lockManager.unlock(myLock);
         }
-	}    
-	
+    }    
+    
 
-	@PreDestroy
-	private void shutdown() {
-		if (!appProperties.getMcpConfig().isEnabled()){
-			return;
-		}
-		logger.debug("Perform logout from MCP");
-		
-		String sessionId=this.lastSession;
-		if(sessionId != null) {
-			try {
-				this.logoutSession(sessionId);
-			} catch (Exception e) {
-				logger.error("Error when trying to logout from MCP: {}", e.getMessage());
-			}
-		}
-	}	
+    @PreDestroy
+    private void shutdown() {
+        if (!appProperties.getMcpConfig().isEnabled()){
+            return;
+        }
+        logger.debug("Perform logout from MCP");
+        
+        String sessionId=this.lastSession;
+        if(sessionId != null) {
+            try {
+                this.logoutSession(sessionId);
+            } catch (Exception e) {
+                logger.error("Error when trying to logout from MCP: {}", e.getMessage());
+            }
+        }
+    }	
 
 }

@@ -18,21 +18,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties
 public class ClientConfiguration {
-	
-	//@Autowired
+    
+    //@Autowired
     private ObjectFactory<HttpMessageConverters> messageConverters = HttpMessageConverters::new;
 
-	@Bean
-	public Decoder decoder() {
-		//return new SpringDecoder(this.messageConverters);
-		return new JacksonDecoder();
-	}
+    @Bean
+    public Decoder decoder() {
+        //return new SpringDecoder(this.messageConverters);
+        return new JacksonDecoder();
+    }
 
-	@Bean
-	public Encoder encoder() {
-		//return new SpringEncoder(this.messageConverters);
-		return new JacksonEncoder();
-	}
+    @Bean
+    public Encoder encoder() {
+        //return new SpringEncoder(this.messageConverters);
+        return new JacksonEncoder();
+    }
 
 
 }

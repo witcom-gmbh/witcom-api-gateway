@@ -15,23 +15,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class BasicAuthFilter extends AbstractNameValueGatewayFilterFactory {
 
-	Logger logger = LoggerFactory.getLogger(this.getClass());
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	@Override
-	public GatewayFilter apply(NameValueConfig config) {
-		// TODO Auto-generated method stub
-		return (exchange, chain) -> {
-			String auth = config.getName()+ ":" +config.getValue();
-			String authHeader = "Basic " + Base64.getEncoder().encodeToString(auth.getBytes());
+    @Override
+    public GatewayFilter apply(NameValueConfig config) {
+        // TODO Auto-generated method stub
+        return (exchange, chain) -> {
+            String auth = config.getName()+ ":" +config.getValue();
+            String authHeader = "Basic " + Base64.getEncoder().encodeToString(auth.getBytes());
 
-			
-			
-		ServerHttpRequest request = exchange.getRequest().mutate()
-				.header(HttpHeaders.AUTHORIZATION, authHeader)
-				.build();
+            
+            
+        ServerHttpRequest request = exchange.getRequest().mutate()
+                .header(HttpHeaders.AUTHORIZATION, authHeader)
+                .build();
         return chain.filter(exchange.mutate().request(request).build());
-		};
+        };
 
-	}
+    }
 
 }

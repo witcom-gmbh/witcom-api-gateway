@@ -20,65 +20,65 @@ import reactor.core.publisher.Mono;
 @Component
 @Log4j2
 public class CommandSessionIdToHeaderFilter
-		extends AbstractGatewayFilterFactory<CommandSessionIdToHeaderFilter.Config> {
+        extends AbstractGatewayFilterFactory<CommandSessionIdToHeaderFilter.Config> {
 
-	private final CommandSessionManager sessionManager;
+    private final CommandSessionManager sessionManager;
 
-	public CommandSessionIdToHeaderFilter(CommandSessionManager sessionManager){
-		super(Config.class);
-		this.sessionManager = sessionManager;
-	}
+    public CommandSessionIdToHeaderFilter(CommandSessionManager sessionManager){
+        super(Config.class);
+        this.sessionManager = sessionManager;
+    }
 
-	@Override
-	public GatewayFilter apply(Config config) {
+    @Override
+    public GatewayFilter apply(Config config) {
 
-		return (exchange, chain) -> {
-			if (config == null || StringUtils.isBlank(config.getSessionHeader())) {
-				log.error("No header-name for command-session-id configured");
-				return this.onError(exchange, HttpStatusCode.valueOf(400),
-						"No header-name for command-session-id configured");
-			}
+        return (exchange, chain) -> {
+            if (config == null || StringUtils.isBlank(config.getSessionHeader())) {
+                log.error("No header-name for command-session-id configured");
+                return this.onError(exchange, HttpStatusCode.valueOf(400),
+                        "No header-name for command-session-id configured");
+            }
 
-			String sessionId = sessionManager.getSessionId();
+            String sessionId = sessionManager.getSessionId();
 
-			// if we have a session-id
-			if (StringUtils.isNotBlank(sessionId)) {
-				// add Session-ID to header
-				ServerHttpRequest request = exchange.getRequest().mutate()
-					.header(config.getSessionHeader(), sessionId)
-					.build();
+            // if we have a session-id
+            if (StringUtils.isNotBlank(sessionId)) {
+                // add Session-ID to header
+                ServerHttpRequest request = exchange.getRequest().mutate()
+                    .header(config.getSessionHeader(), sessionId)
+                    .build();
 
-				// log.debug(request.getHeaders().toString());
-				return chain.filter(exchange.mutate().request(request).build()).then(Mono.fromRunnable(() -> {
-					ServerHttpResponse response = exchange.getResponse();
-					//If unauthorized -> refresh session so that the next call will be ok
-					if (response.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-						sessionManager.refreshSession();
-					}
-				}));					
+                // log.debug(request.getHeaders().toString());
+                return chain.filter(exchange.mutate().request(request).build()).then(Mono.fromRunnable(() -> {
+                    ServerHttpResponse response = exchange.getResponse();
+                    //If unauthorized -> refresh session so that the next call will be ok
+                    if (response.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+                        sessionManager.refreshSession();
+                    }
+                }));					
 
-			}
+            }
 
-			log.warn("Got no Command-Session-ID - API-Call will fail");
-			return chain.filter(exchange);
+            log.warn("Got no Command-Session-ID - API-Call will fail");
+            return chain.filter(exchange);
 
-		};
+        };
 
-	}
+    }
 
-	private Mono<Void> onError(ServerWebExchange exchange, HttpStatusCode status, String err) {
-		ServerHttpResponse response = exchange.getResponse();
-		response.setStatusCode(status);
-		response.getHeaders().add("x-error-message", err);
-		return response.setComplete();
-	}
+    private Mono<Void> onError(ServerWebExchange exchange, HttpStatusCode status, String err) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(status);
+        response.getHeaders().add("x-error-message", err);
+        return response.setComplete();
+    }
 
-	@Data
-	public static class Config implements HasRouteId {
+    @Data
+    public static class Config implements HasRouteId {
 
-		private String routeId;
-		private String sessionHeader;
+        private String routeId;
+        private String sessionHeader;
 
-	}
+    }
 
 }
