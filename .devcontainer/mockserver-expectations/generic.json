@@ -1,0 +1,13 @@
+[
+	{
+		"httpRequest": {
+			"path": "/get",
+			"method": "GET"
+		},
+		"httpResponse": {
+			"body": {
+				"some_var": "a-variable"
+			}
+		}
+	}	
+]
