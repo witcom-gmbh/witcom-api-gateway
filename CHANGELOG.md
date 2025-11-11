@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.3.3 - 2025-11-11
+#### Improvements
+- Replaces deprecated spring-properties - (20cd004) - *iceman91176*
+#### Tests
+- Use internal mockserver instead of httpbin.org - (e2bf8be) - *iceman91176*
+#### Miscellaneous Chores
+- Bumps to spring-boot 3.5.6 - (e831f5a) - *iceman91176*
+- Bump to JDK 21 - (8d8efb5) - *iceman91176*
+- bump snapshot to 2.4.0-SNAPSHOT - (df34155) - *iceman91176*
+#### Style
+- Applies basic checkstyle-policies - (bbe01cb) - *iceman91176*
+- Adds checkstyle definitions - (5bdb4ad) - *iceman91176*
+
+- - -
+
 ## v2.3.2 - 2025-02-06
 #### Bug Fixes
 - **(filter)** Update session-cookie for tenant-switch - (5b746a6) - *iceman91176*
