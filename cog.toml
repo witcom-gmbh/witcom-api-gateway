@@ -1,6 +1,6 @@
 from_latest_tag = false
 ignore_merge_commits = true
-branch_whitelist = ["main"]
+branch_whitelist = ["main", "release/bump-*"]
 tag_prefix = "v"
 pre_bump_hooks = [
     "mvn versions:set -DnewVersion={{version}}",
