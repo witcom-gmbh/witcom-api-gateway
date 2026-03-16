@@ -4,9 +4,29 @@
 
 # pip config set global.trusted-host  "pypi.org files.pythonhosted.org pypi.python.org" --trusted-host=pypi.python.org --trusted-host=pypi.org --trusted-host=files.pythonhosted.org
 
-cp -f ./.devcontainer/bash_aliases.sh ~/.bash_aliases
+npm i -g @redocly/cli@latest
 
-# Install the helm-unittest plugin
-helm plugin install https://github.com/helm-unittest/helm-unittest.git
+# Install helm plugins
+helm plugin install --verify=false https://github.com/helm-unittest/helm-unittest.git || helm plugin install https://github.com/helm-unittest/helm-unittest.git
+helm plugin install --verify=false https://github.com/databus23/helm-diff || helm plugin install https://github.com/databus23/helm-diff
+
+# install krew for plugin management
+(
+  set -x; cd "$(mktemp -d)" &&
+  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+  KREW="krew-${OS}_${ARCH}" &&
+  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+  tar zxvf "${KREW}.tar.gz" &&
+  ./"${KREW}" install krew
+)
+
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:/usr/local/bin:$PATH"
+echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.bashrc
+
+# add plugins
+kubectl krew install oidc-login
+
+cp -f ./.devcontainer/bash_aliases.sh ~/.bash_aliases
 
 echo "Run chezmoi-init for the final touch...."
