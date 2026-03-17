@@ -50,7 +50,7 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-consul-config</artifactId>
         	<exclusions>
@@ -59,7 +59,7 @@
         			<groupId>org.apache.httpcomponents</groupId>
         		</exclusion>
         	</exclusions>
-        </dependency>		
+        </dependency>		 -->
 		<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -211,6 +211,19 @@
 			<artifactId>shedlock-provider-redis-spring</artifactId>
 			<version>4.33.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-contract-wiremock</artifactId>
+			<version>4.3.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+			<!-- <version>3.6.0</version> -->
+		</dependency>				
 
 	</dependencies>
 

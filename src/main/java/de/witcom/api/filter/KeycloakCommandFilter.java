@@ -34,8 +34,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<KeycloakCommandFilter.Config>{
     
-    @Autowired
-    private CommandSessionManager sessionManager;
+    private final CommandSessionManager sessionManager;
     
     private String defaultReadRole="read";
     private String defaultWorkRole="work";
@@ -44,14 +43,16 @@ public class KeycloakCommandFilter extends AbstractGatewayFilterFactory<Keycloak
     
     Logger logger = LoggerFactory.getLogger(this.getClass());
     
-    @Autowired
-    ApplicationProperties appProperties;
+    private final ApplicationProperties appProperties;
+   
+    private final KeyCloakTokenService tokenService;
     
-    @Autowired
-    KeyCloakTokenService tokenService;
-    
-    public KeycloakCommandFilter() {
+    public KeycloakCommandFilter(CommandSessionManager sessionManager,
+                    ApplicationProperties appProperties, KeyCloakTokenService tokenService) {
         super(Config.class);
+        this.sessionManager = sessionManager;
+        this.appProperties = appProperties;
+        this.tokenService = tokenService;
     }
 
     @Override

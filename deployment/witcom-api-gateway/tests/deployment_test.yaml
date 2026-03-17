@@ -1,0 +1,90 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: "test deployment"
+templates:
+  - templates/*.yaml
+values:
+- values/default.yaml
+release:
+  name: test
+tests:
+  - it: should render deployment
+    template: templates/deployment.yaml
+    asserts:
+      - isKind:
+          of: Deployment
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: witcom-api-gateway:.*
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name == "COMMAND_ENABLED")].value
+          value: "true"
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name == "COMMAND_BASE_URL")].value
+          value: http://command:8080
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name == "COMMAND_USER")].value
+          value: command-user
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name == "COMMAND_GROUP")].value
+          value: command-group
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name == "COMMAND_TENANT")].value
+          value: command-tenant
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name == "KEYCLOAK_SERVER_URL")].value
+          value: http://keycloak:8080
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name == "KEYCLOAK_REALM_ID")].value
+          value: my-realm
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name == "REDIS_HOST")].value
+          value: redis-host
+
+
+  - it: should include the generated secret for command-access
+    template: templates/deployment.yaml
+
+    asserts:
+
+      - isNotNullOrEmpty:
+          path: spec.template.spec.containers[0].env[?(@.name == "COMMAND_PASSWORD")]
+      - isSubset:
+          path: spec.template.spec.containers[0].env[?(@.name == "COMMAND_PASSWORD")].valueFrom.secretKeyRef
+          content:
+            name: command-secret
+            key: password-key
+
+
+  - it: should include the generated secret for redis-access
+    template: templates/deployment.yaml
+
+    asserts:
+
+      - isNotNullOrEmpty:
+          path: spec.template.spec.containers[0].env[?(@.name == "REDIS_PASSWORD")]
+      - isSubset:
+          path: spec.template.spec.containers[0].env[?(@.name == "REDIS_PASSWORD")].valueFrom.secretKeyRef
+          content:
+            name: redis-secret
+            key: password
+
+  - it: should fail if invalid configuration
+    template: templates/deployment.yaml
+    set:
+      config:
+        command:
+          passwordSecret: ""
+    asserts:
+      - failedTemplate: {}
+
+  - it: should include extra-env vars
+    template: templates/deployment.yaml
+    set:
+      extraEnvs: 
+        - name: SOME_VAR
+          value: "true"
+    asserts:
+
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name == "SOME_VAR")].value
+          value: "true"
