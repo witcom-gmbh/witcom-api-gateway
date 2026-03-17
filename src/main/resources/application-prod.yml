@@ -4,19 +4,3 @@ spring:
       host: ${REDIS_HOST}
       port: 6379
       password: ${REDIS_PASSWORD}
-  config:
-    import: "consul:"
-  cloud:
-    consul:
-      discovery:
-        enabled: false
-      port: 443
-      scheme:  http                      
-      config:
-        enabled: true
-        fail-fast: true
-        prefixes:
-        - applicationconfig
-        format: yaml
-        profile-separator: "::"
-    

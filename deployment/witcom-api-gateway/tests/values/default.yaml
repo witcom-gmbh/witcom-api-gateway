@@ -1,0 +1,17 @@
+config:
+  keycloak:
+    serverUrl: "http://keycloak:8080"
+    realm: "my-realm"
+  command:
+    enabled: true
+    baseUrl: "http://command:8080"  
+    user: "command-user"
+    group: "command-group"
+    tenant: "command-tenant"
+    passwordSecret: "command-secret"
+    passwordSecretKey: "password-key"
+  redis:
+    host: redis-host
+    secret:
+      # key: "password"
+      name: "redis-secret" 

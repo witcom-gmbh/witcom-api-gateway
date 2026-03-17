@@ -34,23 +34,25 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: SPRING_CLOUD_CONSUL_CONFIG_PREFIXES_0_
-              value: {{ .Values.config.consul.prefix | default "applicationconfig" }}
-            - name: SPRING_APPLICATION_NAME
-              value: {{ .Values.config.consul.applicationName | default (printf "%s" (include "witcom-api-gateway.consulname" .)) }}
-            - name: SPRING_CLOUD_CONSUL_HOST
-              value: {{ .Values.config.consul.host }}
-            - name: SPRING_CLOUD_CONSUL_SCHEME
-              value: {{ .Values.config.consul.scheme }}
-            - name: SPRING_CLOUD_CONSUL_PORT
-              value: '{{ .Values.config.consul.port }}'
-            {{- if .Values.config.consul.token.secretName }}
-            - name: SPRING_CLOUD_CONSUL_CONFIG_ACL_TOKEN
+            - name: COMMAND_ENABLED
+              value: {{ .Values.config.command.enabled | default "true" | quote }}
+            - name: COMMAND_BASE_URL
+              value: {{ required "A valid config.command.baseUrl entry is required!" .Values.config.command.baseUrl }}
+            - name: COMMAND_USER
+              value: {{ required "A valid config.command.user entry is required!" .Values.config.command.user }}
+            - name: COMMAND_GROUP
+              value: {{ required "A valid config.command.group entry is required!" .Values.config.command.group }}
+            - name: COMMAND_TENANT
+              value: {{ required "A valid config.command.tenant entry is required!" .Values.config.command.tenant }}
+            - name: KEYCLOAK_SERVER_URL
+              value: {{ required "A valid config.keycloak.serverUrl entry is required!" .Values.config.keycloak.serverUrl }}
+            - name: KEYCLOAK_REALM_ID
+              value: {{ required "A valid config.keycloak.realm entry is required!" .Values.config.keycloak.realm }}
+            - name: COMMAND_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.config.consul.token.secretKey }}
-                  name: {{ .Values.config.consul.token.secretName }}
-            {{- end }}
+                  key: {{ .Values.config.command.passwordSecretKey | default "password" }}
+                  name: {{ required "A valid config.command.passwordSecret entry is required!" .Values.config.command.passwordSecret }}
             {{- if .Values.config.redis.secret.name }}
             - name: REDIS_PASSWORD
               valueFrom:
@@ -60,8 +62,6 @@ spec:
             {{- end }}
             - name: REDIS_HOST
               value: {{ required "A valid config.redis.host entry is required!" .Values.config.redis.host }}
-            - name: APP_OPTIONS
-              value: '--spring.profiles.active=prod'
             {{- if .Values.extraEnvs }}
 {{ toYaml .Values.extraEnvs | indent 12 }}
             {{- end }}

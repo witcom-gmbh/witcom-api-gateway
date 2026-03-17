@@ -60,6 +60,8 @@ public class ApplicationProperties {
         private boolean enabled=true;
         //@NotEmpty
         private List<ServicePlanetTenantConfiguration> tenants;
+
+        
         
 
     }
@@ -77,6 +79,8 @@ public class ApplicationProperties {
         @NotNull
         private String tenantName;
         private boolean defaultTenant;
+        @NotEmpty
+        private String requiredResourceRole = "smdb-resource-server:full-access";
 
     }    
     

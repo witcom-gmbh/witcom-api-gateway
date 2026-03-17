@@ -1,13 +1,56 @@
 spring:
   application:
     name: witcom-api-gateway
+  main:
+    web-application-type: reactive
   cloud:
-   gateway:
-    globalcors:
-      cors-configurations:
-        '[/**]':
-         allowedOrigins: "*"          
+    consul:
+      discovery:
+        enabled: false
+      port: 443
+      scheme:  http                      
+      config:
+        enabled: false
 
+    gateway:
+      httpclient:
+        ssl:
+          use-insecure-trust-manager: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+application:
+  command-config:
+    enabled: ${COMMAND_ENABLED:true}
+    base-url: ${COMMAND_BASE_URL}
+    user: ${COMMAND_USER}
+    password: ${COMMAND_PASSWORD}
+    group: ${COMMAND_GROUP}
+    mandant: ${COMMAND_TENANT}
+  keycloak-config:
+    keycloak-realm-id: ${KEYCLOAK_REALM_ID}
+    keycloak-server-url: ${KEYCLOAK_SERVER_URL}
+  spl-config:
+    enabled: ${SPL_ENABLED:false}
+    tenants: []
+    # - spl-base-url: ${SPL_BASEURL}
+    #   spl-user: ${SPL_DEV_USER}
+    #   spl-password: ${SPL_DEV_PASSWORD}
+    #   spl-tenant: ${SPL_DEV_SPLTENANT}
+    #   tenant-name: ${SPL_DEV_TENANT_ID}
+    #   default-tenant: true
+    # - spl-base-url: ${SPL_BASEURL}
+    #   spl-user: ${SPL_STAGING_USER}
+    #   spl-password: ${SPL_STAGING_PASSWORD}
+    #   spl-tenant: ${SPL_STAGING_SPLTENANT}
+    #   tenant-name: ${SPL_STAGING_TENANT_ID}
+
+  mcp-config:
+    enabled: false
 
 logging:
   level:
