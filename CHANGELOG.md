@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.0.0 - 2026-03-20
+#### Features
+- <span style="background-color: #d73a49; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 0.85em;">BREAKING</span>Removes consul-based-configuration - (5d93fe2) - *iceman91176*
+#### Build system
+- Updates devcontainer environment - (b5fdd02) - *iceman91176*
+#### Miscellaneous Chores
+- bump snapshot to 2.4.0-SNAPSHOT - (7ff0051) - *iceman91176*
+
+- - -
+
 ## v2.3.3 - 2025-11-11
 #### Improvements
 - Replaces deprecated spring-properties - (20cd004) - *iceman91176*
